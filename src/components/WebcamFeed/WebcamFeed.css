@@ -1,0 +1,15 @@
+/* WebcamFeed.css */
+.webcam-feed {
+    border: 2px solid #66aaff;
+    padding: 0;
+    width: 480px;
+    height: 270px;
+    position: relative;
+    border-radius: 20px;
+  }
+  
+  .webcam-feed img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }

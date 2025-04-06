@@ -1,0 +1,55 @@
+/* Navbar.css */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #3e444e;
+    padding: 1.5rem 2rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .logo {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 170px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .logo, .logo img {
+    border-radius: 10px;
+  }
+  
+  .logo-img {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+  }
+
+  .username {
+    width: 170px;
+    height: 60px;
+    border: 2px solid white;
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    background-color: transparent;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo:focus, .username:focus { 
+    outline: none;
+    box-shadow: none;
+  }
+  

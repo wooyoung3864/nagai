@@ -2,7 +2,8 @@
 .gesture-help {
     background-color: #fcd34d;
     border: none;
-    border-radius: 50%;
+    padding: 0;
+    border-radius: 100px;
     color: white;
     font-weight: bold;
     font-size: 1.5rem;

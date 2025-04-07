@@ -8,6 +8,7 @@
     font-size: 1.5rem;
     font-weight: bold;
     color: white;
+    width: 100% !important;
   }
   
   .logo {
@@ -15,7 +16,7 @@
     border: none;
     padding: 0;
     cursor: pointer;
-    width: 170px;
+    width: 120px;
     height: 60px;
     display: flex;
     align-items: center;
@@ -25,12 +26,14 @@
 
   .logo, .logo img {
     border-radius: 10px;
+    margin-bottom: 0 !important;
   }
   
   .logo-img {
     height: 100%;
-    width: 100%;
-    object-fit: contain;
+    width: auto;         /* maintain aspect ratio */
+    max-width: 100%;
+    display: block;
   }
 
   .username {

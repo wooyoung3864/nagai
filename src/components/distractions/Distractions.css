@@ -1,0 +1,23 @@
+.distractions {
+    background-color: #EB6565;
+    color: white; 
+    border: none;
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 70px; 
+  }
+  
+  .distraction-circle{
+    background-color: #992727;
+    width: 35px;
+    height: 35px;
+    border-radius: 100%;
+  }
+
+  .distraction-text{
+    padding-top: 0.5rem;
+  }

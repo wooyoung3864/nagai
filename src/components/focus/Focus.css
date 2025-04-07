@@ -1,0 +1,10 @@
+.FocusButton{
+    background-color: #3e444e;
+    border-color: white;
+    color: white;
+    height: 70px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

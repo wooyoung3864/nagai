@@ -1,5 +1,5 @@
 # CSE 416
-### Team NAGA — Joohyoung Jun, Jiwoo Kim, Wooyoung Jung
+### Team NAGA — Jiwoo Kim, Joohyoung Jun, Wooyoung Jung
 
 ## Problem statement
 ### NAG-AI

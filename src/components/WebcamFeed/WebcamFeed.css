@@ -1,11 +1,14 @@
 /* WebcamFeed.css */
 .webcam-feed {
+  display: flex;
   border: 2px solid #66aaff;
-  width: 90%;                /* or max-width: 800px; */
+  width: 92%;                /* or max-width: 800px; */
   aspect-ratio: 16 / 9;
   position: relative;
   border-radius: 10px;
   overflow: hidden;
+  max-width: 1067px;
+  max-height: 600px;
 }
 
   .webcam-feed, .webcam-feed img {
@@ -17,3 +20,11 @@
     height: auto;
     object-fit: cover;
   }
+
+  @media screen and (min-width: 2000px) {
+    .webcam-feed {
+        width: 100%;
+        max-width: 1422px;
+        max-height: 800px;
+      }
+}

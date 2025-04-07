@@ -1,0 +1,32 @@
+.distractions {
+    background-color: #EB6565;
+    color: white; 
+    padding: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 50px;
+  }
+
+.distractions:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.distractions:hover {
+    border-color: #646cff;
+    outline: #646cff;
+}
+  
+  .distraction-circle{
+    background-color: #992727;
+    width: 35px;
+    height: 35px;
+    border-radius: 100%;
+  }
+
+  .distraction-text{
+    padding-top: 0.5rem;
+  }

@@ -1,8 +1,8 @@
 // components/GestureHelp.tsx
 import React from 'react';
-import './GestureHelp.css';
+import './GestureHelpButton.css';
 
-export default function GestureHelp() {
+export default function GestureHelpButton() {
   return (
     <button className="gesture-help">?</button>
   );

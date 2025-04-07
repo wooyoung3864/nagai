@@ -5,24 +5,28 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: 110px;
-  height: auto;
+  min-height: 110px !important;
+  height: 110px;
   padding: 1.5rem 2rem;
   box-sizing: border-box;
   gap: 1rem;
   overflow: hidden; /* ✨ prevent overexpansion */
 }
+
+.navbar > * {
+  height: 100%;
+}
+
   
 .logo {
-  border: none;
-  padding: 0;
-  color: white;
-  font-size: 1.2rem;
-  cursor: pointer;
+  height: 100%; /* take full height of navbar */
+  aspect-ratio: auto; /* let image set width */
   display: flex;
   align-items: center;
   justify-content: center;
-  white-space: nowrap;     /* ✨ prevent line break */
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 0 !important;
 }
 
 .username {
@@ -30,12 +34,12 @@
   padding: 0.5rem 1rem;
   color: white;
   font-size: 1.2rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;     /* ✨ prevent line break */
+  display: block;              /* ✨ change from flex to block */
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
   min-width: 170px !important;
+  max-width: 230px !important;
 }
 
 .logo,
@@ -43,22 +47,24 @@
   flex-shrink: 0;           /* prevents flex from shrinking either */
   width: auto;
   min-width: 0;             /* protects from overflow clipping */
-  border-radius: 10px;
-  overflow: auto;
   height: 60px;
   flex-shrink: 0;
   background: none;
+  cursor: pointer !important;
 }
-  
+
 .logo-img {
-  max-width: 100%;
-  max-height: 100%;
+  max-height: 100%;                 /* never exceed button height */
+  max-width: 100%;                  /* prevents it from spilling horizontally */
+  height: auto;                     /* scale naturally */
+  width: auto;
   object-fit: contain;
-  display: flex;
-}  
+  display: block;
+  cursor: pointer;
+}
 
   .logo, .logo img {
-    border-radius: 10px;
+    border-radius: 10px !important;
     margin-bottom: 0 !important;
   }
 

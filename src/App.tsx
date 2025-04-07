@@ -1,28 +1,11 @@
-// App.tsx
 import React from 'react';
-import Navbar from './components/Navbar/Navbar';
-import WebcamFeed from './components/WebcamFeed/WebcamFeed';
-import Timer from './components/Timer/Timer';
-import GestureHelp from './components/GestureHelp/GestureHelp';
-import LoginPage from './pages/LoginPage';
-import LoginFailPage from './pages/LoginFailPage';
-import TermsPage from './pages/TermsPage';
-import AccountCreationPage from './pages/AccountCreationPage';
+import MainPage from './pages/MainPage/MainPage';
 import './App.css';
 
 export default function App() {
   return (
     <div className="app-container">
-      <Navbar />
-      <div className="main-content">
-        <div className="left-column">
-          <div className="webcam-wrapper">
-            <WebcamFeed />
-            <GestureHelp />
-          </div>
-          <Timer />
-        </div>
-      </div>
+      <MainPage />
     </div>
   );
 }

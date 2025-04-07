@@ -2,8 +2,10 @@
 import React from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import WebcamFeed from '../../components/WebcamFeed/WebcamFeed';
-import GestureHelp from '../../components/GestureHelp/GestureHelp';
+import GestureHelpButton from '../../components/GestureHelpButton/GestureHelpButton';
 import Timer from '../../components/Timer/Timer';
+import DistractionsButton from '../../components/DistractionsButton/DistractionsButton';
+import FocusButton from '../../components/FocusButton/FocusButton';
 import '../../App.css'; // if needed for .main-content layout
 import './MainPage.css';
 
@@ -15,11 +17,19 @@ export default function MainPage() {
         <div className="center-content">
           <div className="webcam-timer-row">
             <div className="webcam-wrapper">
-              <WebcamFeed />
-              <GestureHelp />
+              <div className="col-flex">
+                <WebcamFeed />
+                <DistractionsButton />
+              </div>
+              <GestureHelpButton />
             </div>
             <div className="timer-wrap">
-              <Timer />
+              <div className='col-flex'>
+                <div className='timer-wrap'>
+                  <Timer />
+                </div>
+                <FocusButton />
+              </div>
             </div>
           </div>
         </div>

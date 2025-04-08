@@ -9,14 +9,13 @@ import './App.css';
 
 export default function App() {
   return (
-    /*<div className="app-container">
+    <div className="app-container">
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/main" element={<MainPage />} />
       </Routes>
     </div>
-    */
-   <AccountCreationPage />
+    
   );
   
 }

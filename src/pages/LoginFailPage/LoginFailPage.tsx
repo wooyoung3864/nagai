@@ -58,7 +58,7 @@ export default function LoginPage() {
             <span style={{ display: 'none' }}>Continue with Google</span>
           </div>
         </button>
-        <div className='fail-message'>
+        <div className='login-fail-message'>
           <h3>Failed to authenticate with Google.</h3>
           <h3>Please try again</h3>
         </div>

@@ -3,24 +3,24 @@ import './AccountCreationPage.css';
 
 export default function AccountCreationPage() {
   return (
-    <div className="name-edit-container">
+    <div className="accountCreation-container">
       <div className="logo">
         <img src="src/assets/imgs/nagai_logo.png" alt="nagai_logo" />
       </div>
 
-      <div className="form-content">
-        <label htmlFor="name-input" className="name-label">What is your name?</label>
+      <div className="accountCreation-form-content">
+        <label htmlFor="accountCreation-name-input" className="accountCreation-name-label">What is your name?</label>
         <input
-          id="name-input"
+          id="accountCreation-name-input"
           type="text"
-          className="name-input"
+          className="accountCreation-name-input"
           defaultValue="Woohyoung Ji"
         />
       </div>
 
-      <div className="button-group">
-        <button className="cancel-button">Cancel</button>
-        <button className="continue-button">Continue</button>
+      <div className="accountCreation-button-group">
+        <button className="accountCreation-cancel-button">Cancel</button>
+        <button className="accountCreation-continue-button">Continue</button>
       </div>
     </div>
   );

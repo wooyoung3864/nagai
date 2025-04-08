@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './DistractionLog.css';
 import  {Table}  from 'react-bootstrap';
 import Pagination from 'react-bootstrap/Pagination';
@@ -32,6 +32,18 @@ const changeOrder = () => {
 
 const DistractionLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+        if(event.key === "Escape"){
+           onClose();
+        }
+    };    
+    window.addEventListener("keydown", handleKeyDown);    
+    return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+    };
+}, []); 
 
   return (
     <div className="modal-overlay">

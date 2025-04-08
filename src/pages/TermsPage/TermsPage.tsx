@@ -1,0 +1,37 @@
+import React from 'react';
+import './TermsPage.css'
+export default function TermsPage() {
+  return (
+    <div className="terms-container">
+      <div className="logo">
+        <img src="src/assets/imgs/nagai_logo.png" alt="nagai_logo" />
+      </div>
+      <h2>Terms and Conditions</h2>
+
+      <div className="scroll-box">
+        By creating an account, you agree to our Terms and Conditions. <br /><br />
+        You consent to the use of your webcam for the purpose of real-time interaction and learning enhancement. <br />
+        You also agree to allow the application to access and use your Google account information, such as your name and email, solely for identification purposes.
+      </div>
+      <label className="checkbox-label">
+        <input type="checkbox" />
+        I have read and agree to the Terms and Conditions.
+      </label>
+
+      <div className="scroll-box">
+        By continuing, you agree to the collection and use of your personal information, including your name, email, and activity data, as outlined in our Privacy Policy. <br /><br />
+        Your information will be used solely for improving service quality and will not be shared with third parties without your consent.<br /><br />
+        Also, the recorded video data of you will be stored for seven days on the server and removed after seven days it is recorded. 
+        </div>
+      <label className="checkbox-label">
+        <input type="checkbox" />
+        I have read and agree to the Privacy Statement.
+      </label>
+
+      <div className="button-group">
+        <button className="cancel-button">Cancel</button>
+        <button className="continue-button">Continue</button>
+      </div>
+    </div>
+  );
+}

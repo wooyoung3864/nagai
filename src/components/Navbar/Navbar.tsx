@@ -8,9 +8,9 @@ export default function Navbar() {
   return (
     <div className="navbar">
       <button className="logo">
-      <img src={logo} alt="nagAI logo" className="logo-img" />
+        <img src={logo} alt="nagAI logo" className="logo-img" />
       </button>
-      <button className="username">WooHyoung Ji</button>
+      <button className="username">Lorem ipsum, dolor sit amet consectetur adipisicing elit.</button>
     </div>
   );
 }

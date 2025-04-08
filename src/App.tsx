@@ -1,21 +1,25 @@
-// App.tsx
 import React from 'react';
 import Navbar from './components/Navbar/Navbar';
 import WebcamFeed from './components/WebcamFeed/WebcamFeed';
 import Timer from './components/Timer/Timer';
 import GestureHelp from './components/GestureHelp/GestureHelp';
-import MainPage from './pages/MainPage';
-import LoginPage from './pages/LoginPage';
-import LoginFailPage from './pages/LoginFailPage';
-import TermsPage from './pages/TermsPage';
-import AccountCreationPage from './pages/AccountCreationPage';
+import { Routes, Route } from 'react-router-dom';
+import LoginPage from './pages/LoginPage/LoginPage';
+import MainPage from './pages/MainPage/MainPage';
+import LoginFailPage from './pages/LoginFailPage/LoginFailPage';
+import TermsPage from './pages/TermsPage/TermsPage';
+import AccountCreationPage from './pages/AccountCreationPage/AccountCreationPage';
 import './App.css';
 
 export default function App() {
   return (
     <div className="app-container">
-      <Navbar />
-      <MainPage />
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/main" element={<MainPage />} />
+      </Routes>
     </div>
+    
   );
+  
 }

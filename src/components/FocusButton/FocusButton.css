@@ -1,0 +1,16 @@
+.focus-button{
+    background-color: transparent;
+    border-color: white;
+    color: white;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500 !important;
+}
+
+h3 {
+    margin: 0 !important;
+    font-size: 1.1rem;
+}

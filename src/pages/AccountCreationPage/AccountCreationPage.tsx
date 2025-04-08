@@ -1,4 +1,5 @@
 import React from 'react';
+import './AccountCreationPage.css';
 
 export default function AccountCreationPage() {
   return (

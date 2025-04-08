@@ -9,7 +9,7 @@ export default function LoginPage() {
 
   const handleLoginClick = () => {
     // optional: auth logic here
-    navigate('/main');
+    navigate('/terms');
   };
 
   return (

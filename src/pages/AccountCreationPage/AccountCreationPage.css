@@ -1,5 +1,5 @@
 /*AccountCreationPage Style begins*/
-.name-edit-container {
+.accountCreation-container {
     background-color: #4e5158;
     height: 100vh;
     width: 100vw;
@@ -13,19 +13,19 @@
     align-items: center;
   }
   
-  .form-content {
+  .accountCreation-form-content {
     margin-top: 150px;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
   
-  .name-label {
+  .accountCreation-name-label {
     margin-bottom: 1rem;
     font-size: 1.2rem;
   }
   
-  .name-input {
+  .accountCreation-name-input {
     background-color: #4e5158;
     border: none;
     border-bottom: 2px solid black;
@@ -37,7 +37,32 @@
     outline: none;
   }
   
-  .name-input::placeholder {
+  .accountCreation-name-input::placeholder {
     color: #aaa;
+  }
+  .accountCreation-button-group {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .accountCreation-cancel-button {
+    background-color: #ff4d4d;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 25px;
+    font-size: 1rem;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .accountCreation-continue-button {
+    background-color: #4da6ff;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 25px;
+    font-size: 1rem;
+    color: white;
+    cursor: pointer;
   }
   /*AccountCreationPage Style ends*/

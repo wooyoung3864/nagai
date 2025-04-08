@@ -1,7 +1,7 @@
 /*TermsPage Style begins*/
 
-.logo,
-.logo img {
+.terms-logo,
+.terms-logo img {
   width: 230px;
   max-height: 100%;
   /* never exceed button height */
@@ -31,7 +31,7 @@
     font-family: sans-serif;
   }
   
-  .scroll-box {
+  .terms-scroll-box {
     background-color: #ddd;
     color: black;
     width: 80%;
@@ -43,7 +43,7 @@
     margin-bottom: 0.5rem;
   }
   
-  .checkbox-label {
+  .terms-checkbox-label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -51,13 +51,13 @@
     font-size: 0.95rem;
   }
   
-  .button-group {
+  .terms-button-group {
     display: flex;
     gap: 1.5rem;
     margin-top: 2rem;
   }
   
-  .cancel-button {
+  .terms-cancel-button {
     background-color: #ff4d4d;
     border: none;
     padding: 10px 30px;
@@ -67,7 +67,7 @@
     cursor: pointer;
   }
   
-  .continue-button {
+  .terms-continue-button {
     background-color: #4da6ff;
     border: none;
     padding: 10px 30px;

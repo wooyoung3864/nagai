@@ -39,7 +39,7 @@
   text-overflow: ellipsis;
   overflow: hidden;
   min-width: 170px !important;
-  max-width: 230px !important;
+  max-width: 230px;
 }
 
 .logo,
@@ -72,4 +72,12 @@
     outline: none;
     box-shadow: none;
   }
+
+  /* 🔽 Mobile Styles */
+@media screen and (max-width: 900px) {
+  .username {
+    max-width: 150px;
+    width: 150px;
+  }
+}
   

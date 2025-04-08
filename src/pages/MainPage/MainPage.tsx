@@ -6,7 +6,7 @@ import GestureHelpButton from '../../components/GestureHelpButton/GestureHelpBut
 import Timer from '../../components/Timer/Timer';
 import DistractionsButton from '../../components/DistractionsButton/DistractionsButton';
 import FocusButton from '../../components/FocusButton/FocusButton';
-import '../../App.css'; // if needed for .main-content layout
+import '../../App.css';
 import './MainPage.css';
 
 export default function MainPage() {
@@ -23,13 +23,10 @@ export default function MainPage() {
               </div>
               <GestureHelpButton />
             </div>
-            <div className="timer-wrap">
-              <div className='col-flex'>
-                <div className='timer-wrap'>
-                  <Timer />
-                </div>
-                <FocusButton />
-              </div>
+
+            <div className="col-flex timer-wrap">
+              <Timer />
+              <FocusButton />
             </div>
           </div>
         </div>

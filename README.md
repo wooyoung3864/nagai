@@ -11,6 +11,12 @@ As busy university students, we thought of a tool that would help minimize waste
    
 We present ‘NAG,’ short for ‘Never Abandon Goals.’ A convenient companion to help fight off distractions and achieve your creative and intellectual goals.
 
+### Tech Stack:
+- Frontend: TypeScript React with Vite 
+- API: FastAPI
+- Database: MongoDB
+- User Authentication: Google OAuth
+
 
 # React + TypeScript + Vite
 

@@ -40,11 +40,10 @@
   
   .modal-footer {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
   }
   
   .close-button {
-    background-color: #1a1a1a;
     border: none;
     color: white;
     padding: 10px 15px;

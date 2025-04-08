@@ -1,0 +1,27 @@
+.calendar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.calendar-header, .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-cell {
+  border: 1px solid #ccc;
+  min-height: 100px;
+  padding: 6px;
+  font-size: 0.9rem;
+}
+
+.calendar-cell.header {
+  background: #f0f0f0;
+  font-weight: bold;
+  text-align: center;
+}
+
+.focus-time {
+  font-weight: bold;
+  color: green;
+}

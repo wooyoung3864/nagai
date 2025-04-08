@@ -1,10 +1,22 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './AccountCreationPage.css';
 
 export default function AccountCreationPage() {
+  const navigate = useNavigate();
+  
+    const handleContinueClick = () => {
+      // optional: auth logic here
+      navigate('/main');
+    };
+    const handleCancelClick = () => {
+      // optional: auth logic here
+      navigate('/login-fail');
+    };
+
   return (
     <div className="accountCreation-container">
-      <div className="logo">
+      <div className="accountCreation-logo">
         <img src="src/assets/imgs/nagai_logo.png" alt="nagai_logo" />
       </div>
 
@@ -19,8 +31,8 @@ export default function AccountCreationPage() {
       </div>
 
       <div className="accountCreation-button-group">
-        <button className="accountCreation-cancel-button">Cancel</button>
-        <button className="accountCreation-continue-button">Continue</button>
+        <button className="accountCreation-cancel-button" onClick={handleCancelClick}>Cancel</button>
+        <button className="accountCreation-continue-button" onClick={handleContinueClick}>Continue</button>
       </div>
     </div>
   );

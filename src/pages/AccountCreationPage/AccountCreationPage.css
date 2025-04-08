@@ -1,4 +1,17 @@
 /*AccountCreationPage Style begins*/
+
+.accountCreation-logo,
+.accountCreation-logo img {
+  width: 230px;
+  max-height: 100%;
+  /* never exceed button height */
+  max-width: 100%;
+  /* prevents it from spilling horizontally */
+  /* scale naturally */
+  object-fit: contain;
+  display: block;
+  cursor: default;
+}
 .accountCreation-container {
     background-color: #4e5158;
     height: 100vh;

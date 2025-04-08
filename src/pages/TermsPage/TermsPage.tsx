@@ -1,6 +1,19 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './TermsPage.css'
+
+
 export default function TermsPage() {
+  const navigate = useNavigate();
+
+  const handleContinueClick = () => {
+    // optional: auth logic here
+    navigate('/account-creation');
+  };
+  const handleCancelClick = () => {
+    // optional: auth logic here
+    navigate('/login-fail');
+  };
   return (
     <div className="terms-container">
       <div className="terms-logo">
@@ -29,8 +42,8 @@ export default function TermsPage() {
       </label>
 
       <div className="terms-button-group">
-        <button className="terms-cancel-button">Cancel</button>
-        <button className="terms-continue-button">Continue</button>
+        <button className="terms-cancel-button" onClick={handleCancelClick}>Cancel</button>
+        <button className="terms-continue-button" onClick={handleContinueClick}>Continue</button>
       </div>
     </div>
   );

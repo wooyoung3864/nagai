@@ -10,7 +10,7 @@ export default function Navbar() {
       <button className="logo">
         <img src={logo} alt="nagAI logo" className="logo-img" />
       </button>
-      <button className="username">Lorem ipsum, dolor sit amet consectetur adipisicing elit.</button>
+      <button className="username">Woohyoung Ji</button>
     </div>
   );
 }

@@ -3,9 +3,13 @@ html, body, #root {
   width: 100%;
   margin: 0;
   padding: 0;
+  overflow-y: auto; /* enables vertical scroll */
 }
 
 :root {
+  min-height: 100%;
+  overflow-y: auto;
+  
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -56,7 +60,8 @@ button {
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: #646cff !important;
+  outline: #646cff !important;
 }
 button:focus,
 button:focus-visible {
@@ -68,7 +73,7 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
-  a:hover {
+  a:hover, button:hover {
     color: #747bff;
   }
   button {

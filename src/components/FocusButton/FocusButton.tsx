@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import './FocusButton.css'
 import '../../App.css';
-import FocusLog from "../focus/FocusLog";
+import FocusLog from "../FocusLog/FocusLog";
 
 export default function FocusButton(){
     const [focustime, setFocusTime] = useState("01:04:50");

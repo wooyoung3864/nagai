@@ -1,5 +1,5 @@
 /* Navbar.css */
-.navbar {
+.nagai-navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -16,7 +16,6 @@
     border: none;
     padding: 0;
     cursor: pointer;
-    width: 120px;
     height: 60px;
     display: flex;
     align-items: center;
@@ -25,6 +24,7 @@
   }
 
   .logo, .logo img {
+    width: 140px;
     border-radius: 10px;
     margin-bottom: 0 !important;
   }

@@ -38,6 +38,7 @@
   }
   
   .terms-checkbox-label {
+    margin-top: 3px;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -72,12 +73,22 @@
     color: #ffffff !important;
     border-color: #646cff !important;
     outline: #646cff !important;
+    box-shadow: 0 4px 8px rgba(100, 108, 255, 0.4);
   }
   
   .terms-continue-button:hover {
     color: #ffffff !important;
     border-color: #646cff !important;
     outline: #646cff !important;
+    box-shadow: 0 4px 8px rgba(100, 108, 255, 0.4);
+  }
+
+  .terms-error-message {
+    color: #ff4d4f;
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 500;
   }
   
   /*TermsPage Style ends*/

@@ -9,11 +9,28 @@ export default function TermsPage() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [agreeAll, setAgreeAll] = useState(false);
 
+  const handleAgreeAllChange = (checked: boolean) => {
+    setAgreeAll(checked);
+    setAgreeTerms(checked);
+    setAgreePrivacy(checked);
+    setShowError(false);
+  };
+
+  const handleAgreeIndividualCheck = (type: 'terms' | 'privacy', checked: boolean) => {
+    if (type === 'terms') setAgreeTerms(checked);
+    if (type === 'privacy') setAgreePrivacy(checked);
+  
+    if (checked === false) {
+      setAgreeAll(false); 
+    } else if (type === 'terms' && agreePrivacy || type === 'privacy' && agreeTerms) {
+      setAgreeAll(true); 
+    }
+  };
 
   const handleContinueClick = () => {
     if(!agreePrivacy || !agreeTerms){
-      //window.alert("Terms and Conditions Agreement Required!");
       setShowError(true);
       return;
     }
@@ -25,6 +42,8 @@ export default function TermsPage() {
     // optional: auth logic here
     navigate('/login-fail');
   };
+
+
   return (
     <div className="terms-container">
       <div className="terms-logo">
@@ -42,10 +61,12 @@ export default function TermsPage() {
         <input 
           type="checkbox"
           checked={agreeTerms}
-          onChange={(e) => setAgreeTerms(e.target.checked)}
+          onChange={(e) => 
+            handleAgreeIndividualCheck('terms', e.target.checked)}
         />
         I have read and agree to the Terms and Conditions.
       </label>
+      <p></p>
       <h2>Privacy Agreement</h2>
       <p></p>
       <div className="terms-scroll-box">
@@ -57,7 +78,7 @@ export default function TermsPage() {
       <input 
           type="checkbox"
           checked={agreePrivacy}
-          onChange={(e) => setAgreePrivacy(e.target.checked)}
+          onChange={(e) => handleAgreeIndividualCheck('privacy', e.target.checked)}
         />
         I have read and agree to the Privacy Statement.
       </label>
@@ -67,7 +88,14 @@ export default function TermsPage() {
           You must agree to all terms and conditions before continuing.
         </div>
       )}
-
+      <label className="terms-checkbox-label">
+        <input 
+          type="checkbox"
+          checked={agreeAll}
+          onChange={(e) => handleAgreeAllChange(e.target.checked)}
+        />
+        Agree to all
+      </label>
       <div className="terms-button-group">
         <button className="terms-cancel-button" onClick={handleCancelClick}>Cancel</button>
         <button className="terms-continue-button" onClick={handleContinueClick}>Continue</button>

@@ -78,4 +78,12 @@
     color: white;
     cursor: pointer;
   }
+
+.terms-cancel-button:hover {
+  color: #000000;
+}
+
+.terms-continue-button:hover {
+  color: black;
+}
   /*AccountCreationPage Style ends*/

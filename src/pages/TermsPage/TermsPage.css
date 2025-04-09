@@ -25,18 +25,12 @@
     box-sizing: border-box;
   }
   
-  h2 {
-    margin-top: 80px;
-    margin-bottom: 1.5rem;
-    font-family: sans-serif;
-  }
-  
   .terms-scroll-box {
     background-color: #ddd;
     color: black;
     width: 80%;
-    max-width: 500px;
-    height: 100px;
+    max-width: 800px;
+    height: 400px;
     padding: 1rem;
     overflow-y: auto;
     border-radius: 4px;
@@ -59,7 +53,6 @@
   
   .terms-cancel-button {
     background-color: #ff4d4d;
-    border: none;
     padding: 10px 30px;
     border-radius: 25px;
     font-size: 1rem;
@@ -69,11 +62,22 @@
   
   .terms-continue-button {
     background-color: #4da6ff;
-    border: none;
     padding: 10px 30px;
     border-radius: 25px;
     font-size: 1rem;
     color: white;
     cursor: pointer;
   }
+  .terms-cancel-button:hover {
+    color: #ffffff !important;
+    border-color: #646cff !important;
+    outline: #646cff !important;
+  }
+  
+  .terms-continue-button:hover {
+    color: #ffffff !important;
+    border-color: #646cff !important;
+    outline: #646cff !important;
+  }
+  
   /*TermsPage Style ends*/

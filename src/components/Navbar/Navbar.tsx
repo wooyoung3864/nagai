@@ -6,7 +6,7 @@ import './Navbar.css';
 
 export default function Navbar() {
   return (
-    <div className="navbar">
+    <div className="nagai-navbar">
       <button className="logo">
         <img src={logo} alt="nagAI logo" className="logo-img" />
       </button>

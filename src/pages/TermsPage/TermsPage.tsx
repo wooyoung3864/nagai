@@ -8,12 +8,16 @@ export default function TermsPage() {
 
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
+  const [showError, setShowError] = useState(false);
+
 
   const handleContinueClick = () => {
     if(!agreePrivacy || !agreeTerms){
-      window.alert("Terms and Conditions Agreement Required!");
+      //window.alert("Terms and Conditions Agreement Required!");
+      setShowError(true);
       return;
     }
+    setShowError(false);
     // optional: auth logic here
     navigate('/account-creation');
   };
@@ -28,6 +32,7 @@ export default function TermsPage() {
       </div>
       <p />
       <h2>Terms and Conditions</h2>
+      <p></p>
       <div className="terms-scroll-box">
         By creating an account, you agree to our Terms and Conditions. <br /><br />
         You consent to the use of your webcam for the purpose of real-time interaction and learning enhancement. <br />
@@ -42,7 +47,7 @@ export default function TermsPage() {
         I have read and agree to the Terms and Conditions.
       </label>
       <h2>Privacy Agreement</h2>
-      <p />
+      <p></p>
       <div className="terms-scroll-box">
         By continuing, you agree to the collection and use of your personal information, including your name, email, and activity data, as outlined in our Privacy Policy. <br /><br />
         Your information will be used solely for improving service quality and will not be shared with third parties without your consent.<br /><br />
@@ -56,6 +61,12 @@ export default function TermsPage() {
         />
         I have read and agree to the Privacy Statement.
       </label>
+
+      {showError && (
+        <div className="terms-error-message">
+          You must agree to all terms and conditions before continuing.
+        </div>
+      )}
 
       <div className="terms-button-group">
         <button className="terms-cancel-button" onClick={handleCancelClick}>Cancel</button>

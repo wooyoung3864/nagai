@@ -10,7 +10,7 @@
 
 .calendar-cell {
   border: 1px solid #ccc;
-  min-height: 100px;
+  min-height: 50px;
   padding: 6px;
   font-size: 0.9rem;
 }
@@ -19,9 +19,18 @@
   background: #f0f0f0;
   font-weight: bold;
   text-align: center;
+  min-height: 30px;
 }
 
 .focus-time {
   font-weight: bold;
   color: green;
+}
+
+.month{
+    font-size: large;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
 }

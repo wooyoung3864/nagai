@@ -21,7 +21,7 @@ const focusData: DailyData[] = [
 
 const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null; 
-      
+
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if(event.key === "Escape"){
@@ -42,10 +42,10 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
             <button className="close-button" onClick={onClose}>✕</button>
           </div>
           <div className="modal-body">
-            <Calendar year={2025} month={0} data={focusData} />
+            <Calendar data={focusData} />
           </div>
           <div className="modal-footer">
-            <button className="close-button" onClick={onClose}>Close</button>
+            
           </div>
         </div>
       </div>

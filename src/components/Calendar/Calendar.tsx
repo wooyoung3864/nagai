@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Calendar.css';
 
 const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -48,22 +48,27 @@ const Calendar: React.FC<Props> = ({data}) => {
   };
 
   const pastMonth = () => {
-    if(month == 0){
-        setMonth(11);
-        setYear(year - 1);
-    }else{
-        setMonth(month - 1);
-    }
-  }
-
+    setMonth(prevMonth => {
+      if (prevMonth === 0) {
+        setYear(prevYear => prevYear - 1);
+        return 11;
+      } else {
+        return prevMonth - 1;
+      }
+    });
+  };
+  
   const nextMonth = () => {
-    if(month == 11){
-        setMonth(0);
-        setYear(year + 1);
-    }else{
-        setMonth(month + 1);
-    }
-  }
+    setMonth(prevMonth => {
+      if (prevMonth === 11) {
+        setYear(prevYear => prevYear + 1);
+        return 0;
+      } else {
+        return prevMonth + 1;
+      }
+    });
+  };
+  
   
 
   const calendarDays = Array.from({ length: startDay + daysInMonth }).map((_, i) => {
@@ -83,6 +88,21 @@ const Calendar: React.FC<Props> = ({data}) => {
       </div>
     );
   });
+
+  useEffect(() => {
+    const handleKeyChangeMonth = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") {
+        pastMonth();
+      } else if (event.key === "ArrowRight") {
+        nextMonth();
+      }
+    };
+  
+    window.addEventListener("keydown", handleKeyChangeMonth);
+    return () => {
+      window.removeEventListener("keydown", handleKeyChangeMonth);
+    };
+  }, []);
 
   return (
     <div className="calendar">

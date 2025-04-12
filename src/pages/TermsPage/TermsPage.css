@@ -1,95 +1,142 @@
-/*TermsPage Style begins*/
+/* TermsPage Style begins */
+
+.terms-container {
+  background-color: #4e5158;
+  height: 100vh;
+  width: 100vw;
+  color: white;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
 
 .terms-logo,
 .terms-logo img {
   width: 230px;
-  max-height: 100%;
-  /* never exceed button height */
   max-width: 100%;
-  /* prevents it from spilling horizontally */
-  /* scale naturally */
   object-fit: contain;
   display: block;
   cursor: default;
+  margin-bottom: 2rem;
 }
-.terms-container {
-    background-color: #4e5158;
-    height: 100vh;
-    width: 100vw;
-    color: white;
-    font-family: sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    box-sizing: border-box;
-  }
-  
-  .terms-scroll-box {
-    background-color: #ddd;
-    color: black;
-    width: 80%;
-    max-width: 800px;
-    height: 400px;
-    padding: 1rem;
-    overflow-y: auto;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
-  }
-  
-  .terms-checkbox-label {
-    margin-top: 3px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
-  }
-  
-  .terms-button-group {
-    display: flex;
-    gap: 1.5rem;
-    margin-top: 0.5rem;
-  }
-  
-  .terms-cancel-button {
-    background-color: #ff4d4d;
-    padding: 10px 30px;
-    border-radius: 25px;
-    font-size: 1rem;
-    color: white;
-    cursor: pointer;
-  }
-  
-  .terms-continue-button {
-    background-color: #4da6ff;
-    padding: 10px 30px;
-    border-radius: 25px;
-    font-size: 1rem;
-    color: white;
-    cursor: pointer;
-  }
-  .terms-cancel-button:hover {
-    color: #ffffff !important;
-    border-color: #646cff !important;
-    outline: #646cff !important;
-    box-shadow: 0 4px 8px rgba(100, 108, 255, 0.4);
-  }
-  
-  .terms-continue-button:hover {
-    color: #ffffff !important;
-    border-color: #646cff !important;
-    outline: #646cff !important;
-    box-shadow: 0 4px 8px rgba(100, 108, 255, 0.4);
-  }
 
-  .terms-error-message {
-    color: #ff4d4f;
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
-    text-align: center;
-    font-size: 0.95rem;
-    font-weight: 500;
-  }
-  
-  /*TermsPage Style ends*/
+.terms-accordion-card {
+  background-color: #4e5158; 
+  border: 3px solid rgba(255, 255, 255, 0.3); 
+  border-radius: 8px;
+  padding: 1rem;
+  width: 80%;
+  max-width: 800px;
+  box-sizing: border-box;
+  margin-bottom: 1.5rem;
+}
+
+
+.terms-accordion-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 0.5rem;
+  color: #ffffff; 
+}
+
+.terms-scroll-box {
+  width: 100%;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #f1f1f1;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.terms-checkbox-label {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+  color: white;
+}
+
+.terms-checkbox-label.agree-all {
+  width: 80%;
+  max-width: 800px;
+  align-self: flex-start;
+  padding-left: 1rem;
+  box-sizing: border-box;
+}
+
+.terms-checkbox-label input {
+  margin-right: 0.25rem;
+}
+
+.terms-error-message {
+  color: #ff4d4f;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.terms-button-group {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.terms-cancel-button {
+  background-color: #ff4d4d;
+  padding: 10px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+  border: none;
+}
+
+.terms-cancel-button:hover {
+  color: #ffffff !important;
+  border-color: #646cff !important;
+  outline: #646cff !important;
+  box-shadow: 0 4px 8px rgba(100, 108, 255, 0.4);
+}
+
+.terms-continue-button {
+  background-color: #4da6ff;
+  padding: 10px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+  border: none;
+}
+
+.terms-continue-button:hover {
+  color: #ffffff !important;
+  border-color: #646cff !important;
+  outline: #646cff !important;
+  box-shadow: 0 4px 8px rgba(100, 108, 255, 0.4);
+}
+
+.agree-all-wrapper {
+  background-color: transparent;
+  border: none;
+  padding-left: 1rem;
+  width: 80%;
+  max-width: 800px;
+  box-sizing: border-box;
+  margin-top: -0.5rem;
+}
+
+/* TermsPage Style ends */

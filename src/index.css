@@ -60,8 +60,10 @@ button {
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff !important;
-  outline: #646cff !important;
+  outline: 2px solid #646cff !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 8px 2px #646cff88;
+  transition: outline 0.2s ease, box-shadow 0.2s ease;
 }
 button:focus,
 button:focus-visible {

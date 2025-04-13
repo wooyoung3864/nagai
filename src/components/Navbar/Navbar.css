@@ -1,59 +1,72 @@
 /* Navbar.css */
 .nagai-navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #4E5158;
-    padding: 1.5rem 2rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-    width: 100% !important;
-  }
-  
-  .logo {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #4E5158;
+  padding: 1.5rem 2rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  width: 100% !important;
+}
 
-  .logo, .logo img {
-    width: 140px;
-    border-radius: 10px;
-    margin-bottom: 0 !important;
-  }
-  
-  .logo-img {
-    height: 100%;
-    width: auto;         /* maintain aspect ratio */
-    max-width: 100%;
-    display: block;
-  }
+.logo {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
 
-  .username {
-    width: 170px;
-    height: 60px;
-    border: 2px solid white;
-    border-radius: 10px;
-    padding: 0.5rem 1rem;
-    background-color: transparent;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.logo,
+.logo img {
+  width: 140px;
+  border-radius: 10px;
+  margin-bottom: 0 !important;
+}
 
-  }
+.logo-img {
+  height: 100%;
+  width: auto;
+  /* maintain aspect ratio */
+  max-width: 100%;
+  display: block;
 
-  .logo:focus, .username:focus { 
-    outline: none;
-    box-shadow: none;
-  }
-  
+  /* Disable outline and box-shadow for image */
+  outline: none !important;
+  box-shadow: none !important;
+  pointer-events: none; /* Prevent hover/focus on the image itself */
+}
+
+.logo:hover {
+  outline-offset: 4px !important;
+}
+
+.username {
+  width: auto;
+  max-width: 250px;
+  overflow: hidden;
+  height: 60px;
+  border: 2px solid white;
+  border-radius: 15px;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.logo:focus,
+.username:focus {
+  outline: none;
+  box-shadow: none;
+}

@@ -2,7 +2,7 @@
     background-color: #EB6565;
     color: white; 
     padding: 1rem;
-    border-radius: 10px;
+    border-radius: 15px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -28,5 +28,5 @@
   }
 
   .distraction-text{
-    padding-top: 0.5rem;
+    padding-top: 0.4rem;
   }

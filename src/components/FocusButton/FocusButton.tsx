@@ -9,7 +9,7 @@ export default function FocusButton(){
 
     return (
         <div>
-            <button className="FocusButton" onClick={() => setFocusLogOpen(true)}>
+            <button className="focus-button" onClick={() => setFocusLogOpen(true)}>
                 <h3>Focus Time: {focustime}</h3>
             </button>
 

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import './FocusLog.css';
 import Calendar from '../Calendar/Calendar';
+import { motion } from 'framer-motion'; 
 
 interface FocusLogProps {
   isOpen: boolean;
@@ -35,7 +36,12 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
 
     return (
       <div className="modal-overlay">
-        <div className="modal-box">
+        <motion.div 
+          className="modal-box"
+          initial={{ opacity: 0, scale: 0.9, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+        >
           <div className="modal-header">
             <h2 className="modal-title">Focus Log</h2>
             <button className="close-button" onClick={onClose}>✕</button>
@@ -46,7 +52,7 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
           <div className="modal-footer">
 
           </div>
-        </div>
+        </motion.div>
       </div>
     );
 };

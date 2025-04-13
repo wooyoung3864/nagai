@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import './FocusLog.css';
 import Calendar from '../Calendar/Calendar';
-import { motion } from 'framer-motion'; 
 
 interface FocusLogProps {
   isOpen: boolean;
@@ -11,11 +10,19 @@ interface FocusLogProps {
 interface DailyData {
   date: string; // e.g., "2025-01-03"
   focusTime: string;
+  focusCycle: number;
+}
+
+const cycleCalculator = (timeStr: string) => {
+    const hm = timeStr.split(/[ hm]+/).filter(Boolean); // removes empty strings
+    const totalMin = parseFloat(hm[0])*60 + parseFloat(hm[1]);
+    const cycle = totalMin/25.0;
+    return cycle
 }
 
 const focusData: DailyData[] = [
-  { date: '2025-01-01', focusTime: '1h 30m'},
-  { date: '2025-01-02', focusTime: '2h 10m'},
+  { date: '2025-01-01', focusTime: '1h 30m', focusCycle: cycleCalculator('1h 30m')},
+  { date: '2025-01-02', focusTime: '2h 10m', focusCycle: cycleCalculator('2h 10m')},
   // ...
 ];
 
@@ -36,12 +43,7 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
 
     return (
       <div className="modal-overlay">
-        <motion.div 
-          className="modal-box"
-          initial={{ opacity: 0, scale: 0.9, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-        >
+        <div className="modal-box">
           <div className="modal-header">
             <h2 className="modal-title">Focus Log</h2>
             <button className="close-button" onClick={onClose}>✕</button>
@@ -52,7 +54,7 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
           <div className="modal-footer">
 
           </div>
-        </motion.div>
+        </div>
       </div>
     );
 };

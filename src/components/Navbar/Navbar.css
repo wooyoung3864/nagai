@@ -49,6 +49,7 @@
 
 .username {
   width: auto;
+  min-width: 150px;
   max-width: 250px;
   overflow: hidden;
   height: 60px;
@@ -62,7 +63,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
 }
 
 .logo:focus,

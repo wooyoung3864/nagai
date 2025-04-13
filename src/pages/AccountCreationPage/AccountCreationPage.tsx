@@ -55,7 +55,7 @@ export default function AccountCreationPage(): JSX.Element {
           id="accountCreation-name-input"
           type="text"
           className="accountCreation-name-input"
-          placeholder="Woohyoung Ji"
+          placeholder="John Doe"
           value={name}
           onChange={handleNameChange}
         />

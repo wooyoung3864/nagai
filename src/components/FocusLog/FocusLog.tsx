@@ -10,12 +10,11 @@ interface FocusLogProps {
 interface DailyData {
   date: string; // e.g., "2025-01-03"
   focusTime: string;
-  distractions: string[];
 }
 
 const focusData: DailyData[] = [
-  { date: '2025-01-01', focusTime: '1h 30m', distractions: ['YouTube'] },
-  { date: '2025-01-02', focusTime: '2h 10m', distractions: ['Instagram', 'Twitter'] },
+  { date: '2025-01-01', focusTime: '1h 30m'},
+  { date: '2025-01-02', focusTime: '2h 10m'},
   // ...
 ];
 

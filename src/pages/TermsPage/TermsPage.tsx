@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import './TermsPage.css';
 
 export default function TermsPage() {
@@ -45,7 +46,12 @@ export default function TermsPage() {
   };
 
   return (
-    <div className="terms-container">
+    <motion.div
+      className="terms-container"
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
       <div className="terms-logo">
         <img src="src/assets/imgs/nagai_logo.png" alt="nagai_logo" />
       </div>
@@ -113,7 +119,7 @@ export default function TermsPage() {
           />
           Agree to all
         </label>
-        {/* All Agree + Error */}
+
         {showError && (
           <div className="terms-error-message">
             You must agree to all terms and conditions before continuing.
@@ -126,6 +132,6 @@ export default function TermsPage() {
         <button className="terms-cancel-button" onClick={handleCancelClick}>Cancel</button>
         <button className="terms-continue-button" onClick={handleContinueClick}>Continue</button>
       </div>
-    </div>
+    </motion.div>
   );
 }

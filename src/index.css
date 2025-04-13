@@ -10,7 +10,7 @@ html, body, #root {
   min-height: 100%;
   overflow-y: auto;
 
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: creato-display;
   line-height: 1.5;
   font-weight: 400;
 
@@ -22,6 +22,10 @@ html, body, #root {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root * {
+  font-family: creato-display;
 }
 
 a {
@@ -68,4 +72,10 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+@font-face {
+  font-family: "creato-display";
+  font-weight: 500;
+  src: url("./assets/fonts/creato_display/CreatoDisplay-Regular.otf") format("truetype");
 }

@@ -38,7 +38,7 @@ export default function TermsPage() {
       return;
     }
     setShowError(false);
-    navigate('/account-creation');
+    navigate('/create-account');
   };
 
   const handleCancelClick = () => {

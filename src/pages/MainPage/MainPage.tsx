@@ -32,7 +32,7 @@ export default function MainPage() {
               </div>
               <div className="timer-wrap">
                 <div className='col-flex timer-col-flex'>
-                  <div className='timer-wrap'>
+                  <div className='timer-wrap-inner'>
                     <Timer />
                   </div>
                   <FocusButton />

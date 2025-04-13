@@ -16,7 +16,7 @@ export default function App() {
         <Route path="/main" element={<MainPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/login-fail" element={<LoginFailPage />} />
-        <Route path="/account-creation" element={<AccountCreationPage />} />
+        <Route path="/create-account" element={<AccountCreationPage />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="*" element={<NotFoundPage />} /> {/* 404 fallback */}
       </Routes>

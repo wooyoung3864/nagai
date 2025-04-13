@@ -10,7 +10,7 @@
 
 .calendar-cell {
   border: 1px solid #ccc;
-  min-height: 50px;
+  min-height: 57.02px;
   padding: 6px;
   font-size: 0.9rem;
 }
@@ -44,4 +44,8 @@
 .month h3 {
   color: black !important;
   margin: 0;
+}
+
+div.modal-box {
+    min-height: 600px;
 }

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, JSX, useState } from 'react';
+import React, { ChangeEvent, JSX, useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 
 import './MyPage.css'
@@ -46,6 +46,19 @@ export default function MyPage() {
     const handleSignOut = () => {
         //sign out
     }
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if(event.key === "Enter"){
+                handleSaveClick();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [tempName, setName]); 
+    
 
     return (
         <>

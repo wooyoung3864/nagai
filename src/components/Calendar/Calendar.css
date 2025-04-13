@@ -27,11 +27,6 @@
   color: green;
 }
 
-.month h3 {
-  color: black !important;
-  margin: 0;
-}
-
 .month{
     color: #000000;
     font-size: large;
@@ -40,4 +35,13 @@
     gap: 8px;
     justify-content: center;
     margin-bottom: 10px;
+}
+
+.month button {
+  border-radius: 8px;
+}
+
+.month h3 {
+  color: black !important;
+  margin: 0;
 }

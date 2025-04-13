@@ -1,18 +1,45 @@
-import React from 'react';
+import React, { ChangeEvent, JSX, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../contexts/UserContext';
 import './AccountCreationPage.css';
 
-export default function AccountCreationPage() {
+export default function AccountCreationPage(): JSX.Element {
   const navigate = useNavigate();
-  
-    const handleContinueClick = () => {
-      // optional: auth logic here
-      navigate('/main');
-    };
-    const handleCancelClick = () => {
-      // optional: auth logic here
-      navigate('/login-fail');
-    };
+  const { name, setName } = useUser();
+  const [error, setError] = useState<string>('');
+
+  const validateName = (value: string) => {
+    if (!value.trim()) {
+      setError('Name cannot be empty.');
+    } else if (value.length > 30) {
+      setError('Name cannot exceed 30 characters.');
+    } else {
+      setError('');
+    }
+  };
+
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setName(value);
+    validateName(value);
+  };
+
+  const handleContinueClick = () => {
+    if (!name.trim()) {
+      setError('Name cannot be empty.');
+      return;
+    }
+    if (name.length > 30) {
+      setError('Name cannot exceed 30 characters.');
+      return;
+    }
+    setError('');
+    navigate('/main');
+  };
+
+  const handleCancelClick = () => {
+    navigate('/login-fail');
+  };
 
   return (
     <div className="accountCreation-container">
@@ -21,18 +48,32 @@ export default function AccountCreationPage() {
       </div>
 
       <div className="accountCreation-form-content">
-        <label htmlFor="accountCreation-name-input" className="accountCreation-name-label">What is your name?</label>
+        <label htmlFor="accountCreation-name-input" className="accountCreation-name-label">
+          What is your name?
+        </label>
         <input
           id="accountCreation-name-input"
           type="text"
           className="accountCreation-name-input"
-          defaultValue="Woohyoung Ji"
+          placeholder="Woohyoung Ji"
+          value={name}
+          onChange={handleNameChange}
         />
+        <div className="accountCreation-char-count">{name.length} / 30</div>
+        {error && <div className="accountCreation-error">{error}</div>}
       </div>
 
       <div className="accountCreation-button-group">
-        <button className="accountCreation-cancel-button" onClick={handleCancelClick}>Cancel</button>
-        <button className="accountCreation-continue-button" onClick={handleContinueClick}>Continue</button>
+        <button className="accountCreation-cancel-button" onClick={handleCancelClick}>
+          Cancel
+        </button>
+        <button
+          className="accountCreation-continue-button"
+          onClick={handleContinueClick}
+          disabled={!!error || !name.trim()}
+        >
+          Continue
+        </button>
       </div>
     </div>
   );

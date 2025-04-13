@@ -24,7 +24,7 @@ export default function MainPage() {
               <GestureHelpButton />
             </div>
             <div className="timer-wrap">
-              <div className='col-flex'>
+              <div className='col-flex timer-col-flex'>
                 <div className='timer-wrap'>
                   <Timer />
                 </div>

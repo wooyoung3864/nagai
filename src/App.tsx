@@ -2,7 +2,7 @@ import React from 'react';
 import Navbar from './components/Navbar/Navbar';
 import WebcamFeed from './components/WebcamFeed/WebcamFeed';
 import Timer from './components/Timer/Timer';
-import GestureHelp from './components/GestureHelp/GestureHelp';
+import GestureHelpButton from './components/GestureHelpButton/GestureHelpButton';
 import { Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage/LoginPage';
 import MainPage from './pages/MainPage/MainPage';

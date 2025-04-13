@@ -104,13 +104,6 @@ export default function TermsPage() {
         )}
       </div>
 
-      {/* All Agree + Error */}
-      {showError && (
-        <div className="terms-error-message">
-          You must agree to all terms and conditions before continuing.
-        </div>
-      )}
-
       <div className="accordion-card agree-all-wrapper">
         <label className="terms-checkbox-label">
           <input
@@ -120,6 +113,12 @@ export default function TermsPage() {
           />
           Agree to all
         </label>
+        {/* All Agree + Error */}
+        {showError && (
+          <div className="terms-error-message">
+            You must agree to all terms and conditions before continuing.
+          </div>
+        )}
       </div>
 
       {/* Buttons */}

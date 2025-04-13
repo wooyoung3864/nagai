@@ -59,6 +59,10 @@
   color: #333;
 }
 
+.terms-scroll-box-wrapper {
+  overflow: hidden;
+}
+
 .terms-checkbox-label {
   display: flex;
   align-items: center;

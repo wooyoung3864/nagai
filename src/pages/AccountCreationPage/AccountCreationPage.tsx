@@ -1,6 +1,7 @@
 import React, { ChangeEvent, JSX, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
+import { motion } from 'framer-motion';
 import './AccountCreationPage.css';
 
 export default function AccountCreationPage(): JSX.Element {
@@ -42,7 +43,12 @@ export default function AccountCreationPage(): JSX.Element {
   };
 
   return (
-    <div className="accountCreation-container">
+    <motion.div
+      className="accountCreation-container"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
       <div className="accountCreation-logo">
         <img src="src/assets/imgs/nagai_logo.png" alt="nagai_logo" />
       </div>
@@ -75,6 +81,6 @@ export default function AccountCreationPage(): JSX.Element {
           Continue
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

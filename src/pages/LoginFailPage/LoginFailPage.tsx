@@ -1,6 +1,7 @@
 import React from 'react';
 import logo from '../../assets/imgs/nagai_logo.png';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion'; 
 import '../../App.css';
 import '../LoginPage/LoginPage.css';
 
@@ -8,12 +9,16 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleLoginClick = () => {
-    // optional: auth logic here
     navigate('/terms');
   };
 
   return (
-    <div className="login-container">
+    <motion.div
+      className="login-container"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
       <div className="login-flex-col">
         <div className="login-logo">
           <img src={logo} alt="nagAI logo" />
@@ -63,6 +68,6 @@ export default function LoginPage() {
           <h3>Please try again.</h3>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

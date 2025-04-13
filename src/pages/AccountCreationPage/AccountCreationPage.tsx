@@ -1,4 +1,4 @@
-import React, { ChangeEvent, JSX, useState } from 'react';
+import React, { ChangeEvent, JSX, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 import { motion } from 'framer-motion';
@@ -41,6 +41,17 @@ export default function AccountCreationPage(): JSX.Element {
   const handleCancelClick = () => {
     navigate('/login-fail');
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleContinueClick();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [name, error]);
 
   return (
     <motion.div

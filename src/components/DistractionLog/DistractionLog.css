@@ -67,6 +67,10 @@
   background-color: #4b5563;
 }
 
+.styled-table tbody tr {
+  cursor: pointer;
+}
+
 .modal-footer {
   display: flex;
   align-items: center;

@@ -24,7 +24,7 @@ export default function MainPage() {
           <div className="center-content">
             <div className="webcam-timer-row">
               <div className="webcam-wrapper">
-                <div className="col-flex">
+                <div className="col-flex webcam-col-flex">
                   <WebcamFeed />
                   <DistractionsButton />
                 </div>

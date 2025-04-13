@@ -4,6 +4,8 @@
   height: 20vw;       /* maintain square shape */
   min-width: 200px;
   min-height: 200px;
+  max-width: 300px;
+  max-height: 300px;
   aspect-ratio: 1 / 1;
   background-color: #3e444e;
   border: 6px solid #ef4444;  /* scale border, max out at 6px */

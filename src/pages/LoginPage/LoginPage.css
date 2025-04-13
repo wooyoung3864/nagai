@@ -21,7 +21,10 @@
 
 .login-fail-message {
   margin-top: 10px;
-  color: #ff4d4f;
+}
+
+.login-fail-message h3 {
+  color: #ff4d4f !important;
   text-align: center;
   font-family: sans-serif;
 }

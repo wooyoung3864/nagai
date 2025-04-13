@@ -64,16 +64,14 @@
 }
 
 .webcam-wrapper {
-    position: relative;
-    width: auto;
+    flex: 1;
     max-width: 800px;
-    height: auto;
-    /* ensure it grows with content */
-    display: inline-flex;
-    justify-content: flex-start;
+    width: 100%;
+    display: flex;
+    justify-content: center;
     align-items: stretch;
-    /* stretch child column vertically */
-}
+    position: relative;
+  }  
 
 .timer-wrap {
     margin-left: 4%;

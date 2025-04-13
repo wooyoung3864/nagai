@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import logo from '../../assets/imgs/nagai_logo.png';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion'; 
+import { motion } from 'framer-motion';
 import '../../App.css';
 import './LoginPage.css';
 
@@ -11,6 +11,17 @@ export default function LoginPage() {
   const handleLoginClick = () => {
     navigate('/terms');
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleLoginClick();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <motion.div

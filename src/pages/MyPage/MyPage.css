@@ -105,3 +105,75 @@
   font-size: 1.2rem;
   border-radius: 15px;
 }
+
+.myPage-success {
+  color: #747bff;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.modal-box-sm.modal-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 30%;
+  height: 40%;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-box-sm.modal-centered * {
+  transform: translateY(0rem);
+}
+
+.modal-title {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  color: #111 !important;
+}
+
+.modal-message {
+  font-size: 1.1rem;
+  color: #444;
+  margin: 1rem 0;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.modal-footer button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.back-button {
+  background-color: #4da6ff;
+  color: white;
+}
+
+.back-button:hover {
+  background-color: #4d85ff;
+}
+
+
+.danger-button {
+  background-color: #ef4444;
+  color: white;
+}
+
+.danger-button:hover {
+  background-color: #dc2626;
+}

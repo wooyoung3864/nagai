@@ -37,39 +37,50 @@
     gap: 2rem;
     align-items: center;
     max-height: 600px !important;
+    width: 100%;
     height: 100% !important;
+}
+
+.webcam-col-flex {
+    width: 100%;
 }
 
 .timer-col-flex {
     /* gap: 4.5rem; */
 }
 
+.main-content,
 .webcam-timer-row {
-    display: inline-flex;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+
+.webcam-timer-row {
+    display: flex;
     justify-content: center;
     align-items: center;
     height: auto;
-    width: 80%;
+    width: 100%;
 }
 
 .webcam-wrapper {
     position: relative;
-    width: 100%;
+    width: auto;
     max-width: 800px;
     height: auto;
     /* ensure it grows with content */
     display: inline-flex;
-    justify-content: left;
+    justify-content: flex-start;
     align-items: stretch;
     /* stretch child column vertically */
 }
 
 .timer-wrap {
-    margin-left: 2%;
+    margin-left: 4%;
     width: auto;
     height: 100% !important;
     min-height: 220px;
-    max-height: 600px;
+    max-height: 500px;
     align-items: stretch;
 }
 
@@ -127,7 +138,8 @@
     }
 
     .webcam-wrapper {
-        width: 90%;
+        max-width: 90%;
+        justify-content: center;
     }
 
     .timer-wrap {
@@ -138,6 +150,7 @@
 
     .col-flex {
         gap: 30px;
+        justify-content: center;
     }
 
     .main-content {

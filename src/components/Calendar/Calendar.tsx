@@ -19,7 +19,6 @@ function getMonth(month: number){
 interface DailyData {
   date: string;
   focusTime: string;
-  distractions: string[];
 }
 
 interface Props {

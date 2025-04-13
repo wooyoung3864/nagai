@@ -9,6 +9,7 @@ import MainPage from './pages/MainPage/MainPage';
 import LoginFailPage from './pages/LoginFailPage/LoginFailPage';
 import TermsPage from './pages/TermsPage/TermsPage';
 import AccountCreationPage from './pages/AccountCreationPage/AccountCreationPage';
+import MyPage from './pages/MyPage/MyPage';
 import './App.css';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/login-fail" element={<LoginFailPage />} />
         <Route path="/account-creation" element={<AccountCreationPage />} />
+        <Route path="/mypage" element={<MyPage />} />
       </Routes>
     </div>
     

@@ -81,7 +81,7 @@ export default function MyPage() {
                   value={tempName}
                   onChange={handleNameChange}
                 />
-                <div className="myPage-char-count">{name.length} / 30</div>
+                <div className="myPage-char-count">{tempName.length} / 30</div>
                     {error && <div className="myPage-error">{error}</div>}
                 </div>
                 <div className="myPage-button-group">

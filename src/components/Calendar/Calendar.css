@@ -27,7 +27,13 @@
   color: green;
 }
 
+.month h3 {
+  color: black !important;
+  margin: 0;
+}
+
 .month{
+    color: #000000;
     font-size: large;
     display: flex;
     align-items: center;

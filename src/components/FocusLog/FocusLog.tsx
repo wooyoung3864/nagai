@@ -27,8 +27,8 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
             if(event.key === "Escape"){
                onClose();
             }
-        };    
-        window.addEventListener("keydown", handleKeyDown);    
+        };
+        window.addEventListener("keydown", handleKeyDown);
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
@@ -45,7 +45,7 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
             <Calendar data={focusData} />
           </div>
           <div className="modal-footer">
-            
+
           </div>
         </div>
       </div>

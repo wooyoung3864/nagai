@@ -72,10 +72,12 @@
 }
 
 /* ✅ Mobile & small screen safety fallback */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 1080px) {
   .webcam-feed {
     min-width: 320px;
+    max-width: 71vw;
     min-height: 180px;
+    max-height: 40vh;
   }
 }
 

@@ -20,23 +20,21 @@ export default function MainPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="main-content">
-          <div className="center-content">
-            <div className="webcam-timer-row">
-              <div className="webcam-wrapper">
-                <div className="col-flex webcam-col-flex">
-                  <WebcamFeed />
-                  <DistractionsButton />
-                </div>
-                <GestureHelpButton />
+        <div className="center-content">
+          <div className="webcam-timer-row">
+            <div className="webcam-wrapper">
+              <div className="col-flex webcam-col-flex">
+                <WebcamFeed />
+                <DistractionsButton />
               </div>
-              <div className="timer-wrap">
-                <div className='col-flex timer-col-flex'>
-                  <div className='timer-wrap-inner'>
-                    <Timer />
-                  </div>
-                  <FocusButton />
+              <GestureHelpButton />
+            </div>
+            <div className="timer-wrap">
+              <div className='col-flex timer-col-flex'>
+                <div className='timer-wrap-inner'>
+                  <Timer />
                 </div>
+                <FocusButton />
               </div>
             </div>
           </div>

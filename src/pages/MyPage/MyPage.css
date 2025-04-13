@@ -10,18 +10,24 @@
   box-sizing: border-box;
   position: relative;
   align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.myPage-container * {
+  transform: translateY(-2rem);
 }
 
 .myPage-form-content {
-  margin-top: 100px;
   display: flex;
   flex-direction: column;
-  align-items: left;
+  align-items: center;
 }
 
 .myPage-name-label {
-  margin-bottom: 1rem;
-  font-size: 2.35rem;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  padding: 30px;
 }
 
 .myPage-name-input {
@@ -39,34 +45,63 @@
 .myPage-name-input::placeholder {
   color: #aaa;
 }
+
+.myPage-char-count {
+  color: #ccc;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.myPage-error {
+  color: #ff4d4d;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
 .myPage-button-group {
   display: flex;
   gap: 1.5rem;
-  margin-top: 2rem;
 }
 
 .myPage-cancel-button {
-    background-color: #ff4d4d;
-    border: none;
-    padding: 10px 30px;
-    border-radius: 25px;
-    font-size: 1rem;
-    color: white;
-    cursor: pointer;
-}
-  
-.myPage-continue-button {
-    background-color: #4da6ff;
-    border: none;
-    padding: 10px 30px;
-    border-radius: 25px;
-    font-size: 1rem;
-    color: white;
-    cursor: pointer;
+  background-color: #ff4d4d;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
 }
 
-.myPage-underline {
-  margin-top: 100px;
+.myPage-continue-button {
+  background-color: #4da6ff;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+}
+
+.myPage-continue-button:disabled {
+  background-color: #7ab8f7; /* lighter blue */
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
+.myPage-cancel-button:hover {
+  color: #747bff;
+}
+
+.myPage-continue-button:hover {
+  color: #747bff;
+}
+
+.myPage-underline{
   text-decoration: underline;
   font-size: 1.2rem;
+  border-radius: 8px;
 }

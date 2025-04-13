@@ -1,6 +1,7 @@
 import React from 'react';
-import logo from '../../assets/imgs/nagai_logo.png';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import logo from '../../assets/imgs/nagai_logo.png';
 import '../../App.css';
 import './LoginPage.css';
 
@@ -8,17 +9,38 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleLoginClick = () => {
-    // optional: auth logic here
     navigate('/terms');
   };
 
   return (
-    <div className="login-container">
-      <div className="login-flex-col">
-        <div className="login-logo">
+    <motion.div
+      className="login-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div
+        className="login-flex-col"
+        initial={{ y: -30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div
+          className="login-logo"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
           <img src={logo} alt="nagAI logo" />
-        </div>
-        <button className="gsi-material-button" onClick={handleLoginClick}>
+        </motion.div>
+
+        <motion.button
+          className="gsi-material-button"
+          onClick={handleLoginClick}
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
           <div className="gsi-material-button-state"></div>
           <div className="gsi-material-button-content-wrapper">
             <div className="gsi-material-button-icon">
@@ -57,8 +79,8 @@ export default function LoginPage() {
             <span className="gsi-material-button-contents">Continue with Google</span>
             <span style={{ display: 'none' }}>Continue with Google</span>
           </div>
-        </button>
-      </div>
-    </div>
+        </motion.button>
+      </motion.div>
+    </motion.div>
   );
 }

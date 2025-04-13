@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import './TermsPage.css';
 
 export default function TermsPage() {
@@ -46,12 +47,18 @@ export default function TermsPage() {
 
   return (
     <div className="terms-container">
-      <div className="terms-logo">
+      <motion.div className="terms-logo">
         <img src="src/assets/imgs/nagai_logo.png" alt="nagai_logo" />
-      </div>
+      </motion.div>
 
       {/* Terms Section */}
-      <div className="terms-accordion-card">
+      <motion.div
+        className="terms-accordion-card"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        viewport={{ once: true }}
+      >
         <div className="terms-accordion-header" onClick={() => setOpenTerms(!openTerms)}>
           <span>Terms and Conditions</span>
           <span>{openTerms ? '▲' : '▼'}</span>
@@ -75,10 +82,16 @@ export default function TermsPage() {
             </label>
           </>
         )}
-      </div>
+      </motion.div>
 
       {/* Privacy Section */}
-      <div className="terms-accordion-card">
+      <motion.div
+        className="terms-accordion-card"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        viewport={{ once: true }}
+      >
         <div className="terms-accordion-header" onClick={() => setOpenPrivacy(!openPrivacy)}>
           <span>Privacy Agreement</span>
           <span>{openPrivacy ? '▲' : '▼'}</span>
@@ -102,7 +115,7 @@ export default function TermsPage() {
             </label>
           </>
         )}
-      </div>
+      </motion.div>
 
       {/* All Agree + Error */}
       {showError && (
@@ -123,10 +136,16 @@ export default function TermsPage() {
       </div>
 
       {/* Buttons */}
-      <div className="terms-button-group">
+      <motion.div
+        className="terms-button-group"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+        viewport={{ once: true }}
+      >
         <button className="terms-cancel-button" onClick={handleCancelClick}>Cancel</button>
         <button className="terms-continue-button" onClick={handleContinueClick}>Continue</button>
-      </div>
+      </motion.div>
     </div>
   );
 }

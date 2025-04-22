@@ -70,3 +70,9 @@
   outline: none;
   box-shadow: none;
 }
+
+@media screen and (max-width: 910px) {
+    .nagai-navbar {
+      padding: 1rem;
+    }
+}

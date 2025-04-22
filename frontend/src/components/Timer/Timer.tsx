@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import './Timer.css';
+import DistractionModal from '../DistractionModal/DistractionModal';
 
 const FOCUS_DURATION = 15;
 const BREAK_DURATION = 10;
@@ -17,6 +18,7 @@ export default function Timer({ onSessionComplete, onFocusChange, onRunningChang
   const [isFocus, setIsFocus] = useState(true);
   const progress = useMotionValue(0);
   const sessionStartRef = useRef<number | null>(null);
+  const [distractionVisible, setDistractionVisible] = useState(false);
 
   const total = isFocus ? FOCUS_DURATION : BREAK_DURATION;
 
@@ -27,6 +29,17 @@ export default function Timer({ onSessionComplete, onFocusChange, onRunningChang
       setIsRunning(true);
       sessionStartRef.current = Date.now();
     }
+  };
+
+  const handleDistraction = () => {
+    if (isRunning && isFocus && sessionStartRef.current) {
+      const elapsedSec = Math.floor((Date.now() - sessionStartRef.current) / 1000);
+      onSessionComplete(elapsedSec, true);
+    }
+
+    setIsRunning(false);
+    onRunningChange(false);
+    setDistractionVisible(true);
   };
 
   const pauseTimer = () => {
@@ -87,6 +100,17 @@ export default function Timer({ onSessionComplete, onFocusChange, onRunningChang
 
   return (
     <>
+      {isRunning && isFocus && (
+        <div className="d-flex justify-content-center mb-3">
+          <button
+            className="timer-btn-temp distract-btn-overlay"
+            onClick={handleDistraction}
+          >
+            Distract Me!
+          </button>
+        </div>
+      )}
+      
       <motion.div
         className="timer-circle"
         style={{
@@ -112,6 +136,10 @@ export default function Timer({ onSessionComplete, onFocusChange, onRunningChang
           </>
         )}
       </div>
+      <DistractionModal
+        isVisible={distractionVisible}
+        onDismiss={() => setDistractionVisible(false)}
+      />
     </>
   );
 }

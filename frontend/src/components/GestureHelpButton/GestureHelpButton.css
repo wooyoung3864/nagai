@@ -1,0 +1,26 @@
+/* GestureHelp.css */
+.gesture-help {
+    background-color: #fcd34d;
+    padding: 0;
+    border-radius: 100px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    z-index: 1000; /* IMPORTANT: should be above HelpMessage overlay & below modals */
+  }
+
+  .gesture-help:hover {
+    
+  }
+
+  .gesture-help:focus {
+    outline: none;
+    box-shadow: none;
+  }

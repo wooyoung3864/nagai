@@ -1,22 +1,50 @@
-/* Timer.css */
 .timer-circle {
-  width: 20vw;        /* scales with width, max 300px */
-  height: 20vw;       /* maintain square shape */
+  position: relative;
+  width: 20vw;
+  height: 20vw;
   min-width: 200px;
   min-height: 200px;
   max-width: 300px;
   max-height: 300px;
   aspect-ratio: 1 / 1;
-  background-color: #3e444e;
-  border: 6px solid #ef4444;  /* scale border, max out at 6px */
   border-radius: 50%;
+  background-color: #3e444e;
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  overflow: hidden;
+}
+
+.timer-circle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 6px;
+  background: conic-gradient(var(--border-color) var(--progress), transparent 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 6px), black 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), black 0);
+  transition: transform 0.3s linear, background 0.3s linear;
 }
 
 .timer-text {
-  font-size: min(5vw, 2rem);      /* scales with viewport, capped */
+  font-size: min(5vw, 2rem);
   font-weight: bold;
+  color: white;
+  z-index: 1;
+}
+
+.timer-btn-temp {
+  margin: 1rem 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  color: #fff;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #444;
 }

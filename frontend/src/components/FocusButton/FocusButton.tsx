@@ -3,8 +3,7 @@ import './FocusButton.css'
 import '../../App.css';
 import FocusLog from "../FocusLog/FocusLog";
 
-export default function FocusButton(){
-    const [focustime, setFocusTime] = useState("01:04:50");
+export default function FocusButton({ focustime }: { focustime: string }) {
     const [isFocusLogOpen, setFocusLogOpen] = useState(false);
 
     return (

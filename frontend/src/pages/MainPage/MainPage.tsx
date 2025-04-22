@@ -13,8 +13,25 @@ export default function MainPage() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [cameraAvailable, setCameraAvailable] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isFocus, setIsFocus] = useState(true);
+  const [totalFocusSeconds, setTotalFocusSeconds] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+
 
   const toggleOverlay = () => setShowOverlay((prev) => !prev);
+
+  const handleSessionComplete = (duration: number, wasFocus: boolean) => {
+    if (wasFocus) {
+      setTotalFocusSeconds((prev) => prev + duration);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  };
 
   return (
     <>
@@ -36,7 +53,7 @@ export default function MainPage() {
                   cameraAvailable={cameraAvailable}
                   errorMessage={errorMessage}
                 />
-                <DistractionsButton />
+                {(!isTimerRunning || !isFocus) && <DistractionsButton />}
               </div>
               {cameraAvailable && (
                 <GestureHelpButton onClick={toggleOverlay} />
@@ -45,9 +62,13 @@ export default function MainPage() {
             <div className="timer-wrap">
               <div className="col-flex timer-col-flex">
                 <div className="timer-wrap-inner">
-                  <Timer />
+                  <Timer
+                    onSessionComplete={handleSessionComplete}
+                    onFocusChange={setIsFocus}
+                    onRunningChange={setIsTimerRunning}
+                  />
                 </div>
-                <FocusButton />
+                {(!isTimerRunning || !isFocus) && <FocusButton focustime={formatTime(totalFocusSeconds)} />}
               </div>
             </div>
           </div>

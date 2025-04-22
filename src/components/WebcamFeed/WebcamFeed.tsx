@@ -1,7 +1,13 @@
+// src/components/WebcamFeed/WebcamFeed.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import './WebcamFeed.css';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export default function WebcamFeed() {
+interface WebcamFeedProps {
+  showOverlay: boolean;
+}
+
+export default function WebcamFeed({ showOverlay }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [cameraAvailable, setCameraAvailable] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -44,7 +50,18 @@ export default function WebcamFeed() {
   return (
     <div className="webcam-feed">
       {cameraAvailable ? (
+        <>
+        {showOverlay && (
+            <motion.div
+              className="gesture-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            />
+          )}
         <video ref={videoRef} autoPlay muted playsInline />
+        </>
       ) : (
         <div className="webcam-error">
           <p style={{ whiteSpace: 'pre-line' }}>{errorMessage}</p>

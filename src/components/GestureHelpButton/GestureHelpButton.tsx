@@ -1,9 +1,15 @@
-// components/GestureHelp.tsx
+// src/components/GestureHelpButton/GestureHelpButton.tsx
 import React from 'react';
 import './GestureHelpButton.css';
 
-export default function GestureHelpButton() {
+interface GestureHelpButtonProps {
+  onClick: () => void;
+}
+
+export default function GestureHelpButton({ onClick }: GestureHelpButtonProps) {
   return (
-    <button className="gesture-help">?</button>
+    <button className="gesture-help" onClick={onClick}>
+      ?
+    </button>
   );
 }

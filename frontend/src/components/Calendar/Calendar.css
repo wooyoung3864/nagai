@@ -1,0 +1,55 @@
+.calendar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.calendar-header, .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-cell {
+  border: 1px solid #ccc;
+  min-height: 78.62px;
+  padding: 6px;
+  font-size: 0.9rem;
+}
+
+.calendar-cell.header {
+  background: #f0f0f0;
+  font-weight: bold;
+  text-align: center;
+  min-height: 30px;
+}
+
+.focus-time {
+  font-weight: bold;
+  color: green;
+}
+
+.focus-cycle {
+    color: #ef4444;
+}
+
+.month{
+    color: #000000;
+    font-size: large;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.month button {
+  border-radius: 8px;
+}
+
+.month h3 {
+  color: black !important;
+  margin: 0;
+}
+
+div.modal-box {
+    min-height: 712px;
+}

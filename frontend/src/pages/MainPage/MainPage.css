@@ -1,0 +1,170 @@
+body, html, #root {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent scroll */
+  }
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    /* or space-evenly / space-between */
+    align-items: baseline;
+    gap: 3rem;
+    padding: 2rem;
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+}
+
+.center-content {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    align-items: center;
+    width: 100%;
+    /* <- allow it to grow/shrink */
+    max-width: none;
+    /* <- remove constraint */
+}
+
+.col-flex {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2rem;
+    align-items: center;
+    max-height: 600px !important;
+    width: 100%;
+    height: 100% !important;
+}
+
+.webcam-col-flex {
+    width: 100%;
+}
+
+.timer-col-flex {
+    /* gap: 4.5rem; */
+}
+
+.main-content,
+.webcam-timer-row {
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+
+.webcam-timer-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    width: 100%;
+}
+
+.webcam-wrapper {
+    flex: 1;
+    max-width: 800px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    position: relative;
+  }  
+
+.timer-wrap {
+    margin-left: 4%;
+}
+
+.timer-wrap, .timer-wrap-inner {
+    width: auto;
+    height: 100% !important;
+    min-height: 200px;
+    align-items: stretch;
+}
+
+.gesture-help-wrap {}
+
+.timer-focus-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: last-baseline;
+    align-items: center;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    align-items: center;
+    width: 100%;
+    /* <- allow it to grow/shrink */
+    max-width: none;
+    /* <- remove constraint */
+}
+
+@media screen and (min-width: 2000px) {
+    .webcam-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 1200px;
+        height: auto;
+        /* ensure it grows with content */
+        display: inline-flex;
+        justify-content: left;
+        align-items: stretch;
+        /* stretch child column vertically */
+    }
+
+    .col-flex {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 20px;
+        align-items: stretch;
+        max-height: 800px !important;
+        height: 100% !important;
+    }
+}
+
+/* 🔽 Mobile Styles */
+@media screen and (max-width: 1080px) {
+    .webcam-timer-row {
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .webcam-wrapper {
+        max-width: 90%;
+        justify-content: center;
+    }
+
+    .timer-wrap {
+        margin-top: 2rem;
+        margin-left: 0;
+        min-height: 200px;
+    }
+
+    .col-flex {
+        gap: 2rem;
+        justify-content: center;
+    }
+
+    .main-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .center-content {
+        width: 100%;
+    }
+}

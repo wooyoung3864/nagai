@@ -1,0 +1,118 @@
+/*AccountCreationPage Style begins*/
+
+.accountCreation-logo,
+.accountCreation-logo img {
+  width: 230px;
+  max-height: 100%;
+  /* never exceed button height */
+  max-width: 100%;
+  /* prevents it from spilling horizontally */
+  /* scale naturally */
+  object-fit: contain;
+  display: block;
+  cursor: default;
+}
+
+.accountCreation-logo {
+  margin: 0 0 1rem;
+}
+
+.accountCreation-container {
+  background-color: #4e5158;
+  height: 100vh;
+  width: 100vw;
+  color: white;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  box-sizing: border-box;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.accountCreation-form-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.accountCreation-name-label {
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+}
+
+.accountCreation-name-input {
+  background-color: #4e5158;
+  border: none;
+  border-bottom: 2px solid #ffffff;
+  color: white;
+  font-size: 1.2rem;
+  padding: 5px 0;
+  width: 250px;
+  text-align: center;
+  outline: none;
+}
+
+.accountCreation-name-input::placeholder {
+  color: #aaa;
+}
+
+.accountCreation-char-count {
+  color: #ccc;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.accountCreation-error {
+  color: #ff4d4d;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.accountCreation-button-group {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.accountCreation-cancel-button {
+  background-color: #ff4d4d;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+}
+
+.accountCreation-continue-button {
+  background-color: #4da6ff;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+}
+
+.accountCreation-continue-button:disabled {
+  background-color: #7ab8f7; /* lighter blue */
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
+.terms-cancel-button:hover {
+  color: #747bff;
+}
+
+.terms-continue-button:hover {
+  color: #747bff;
+}
+
+/*AccountCreationPage Style ends*/

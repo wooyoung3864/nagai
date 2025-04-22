@@ -1,9 +1,12 @@
-body, html, #root {
+body,
+html,
+#root {
     height: 100vh;
     margin: 0;
     padding: 0;
-    overflow: auto; /* alow scroll */
-  }
+    overflow: auto;
+    /* alow scroll */
+}
 
 .main-content {
     flex: 1;
@@ -58,7 +61,7 @@ body, html, #root {
 
 .main-content,
 .webcam-timer-row {
-  flex-wrap: wrap;
+    flex-wrap: wrap;
 }
 
 .webcam-timer-row {
@@ -77,13 +80,14 @@ body, html, #root {
     justify-content: center;
     align-items: stretch;
     position: relative;
-  }  
+}
 
 .timer-wrap {
     margin-left: 4%;
 }
 
-.timer-wrap, .timer-wrap-inner {
+.timer-wrap,
+.timer-wrap-inner {
     width: auto;
     height: 100% !important;
     min-height: 200px;
@@ -165,5 +169,11 @@ body, html, #root {
 
     .center-content {
         width: 100%;
+    }
+}
+
+@media screen and (max-width: 910px) {
+    .main-content {
+        padding: 1rem;
     }
 }

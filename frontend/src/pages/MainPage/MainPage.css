@@ -59,7 +59,6 @@ body, html, #root {
 .main-content,
 .webcam-timer-row {
   flex-wrap: wrap;
-  overflow: hidden;
 }
 
 .webcam-timer-row {

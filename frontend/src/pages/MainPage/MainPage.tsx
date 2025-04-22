@@ -1,4 +1,3 @@
-// src/pages/MainPage.tsx
 import React, { useState } from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import WebcamFeed from '../../components/WebcamFeed/WebcamFeed';
@@ -6,14 +5,16 @@ import GestureHelpButton from '../../components/GestureHelpButton/GestureHelpBut
 import Timer from '../../components/Timer/Timer';
 import DistractionsButton from '../../components/DistractionsButton/DistractionsButton';
 import FocusButton from '../../components/FocusButton/FocusButton';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import '../../App.css';
 import './MainPage.css';
 
 export default function MainPage() {
   const [showOverlay, setShowOverlay] = useState(false);
+  const [cameraAvailable, setCameraAvailable] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const toggleOverlay = () => setShowOverlay(prev => !prev);
+  const toggleOverlay = () => setShowOverlay((prev) => !prev);
 
   return (
     <>
@@ -28,14 +29,22 @@ export default function MainPage() {
           <div className="webcam-timer-row">
             <div className="webcam-wrapper">
               <div className="col-flex webcam-col-flex">
-                <WebcamFeed showOverlay={showOverlay} />
+                <WebcamFeed
+                  showOverlay={showOverlay}
+                  setCameraAvailable={setCameraAvailable}
+                  setErrorMessage={setErrorMessage}
+                  cameraAvailable={cameraAvailable}
+                  errorMessage={errorMessage}
+                />
                 <DistractionsButton />
               </div>
-              <GestureHelpButton onClick={toggleOverlay} />
+              {cameraAvailable && (
+                <GestureHelpButton onClick={toggleOverlay} />
+              )}
             </div>
             <div className="timer-wrap">
-              <div className='col-flex timer-col-flex'>
-                <div className='timer-wrap-inner'>
+              <div className="col-flex timer-col-flex">
+                <div className="timer-wrap-inner">
                   <Timer />
                 </div>
                 <FocusButton />

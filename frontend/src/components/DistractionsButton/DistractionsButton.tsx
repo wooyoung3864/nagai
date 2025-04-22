@@ -8,7 +8,7 @@ export default function DistractionsButton() {
     const [isDistractionLogOpen, setDistractionLogOpen] = useState(false);
 
     return (
-        <div>
+        <div className="distractions-btn-wrap">
             <button className="distractions" color='eb6565' onClick={() => setDistractionLogOpen(true)}>
                 <div>
                 <svg width="35px" height="30px" viewBox="0 0 512.00 512.00" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" preserveAspectRatio="xMidYMid meet" fill="#ffffff" stroke="#ffffff" strokeWidth="0.00512">

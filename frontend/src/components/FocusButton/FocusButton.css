@@ -1,3 +1,10 @@
+.focus-btn-wrap {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
 .focus-button{
     background-color: transparent;
     border: 1px solid white;

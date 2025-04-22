@@ -8,7 +8,7 @@ export default function FocusButton(){
     const [isFocusLogOpen, setFocusLogOpen] = useState(false);
 
     return (
-        <div>
+        <div className="focus-btn-wrap">
             <button className="focus-button" onClick={() => setFocusLogOpen(true)}>
                 <h3>Focus Time: {focustime}</h3>
             </button>

@@ -1,0 +1,41 @@
+.gesture-overlay {
+  position: fixed; /* ← was absolute */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.6);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.distraction-modal {
+  background: #4E5158;
+  padding: 2rem;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.distraction-modal h1 {
+  font-size: 2rem;
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.distraction-modal p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.distraction-modal button {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}

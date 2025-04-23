@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import WebcamFeed from '../../components/WebcamFeed/WebcamFeed';
 import GestureHelpButton from '../../components/GestureHelpButton/GestureHelpButton';

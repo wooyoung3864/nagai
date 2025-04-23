@@ -4,11 +4,18 @@ import './DistractionModal.css';
 
 interface DistractionModalProps {
   isVisible: boolean;
-  onDismiss: () => void;
+  onDismiss: () => void;  // hide the modal
 }
 
-export default function DistractionModal({ isVisible, onDismiss }: DistractionModalProps) {
+export default function DistractionModal({
+  isVisible,
+  onDismiss
+}: DistractionModalProps) {
   if (!isVisible) return null;
+
+  const handleDismiss = () => {
+    onDismiss();
+  };
 
   return (
     <motion.div
@@ -25,7 +32,7 @@ export default function DistractionModal({ isVisible, onDismiss }: DistractionMo
       >
         <h1>Distraction Detected!</h1>
         <p>Try to focus on your task.</p>
-        <button onClick={onDismiss}>Dismiss</button>
+        <button onClick={handleDismiss}>Dismiss</button>
       </motion.div>
     </motion.div>
   );

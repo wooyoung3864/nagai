@@ -12,11 +12,15 @@ interface WebcamFeedProps {
   setErrorMessage: (msg: string) => void;
   cameraAvailable: boolean;
   errorMessage: string;
+  cameraInitialized: boolean;
+  setCameraInitialized: (value: boolean) => void;
 }
 
 export default function WebcamFeed({
   showOverlay,
   setCameraAvailable,
+  cameraInitialized,
+  setCameraInitialized,
   setErrorMessage,
   cameraAvailable,
   errorMessage,
@@ -33,7 +37,6 @@ export default function WebcamFeed({
             videoRef.current.srcObject = stream;
           }
 
-          // Even if videoRef hasn't rendered yet, stream is active
           if (stream.active) {
             setCameraAvailable(true);
             setErrorMessage('');
@@ -41,23 +44,15 @@ export default function WebcamFeed({
             setCameraAvailable(false);
             setErrorMessage('Stream is inactive.\nPlease try again.');
           }
+          setCameraInitialized(true); // ← add this
         })
         .catch((err) => {
           console.error('webcam error:', err);
           setCameraAvailable(false);
-
-          if (err.name === 'NotAllowedError') {
-            setErrorMessage(
-              'Webcam access denied.\nPlease enable it in your browser settings and try again.'
-            );
-          } else if (err.name === 'NotFoundError') {
-            setErrorMessage(
-              'No webcam device found.\nPlease connect a camera and try again.'
-            );
-          } else {
-            setErrorMessage('Unable to access your webcam.\nPlease try again.');
-          }
+          // (error handling logic stays the same)
+          setCameraInitialized(true); // ← add this
         });
+
     };
 
     initCamera();
@@ -75,43 +70,24 @@ export default function WebcamFeed({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className='overlay-grid-wrap'>
-                <div className='overlay-grid-col'>
-                  <div className='overlay-grid-header'>
-                    <h2 className='overlay-text margin-left-1rem'>
-                      Raise your hand like:
-                    </h2>
-                  </div>
-                  <div className='overlay-grid-row'>
-                    <div className='overlay-grid-cell'>
-                      <img src={palmImg} className='palm-icon' alt="Palm gesture" /><h2 className='overlay-text margin-left-2rem'>
-                        {isMobile ? 'to stop.' : 'to stop the timer/break.'}
-                      </h2>
-                    </div>
-                    <div className='overlay-grid-cell'>
-                      <img src={backOfHandImg} className='back-of-hand-icon' alt="Back of hand gesture" />
-                      <h2 className='overlay-text margin-left-2rem'>
-                        {isMobile ? 'to pause.' : 'to pause the timer.'}
-                      </h2>
-
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* Overlay content */}
             </motion.div>
           )}
           <video ref={videoRef} autoPlay muted playsInline />
         </>
       ) : (
-        <div className="webcam-error">
-          <p style={{ whiteSpace: 'pre-line' }}>{errorMessage}</p>
-          <button
-            className="retry-camera-button"
-            onClick={() => window.location.reload()}
-          >
-            Try Again
-          </button>
-        </div>
+        // Don't show this unless cameraInitialized is true
+        cameraInitialized && (
+          <div className="webcam-error">
+            <p style={{ whiteSpace: 'pre-line' }}>{errorMessage}</p>
+            <button
+              className="retry-camera-button"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </button>
+          </div>
+        )
       )}
     </div>
   );

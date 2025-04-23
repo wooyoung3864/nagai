@@ -55,6 +55,6 @@
   cursor: pointer;
 }
 
-button:hover {
+.timer-btn-temp:hover {
   background: #444;
 }

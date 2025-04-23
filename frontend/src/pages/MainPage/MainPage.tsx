@@ -18,7 +18,6 @@ export default function MainPage() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [cameraInitialized, setCameraInitialized] = useState(false);
 
-
   const toggleOverlay = () => setShowOverlay((prev) => !prev);
 
   const handleSessionComplete = (duration: number, wasFocus: boolean) => {
@@ -53,6 +52,8 @@ export default function MainPage() {
                   setErrorMessage={setErrorMessage}
                   cameraAvailable={cameraAvailable}
                   errorMessage={errorMessage}
+                  cameraInitialized={cameraInitialized}
+                  setCameraInitialized={setCameraInitialized}
                 />
                 {(!isTimerRunning || !isFocus) && <DistractionsButton />}
               </div>

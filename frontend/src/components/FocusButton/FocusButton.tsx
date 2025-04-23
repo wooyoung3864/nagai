@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import './FocusButton.css'
 import '../../App.css';
 import FocusLog from "../FocusLog/FocusLog";

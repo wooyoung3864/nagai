@@ -1,4 +1,4 @@
-.gesture-overlay {
+.distraction-modal-overlay {
   position: fixed; /* ← was absolute */
   top: 0;
   left: 0;

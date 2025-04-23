@@ -16,6 +16,7 @@ export default function MainPage() {
   const [isFocus, setIsFocus] = useState(true);
   const [totalFocusSeconds, setTotalFocusSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [cameraInitialized, setCameraInitialized] = useState(false);
 
 
   const toggleOverlay = () => setShowOverlay((prev) => !prev);

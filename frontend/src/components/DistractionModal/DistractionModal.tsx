@@ -10,7 +10,7 @@ export default function DistractionModal({ isVisible, onDismiss }: DistractionMo
   if (!isVisible) return null;
 
   return (
-    <div className="gesture-overlay">
+    <div className="distraction-modal-overlay">
       <div className="distraction-modal">
         <h1>Distraction Detected!</h1>
         <p>Try to focus on your task.</p>

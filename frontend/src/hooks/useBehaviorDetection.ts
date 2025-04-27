@@ -185,10 +185,10 @@ export function useBehaviorDetection({
 
         const base64Image = await blobToBase64(blob);
         const promptToSend = TESTING_PROMPT;
-        const result = await callGeminiAPI(base64Image.split(',')[1], promptToSend);
-        if (result) {
-          console.log("🎯 Gemini Test Response:", result);
-        }
+        //const result = await callGeminiAPI(base64Image.split(',')[1], promptToSend);
+        //if (result) {
+          //console.log("🎯 Gemini Test Response:", result);
+        //}
       }
     }, 'image/png');
   }

@@ -1,114 +1,84 @@
-/**
- * useBehaviorDetection
- * 
- * Hook to detect user behaviors from webcam snapshots using Gemini 1.5 Flash.
- * 
- * Behaviors Detected:
- * - Palm raise → STOP
- * - Fist raise while running → PAUSE
- * - Fist raise while paused → RESUME
- * - Palm raise during break → GOTO NEXT SESSION
- * - Otherwise, predict focus behaviors and focus_score (only while running)
- * 
- * Features:
- * - Motion detection (simple pixel difference)
- * - Snapshot webcam frame after motion detected
- * - Resize to 512x512 with aspect ratio preserved (black bars)
- * - Base64 encode snapshot
- * - Send image + dynamic prompt (running/paused/stopped/break) to Gemini
- * - Parse { "action" } or { "focus_score" }
- * - Act accordingly
- * 
- * Usage:
- * Call `startBehaviorDetection()` when camera feed starts,
- * and `stopBehaviorDetection()` when camera feed stops.
- */
-
 import { useEffect, useRef, useState } from 'react';
 
-const API_KEY = "AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo"; // actual key; DO NOT share with anyone else.
+const API_KEY = "AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo"; // actual API key; DO NOT share with others.
+const GEMINI_CALL_ENABLED = true;
+const BASE_WIDTH = 64;   // canvas width for motion detection
+const BASE_HEIGHT = 48;
+const MOTION_SNAPSHOT_INTERVAL = 2000;   // 2s after motion
+const IDLE_SNAPSHOT_INTERVAL = 12000;    // 12s when idle
+const MOTION_DETECTION_THRESHOLD = 2;  // how many motion frames to confirm motion
+const MOTION_END_THRESHOLD = 3;         // how many still frames to confirm no motion
 
 const prompts = {
   stopped:
-    'From webcam snapshot: If fist is raised, return { "action": "RESUME" }. Else do nothing. JSON only.',
+    'From webcam snapshot: If fist is raised, return { "action": "START" }. Else do nothing. JSON only.',
 
   running:
-    'From webcam snapshot: If palm is raised, return { "action": "STOP" }, if fist is raised, return { "action": "PAUSE" }. Else analyze focus: list focus (facing screen, eyes open, no phone, no talking, still) or distraction (looking away, closed eyes, phone, talking, absent). Score 0–100. Return JSON: { "focus_score": 0–100, "focus_state": "Focused" or "Not Focused", "observed_behaviors": [], "explanation": "" }. JSON only.',
+    'From webcam snapshot: If palm is raised, return { "action": "STOP" }, if fist is raised, return { "action": "PAUSE" }. Else analyze focus: list focus (facing screen, eyes open, no phone, no talking, still) or distraction (looking away, closed eyes, phone, talking, absent). Score 0–100. Return JSON: { "focus_score": 0–100, "is_focused": true or false, "observed_behaviors": [], "explanation": "" }. JSON only.',
 
   paused:
-    'From webcam snapshot: If palm is raised, return { "action": "STOP" }, if fist is raised, return { "action": "RESUME" }. Else do nothing. JSON only.',
+    'From webcam snapshot: If palm is raised, return { "action": "STOP" }, if fist is raised, return { "action": "RESUME" }. Else do nothing. DO NOT analyze focus. JSON only.',
 
   break:
-    'From webcam snapshot: If palm is raised, return { "action": "GOTO NEXT SESSION" }. Else do nothing. JSON only.'
+    'From webcam snapshot: If palm is raised, return { "action": "NEXT" }. Else do nothing. DO NOT analyze focus. JSON only.'
 };
-
-// ⬇️ Temporary fixed prompt for testing
-const TESTING_PROMPT =
-  prompts.running;
-
 interface UseBehaviorDetectionProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  isTimerRunning: boolean;
-  isTimerPaused: boolean;
-  isDuringBreak: boolean;
-  onStop: () => void;
-  onPause: () => void;
-  onResume: () => void;
-  onNextSession: () => void;
-  onDistraction: () => void;
+  externalTimerControlsRef: React.RefObject<any>;
+  externalTimerStateRef: React.RefObject<any>;
 }
 
 export function useBehaviorDetection({
   videoRef,
-  isTimerRunning,
-  isTimerPaused,
-  isDuringBreak,
-  onStop,
-  onPause,
-  onResume,
-  onNextSession,
-  onDistraction,
+  externalTimerControlsRef,
+  externalTimerStateRef,
 }: UseBehaviorDetectionProps) {
+  const [cooldownActive, setCooldownActive] = useState(false);
   const motionRef = useRef<HTMLCanvasElement | null>(null);
-  const motionDetectionActive = useRef(false);
+  const motionDetectedCountRef = useRef(0);
+  const motionEndedCountRef = useRef(0);
+
   const previousFrameData = useRef<Uint8ClampedArray | null>(null);
   const detectionInterval = useRef<number | null>(null);
-  const [cooldownActive, setCooldownActive] = useState(false);
-  const [lastCapturedImage, setLastCapturedImage] = useState<string | null>(null);
 
   useEffect(() => {
-    return () => {
-      stopBehaviorDetection();
-    };
+    return () => stopBehaviorDetection();
   }, []);
 
   function startBehaviorDetection() {
-    if (motionDetectionActive.current) return;
-    motionDetectionActive.current = true;
-    // detectionInterval.current = setInterval(detectMotion, 500);
-    detectionInterval.current = window.setInterval(captureSnapshotAndAnalyze, 15000); // Every 5s
+    if (detectionInterval.current) return;
+    detectionInterval.current = setInterval(detectMotion, 500);
   }
 
   function stopBehaviorDetection() {
-    motionDetectionActive.current = false;
     if (detectionInterval.current) {
       clearInterval(detectionInterval.current);
+      detectionInterval.current = null;
     }
   }
+
+  const nextSnapshotAllowedTimeRef = useRef(Date.now());
+  const lastMotionDetectedRef = useRef(false);
 
   async function detectMotion() {
     if (!videoRef.current || cooldownActive) return;
 
+    const video = videoRef.current;
+    const videoAspectRatio = video.videoWidth / video.videoHeight || (16 / 9); // fallback
+    const canvasWidth = BASE_WIDTH;
+    const canvasHeight = Math.round(canvasWidth / videoAspectRatio);
+
     const canvas = motionRef.current || document.createElement('canvas');
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const video = videoRef.current;
-    canvas.width = 64;
-    canvas.height = 48;
-
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const currentData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+    let now = Date.now();
 
     if (previousFrameData.current) {
       let diff = 0;
@@ -117,27 +87,40 @@ export function useBehaviorDetection({
       }
 
       const avgDiff = diff / (canvas.width * canvas.height);
-      if (avgDiff > 20) {
-        await captureSnapshotAndAnalyze();
+
+      if (avgDiff > 10) {
+        motionDetectedCountRef.current++;
+        motionEndedCountRef.current = 0;
+
+        if (motionDetectedCountRef.current >= MOTION_DETECTION_THRESHOLD && !lastMotionDetectedRef.current) {
+          console.log('⚡ Motion detected!');
+          lastMotionDetectedRef.current = true;
+        }
+
+        if (now >= nextSnapshotAllowedTimeRef.current) {
+          console.log('📸 Motion snapshot captured!');
+          await captureSnapshotAndAnalyze();
+          nextSnapshotAllowedTimeRef.current = now + (MOTION_SNAPSHOT_INTERVAL + Math.random() * 2000);
+        }
+      } else {
+        motionDetectedCountRef.current = 0;
+        motionEndedCountRef.current++;
+
+        if (motionEndedCountRef.current >= MOTION_END_THRESHOLD && lastMotionDetectedRef.current) {
+          console.log('😴 Motion ended.');
+          lastMotionDetectedRef.current = false;
+        }
+
+        if (!lastMotionDetectedRef.current && now >= nextSnapshotAllowedTimeRef.current) {
+          console.log('💤 Idle snapshot captured!');
+          await captureSnapshotAndAnalyze();
+          nextSnapshotAllowedTimeRef.current = now + (IDLE_SNAPSHOT_INTERVAL + Math.random() * 3000);
+        }
       }
     }
 
     previousFrameData.current = currentData;
     motionRef.current = canvas;
-  }
-
-  function blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result && typeof reader.result === 'string') {
-          resolve(reader.result);
-        } else {
-          reject(new Error('Failed to convert blob to base64'));
-        }
-      };
-      reader.readAsDataURL(blob);
-    });
   }
 
   async function captureSnapshotAndAnalyze() {
@@ -153,17 +136,8 @@ export function useBehaviorDetection({
 
     const video = videoRef.current;
     const videoAspectRatio = video.videoWidth / video.videoHeight;
-
-    let drawWidth: number, drawHeight: number;
-
-    if (videoAspectRatio > 1) {
-      drawWidth = canvasSize;
-      drawHeight = canvasSize / videoAspectRatio;
-    } else {
-      drawHeight = canvasSize;
-      drawWidth = canvasSize * videoAspectRatio;
-    }
-
+    const drawWidth = videoAspectRatio > 1 ? canvasSize : canvasSize * videoAspectRatio;
+    const drawHeight = videoAspectRatio > 1 ? canvasSize / videoAspectRatio : canvasSize;
     const offsetX = (canvasSize - drawWidth) / 2;
     const offsetY = (canvasSize - drawHeight) / 2;
 
@@ -172,25 +146,53 @@ export function useBehaviorDetection({
     ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
 
     canvas.toBlob(async (blob) => {
-      if (blob) {
-        const blobUrl = URL.createObjectURL(blob);
-        setLastCapturedImage(blobUrl);
+      if (!blob) return;
 
-        const a = document.createElement('a');
-        //a.href = blobUrl;
-        //a.download = `snapshot-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.png`;
-        //document.body.appendChild(a);
-        //a.click();
-        //document.body.removeChild(a);
-
-        const base64Image = await blobToBase64(blob);
-        const promptToSend = TESTING_PROMPT;
-        //const result = await callGeminiAPI(base64Image.split(',')[1], promptToSend);
-        //if (result) {
-          //console.log("🎯 Gemini Test Response:", result);
-        //}
+      if (GEMINI_CALL_ENABLED) {
+        try {
+          const base64 = await blobToBase64(blob);
+          const prompt = selectPrompt();
+          const result = await callGeminiAPI(base64.split(',')[1], prompt);
+          if (result) {
+            const parsed = parseGeminiResponse(result);
+            handleBehaviorResult(parsed);
+          }
+        } catch (err) {
+          console.error('Gemini API or parsing error:', err);
+        }
       }
     }, 'image/png');
+  }
+
+  function selectPrompt() {
+    const { isRunning, isPaused, isDuringBreak } = externalTimerStateRef.current;
+    let res = '';
+    if (isDuringBreak) res = prompts.break;
+    else if (isRunning) res = prompts.running;
+    else if (isPaused) res = prompts.paused;
+    else res = prompts.stopped;
+
+    console.log(res);
+    return res;
+  }
+
+  function parseGeminiResponse(raw: string) {
+    const cleaned = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(cleaned);
+  }
+
+  async function blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result && typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          reject(new Error('Failed to convert blob to base64'));
+        }
+      };
+      reader.readAsDataURL(blob);
+    });
   }
 
   async function callGeminiAPI(base64Image: string, prompt: string) {
@@ -208,27 +210,39 @@ export function useBehaviorDetection({
       ]
     };
 
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
-      const result = await response.json();
-      if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-        return result.candidates[0].content.parts[0].text;
-      }
-      return null;
-    } catch (err) {
-      console.error('Gemini API error:', err);
-      return null;
+    if (!response.ok) throw new Error(`Gemini API returned HTTP ${response.status}`);
+
+    const result = await response.json();
+    return result.candidates?.[0]?.content?.parts?.[0]?.text || null;
+  }
+
+  function handleBehaviorResult(result: any) {
+    console.log(JSON.stringify(result, null, 2));
+    if (result?.action) {
+      console.log("🎯 Action detected:", result.action);
+      const actions = {
+        START: () => externalTimerControlsRef.current.start?.(),
+        STOP: () => externalTimerControlsRef.current.stop?.(),
+        PAUSE: () => externalTimerControlsRef.current.pause?.(),
+        RESUME: () => externalTimerControlsRef.current.resume?.(),
+        NEXT: () => externalTimerControlsRef.current.stop?.(),
+      };
+      const action = result.action as keyof typeof actions;
+      console.log(externalTimerStateRef.current);
+      actions[action]?.();
+    } else if (!externalTimerStateRef.current.isDuringBreak && result?.is_focused === false) {
+      externalTimerControlsRef.current.distraction?.();
     }
   }
 
   return {
     startBehaviorDetection,
     stopBehaviorDetection,
-    lastCapturedImage
   };
 }

@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import WebcamFeed from '../../components/WebcamFeed/WebcamFeed';
-import GestureHelpButton from '../../components/GestureHelpButton/GestureHelpButton';
 import Timer from '../../components/Timer/Timer';
 import DistractionsButton from '../../components/DistractionsButton/DistractionsButton';
 import FocusButton from '../../components/FocusButton/FocusButton';
+import GestureHelpButton from '../../components/GestureHelpButton/GestureHelpButton';
 import { motion } from 'framer-motion';
 import '../../App.css';
 import './MainPage.css';
@@ -13,16 +13,38 @@ export default function MainPage() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [cameraAvailable, setCameraAvailable] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [isFocus, setIsFocus] = useState(true);
-  const [totalFocusSeconds, setTotalFocusSeconds] = useState(0);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [cameraInitialized, setCameraInitialized] = useState(false);
 
-  const toggleOverlay = () => setShowOverlay((prev) => !prev);
+  const [isFocus, setIsFocus] = useState(true);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+
+  const [totalFocusSeconds, setTotalFocusSeconds] = useState(0);
+
+  // External refs to control Timer & DistractionModal
+  const externalTimerControlsRef = useRef<{
+    start?: () => void;
+    pause?: () => void;
+    stop?: () => void;
+    resume?: () => void;
+    nextSession?: () => void;
+    distraction?: () => void;
+  }>({});
+
+  const externalTimerStateRef = useRef<{
+    isRunning: boolean;
+    isPaused: boolean;
+    isDuringBreak: boolean;
+  }>({
+    isRunning: false,
+    isPaused: false,
+    isDuringBreak: false,
+  });
+
+  const toggleOverlay = () => setShowOverlay(prev => !prev);
 
   const handleSessionComplete = (duration: number, wasFocus: boolean) => {
     if (wasFocus) {
-      setTotalFocusSeconds((prev) => prev + duration);
+      setTotalFocusSeconds(prev => prev + duration);
     }
   };
 
@@ -48,29 +70,39 @@ export default function MainPage() {
               <div className="col-flex webcam-col-flex">
                 <WebcamFeed
                   showOverlay={showOverlay}
+                  setShowOverlay={setShowOverlay}
                   setCameraAvailable={setCameraAvailable}
                   setErrorMessage={setErrorMessage}
                   cameraAvailable={cameraAvailable}
                   errorMessage={errorMessage}
                   cameraInitialized={cameraInitialized}
                   setCameraInitialized={setCameraInitialized}
+                  externalTimerControlsRef={externalTimerControlsRef}
+                  externalTimerStateRef={externalTimerStateRef}
                 />
-                {(!isTimerRunning || !isFocus) && <DistractionsButton />}
+                {(!externalTimerStateRef.current.isRunning || !isFocus) && <DistractionsButton />}
               </div>
+
               {cameraAvailable && (
                 <GestureHelpButton onClick={toggleOverlay} />
               )}
             </div>
+
             <div className="timer-wrap">
               <div className="col-flex timer-col-flex">
                 <div className="timer-wrap-inner">
                   <Timer
+                    externalTimerControlsRef={externalTimerControlsRef}
+                    externalTimerStateRef={externalTimerStateRef}
+                    onRunningChange={setIsTimerRunning}   // ✅ pass the update functions
+                    onFocusChange={setIsFocus}             // ✅ pass the update functions
                     onSessionComplete={handleSessionComplete}
-                    onFocusChange={setIsFocus}
-                    onRunningChange={setIsTimerRunning}
                   />
                 </div>
-                {(!isTimerRunning || !isFocus) && <FocusButton focustime={formatTime(totalFocusSeconds)} />}
+
+                {(!externalTimerStateRef.current.isRunning || !isFocus) && (
+                  <FocusButton focustime={formatTime(totalFocusSeconds)} />
+                )}
               </div>
             </div>
           </div>

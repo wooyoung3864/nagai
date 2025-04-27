@@ -4,7 +4,9 @@ import './WebcamFeed.css';
 import { motion } from 'framer-motion';
 import useIsMobile from '../../hooks/useIsMobile';
 import palmImg from '../../assets/imgs/palm.png';
-import backOfHandImg from '../../assets/imgs/back_of_hand.png';
+import fistImg from '../../assets/imgs/fist.png';
+
+import { useBehaviorDetection } from '../../hooks/useBehaviorDetection';
 
 interface WebcamFeedProps {
   showOverlay: boolean;
@@ -27,6 +29,19 @@ export default function WebcamFeed({
 }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const isMobile = useIsMobile();
+
+  // Set up useBehaviorDetection
+  const { startBehaviorDetection, stopBehaviorDetection, lastCapturedImage } = useBehaviorDetection({
+    videoRef,
+    isTimerRunning: false,   // temporary placeholder
+    isTimerPaused: false,    // temporary placeholder
+    isDuringBreak: false,    // temporary placeholder
+    onStop: () => console.log("🛑 STOP triggered"),
+    onPause: () => console.log("⏸️ PAUSE triggered"),
+    onResume: () => console.log("▶️ RESUME triggered"),
+    onNextSession: () => console.log("🔄 NEXT SESSION triggered"),
+    onDistraction: () => console.log("⚠️ DISTRACTION detected"),
+  });
 
   useEffect(() => {
     const initCamera = () => {
@@ -58,6 +73,14 @@ export default function WebcamFeed({
     initCamera();
   }, [setCameraAvailable, setErrorMessage]);
 
+  useEffect(() => {
+    if (cameraAvailable && videoRef.current) {
+      startBehaviorDetection();
+    } else {
+      stopBehaviorDetection();
+    }
+  }, [cameraAvailable, startBehaviorDetection, stopBehaviorDetection]);
+
   return (
     <div className="webcam-feed">
       {cameraAvailable ? (
@@ -84,7 +107,7 @@ export default function WebcamFeed({
                       </h2>
                     </div>
                     <div className='overlay-grid-cell'>
-                      <img src={backOfHandImg} className='back-of-hand-icon' alt="Back of hand gesture" />
+                      <img src={fistImg} className='fist-icon' alt="Back of hand gesture" />
                       <h2 className='overlay-text margin-left-2rem'>
                         {isMobile ? 'to pause.' : 'to pause the timer.'}
                       </h2>
@@ -114,3 +137,12 @@ export default function WebcamFeed({
     </div>
   );
 }
+
+/**
+ *           {lastCapturedImage && (
+            <div style={{ marginTop: '1rem' }}>
+              <img src={lastCapturedImage} alt="Last Snapshot" style={{ width: '256px', height: '256px', objectFit: 'contain', border: '1px solid #ccc' }} />
+              <p>↑ Auto-saved snapshot</p>
+            </div>
+          )}
+ */

@@ -45,6 +45,7 @@ export default function Timer({
   const sessionStartRef = useRef<number | null>(null);
   const progress = useMotionValue(0);
   const progressTransform = useTransform(progress, p => `${100 - p}%`);
+  const controlsRef = useRef<ReturnType<typeof animate> | null>(null);  // 🛠 Add
 
   const computeElapsed = () => sessionStartRef.current
     ? Math.floor((Date.now() - sessionStartRef.current) / 1000)
@@ -88,16 +89,24 @@ export default function Timer({
   const stopTimer = () => {
     if (isRunning && isFocus) commitFocusTime();
     setIsRunning(false);
-    setWasPaused(false); // stopping in a paused state resets wasPaused; no effect otherwise
+    setWasPaused(false);
     isRunningRef.current = false;
     setIsFocus(true);
     setRemainingSeconds(FOCUS_DURATION);
     setFocusAccumulated(0);
     externalTimerStateRef.current.isRunning = false;
-    onRunningChange(false);  // ✅ updates MainPage
+    onRunningChange(false);
     externalTimerStateRef.current.isPaused = false;
     sessionStartRef.current = null;
-    progress.set(0);
+
+    if (controlsRef.current) {
+      controlsRef.current.stop();    // 🛠 stop animation first
+    }
+
+    progress.set(0);                  // 🛠 reset progress to 0
+
+    // 🛠 Force update immediately after reset
+    progress.clearListeners();
   };
 
   const resumeTimer = () => {

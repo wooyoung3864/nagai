@@ -31,7 +31,7 @@ export default function WebcamFeed({
   const isMobile = useIsMobile();
 
   // Set up useBehaviorDetection
-  const { startBehaviorDetection, stopBehaviorDetection, lastCapturedImage } = useBehaviorDetection({
+  const { startBehaviorDetection, stopBehaviorDetection } = useBehaviorDetection({
     videoRef,
     isTimerRunning: false,   // temporary placeholder
     isTimerPaused: false,    // temporary placeholder

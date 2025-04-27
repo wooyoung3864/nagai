@@ -1,3 +1,4 @@
+// src/components/Timer/Timer.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import './Timer.css';
@@ -6,18 +7,36 @@ import DistractionModal from '../DistractionModal/DistractionModal';
 const FOCUS_DURATION = 30;
 const BREAK_DURATION = 15;
 
-interface TimerProps {
-  onSessionComplete: (duration: number, wasFocus: boolean) => void;
-  onFocusChange: (isFocus: boolean) => void;
-  onRunningChange: (isRunning: boolean) => void;
+// Timer.tsx
+export interface TimerProps {
+  externalTimerControlsRef: React.RefObject<{
+    start?: () => void;
+    pause?: () => void;
+    stop?: () => void;
+    resume?: () => void;
+    nextSession?: () => void;
+    distraction?: () => void;
+  }>;
+  externalTimerStateRef: React.RefObject<{
+    isRunning: boolean;
+    isPaused: boolean;
+    isDuringBreak: boolean;
+  }>;
+  onRunningChange: (isRunning: boolean) => void
+  onFocusChange: (isFocus: boolean) => void
+  onSessionComplete: (duration: number, wasFocus: boolean) => void; // 🛠️ <-- add this line
 }
 
 export default function Timer({
-  onSessionComplete,
-  onFocusChange,
+  externalTimerControlsRef,
+  externalTimerStateRef,
   onRunningChange,
+  onFocusChange,
+  onSessionComplete
 }: TimerProps) {
   const [isRunning, setIsRunning] = useState(false);
+  const isRunningRef = useRef(false);
+  const [wasPaused, setWasPaused] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(FOCUS_DURATION);
   const [isFocus, setIsFocus] = useState(true);
   const [distractionVisible, setDistractionVisible] = useState(false);
@@ -27,67 +46,111 @@ export default function Timer({
   const progress = useMotionValue(0);
   const progressTransform = useTransform(progress, p => `${100 - p}%`);
 
-  const computeElapsed = () =>
-    sessionStartRef.current
-      ? Math.floor((Date.now() - sessionStartRef.current) / 1000)
-      : 0;
+  const computeElapsed = () => sessionStartRef.current
+    ? Math.floor((Date.now() - sessionStartRef.current) / 1000)
+    : 0;
 
   const commitFocusTime = () => {
     if (isFocus && sessionStartRef.current) {
       const delta = computeElapsed();
       setFocusAccumulated(prev => prev + delta);
+
+      // report accumulated focus time to MainPage
       onSessionComplete(delta, true);
+
       sessionStartRef.current = null;
     }
   };
 
   const startTimer = () => {
-    if (!isRunning) {
-      onFocusChange(isFocus);
-      onRunningChange(true);
+    if (!isRunningRef.current) {
       setIsRunning(true);
+      isRunningRef.current = true;
+      externalTimerStateRef.current.isRunning = true;
+      onRunningChange(true);  // ✅ updates MainPage
+      externalTimerStateRef.current.isPaused = false;
       if (isFocus) sessionStartRef.current = Date.now();
+      setWasPaused(false);
     }
   };
 
   const pauseTimer = () => {
-    if (!isRunning) return;
-
-    // **Accumulate any focus time up to this pause.**
-    if (isFocus) {
-      commitFocusTime();
-    }
-
+    if (!isRunningRef.current) return;
+    if (isFocus) commitFocusTime();
     setIsRunning(false);
-    onRunningChange(false);
+    isRunningRef.current = false;
+    externalTimerStateRef.current.isRunning = false;
+    onRunningChange(false);  // ✅ updates MainPage
+    externalTimerStateRef.current.isPaused = true;
+    setWasPaused(true);
   };
 
   const stopTimer = () => {
-    if (isRunning && isFocus) {
-      commitFocusTime();
-    }
+    if (isRunning && isFocus) commitFocusTime();
     setIsRunning(false);
+    setWasPaused(false); // stopping in a paused state resets wasPaused; no effect otherwise
+    isRunningRef.current = false;
     setIsFocus(true);
     setRemainingSeconds(FOCUS_DURATION);
     setFocusAccumulated(0);
-    progress.set(0);
+    externalTimerStateRef.current.isRunning = false;
+    onRunningChange(false);  // ✅ updates MainPage
+    externalTimerStateRef.current.isPaused = false;
     sessionStartRef.current = null;
-    onRunningChange(false);
+    progress.set(0);
+  };
+
+  const resumeTimer = () => {
+    if (!isRunningRef.current) {
+      setIsRunning(true);
+      isRunningRef.current = true;
+      externalTimerStateRef.current.isRunning = true;
+      onRunningChange(true);  // ✅ updates MainPage
+      externalTimerStateRef.current.isPaused = false;
+      sessionStartRef.current = Date.now();
+      setWasPaused(false);
+    }
+  };
+
+  const nextSession = () => {
+    if (isRunningRef.current && isFocus) commitFocusTime();
+    setIsFocus(prev => !prev);
+    setRemainingSeconds(isFocus ? BREAK_DURATION : FOCUS_DURATION);
+    externalTimerStateRef.current.isDuringBreak = !isFocus;
+    sessionStartRef.current = Date.now();
+    setFocusAccumulated(0);
+    progress.set(0);
   };
 
   const handleDistraction = () => {
-    if (isRunning && isFocus) {
-      commitFocusTime();
-    }
+    if (isRunning && isFocus) commitFocusTime();
     setIsRunning(false);
-    onRunningChange(false);
+    isRunningRef.current = false;
+    externalTimerStateRef.current.isRunning = false;
+    onRunningChange(false);  // ✅ updates MainPage
     sessionStartRef.current = null;
     setDistractionVisible(true);
   };
 
   useEffect(() => {
-    onFocusChange(isFocus);
-    if (!isRunning) return;
+    if (externalTimerControlsRef.current) {
+      externalTimerControlsRef.current.start = startTimer;
+      externalTimerControlsRef.current.pause = pauseTimer;
+      externalTimerControlsRef.current.stop = stopTimer;
+      externalTimerControlsRef.current.resume = resumeTimer;
+      externalTimerControlsRef.current.nextSession = stopTimer; // instead of nextSession
+      externalTimerControlsRef.current.distraction = handleDistraction;
+    }
+  }, []);
+
+  // 🛠 Automatically sync isDuringBreak whenever isFocus changes
+  useEffect(() => {
+    externalTimerStateRef.current.isDuringBreak = !isFocus;
+    onFocusChange(isFocus); // ✅ Also report isFocus to MainPage
+  }, [isFocus]);
+
+  useEffect(() => {
+    if (!isRunningRef.current) return;
 
     if (isFocus && sessionStartRef.current === null) {
       sessionStartRef.current = Date.now();
@@ -97,25 +160,7 @@ export default function Timer({
       duration: remainingSeconds,
       ease: 'linear',
       onComplete: () => {
-        // commit end-of-session time
-        if (sessionStartRef.current) {
-          const delta = computeElapsed();
-          if (isFocus) {
-            setFocusAccumulated(prev => prev + delta);
-          }
-          onSessionComplete(delta, isFocus);
-        }
-
-        // toggle focus/break *and* reset duration together
-        setIsFocus(prev => {
-          const next = !prev;
-          setRemainingSeconds(next ? FOCUS_DURATION : BREAK_DURATION);
-          return next;
-        });
-
-        // reset progress & start next session immediately
-        progress.set(0);
-        sessionStartRef.current = Date.now();
+        nextSession();
       },
     });
 
@@ -158,7 +203,7 @@ export default function Timer({
       <div className="d-flex justify-content-center align-items-center">
         {!isRunning ? (
           <button className="timer-btn-temp" onClick={startTimer}>
-            Start
+            {wasPaused ? 'Resume' : 'Start'}
           </button>
         ) : (
           <>

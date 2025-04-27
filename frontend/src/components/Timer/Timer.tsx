@@ -3,8 +3,8 @@ import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import './Timer.css';
 import DistractionModal from '../DistractionModal/DistractionModal';
 
-const FOCUS_DURATION = 3;
-const BREAK_DURATION = 3;
+const FOCUS_DURATION = 30;
+const BREAK_DURATION = 15;
 
 interface TimerProps {
   onSessionComplete: (duration: number, wasFocus: boolean) => void;

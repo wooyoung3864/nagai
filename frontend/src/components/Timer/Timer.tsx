@@ -165,7 +165,8 @@ export default function Timer({
       sessionStartRef.current = Date.now();
     }
 
-    const controls = animate(progress, 100, {
+    // instead of const controls = animate(...)
+    controlsRef.current = animate(progress, 100, {
       duration: remainingSeconds,
       ease: 'linear',
       onComplete: () => {
@@ -178,7 +179,7 @@ export default function Timer({
     }, 1000);
 
     return () => {
-      controls.stop();
+      controlsRef.current?.stop();
       clearInterval(ticker);
     };
   }, [isRunning, isFocus]);

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
 const API_KEY = "AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo"; // actual API key; DO NOT share with others.
-const GEMINI_CALL_ENABLED = true;
+const GEMINI_CALL_ENABLED = true; // switch to false during testing/dev to save API calls
 const BASE_WIDTH = 64;   // canvas width for motion detection
 const BASE_HEIGHT = 48;
 const MOTION_SNAPSHOT_INTERVAL = 2000;   // 2s after motion
-const IDLE_SNAPSHOT_INTERVAL = 12000;    // 12s when idle
+const IDLE_SNAPSHOT_INTERVAL = 12 *1000;    // 12s when idle
 const MOTION_DETECTION_THRESHOLD = 2;  // how many motion frames to confirm motion
 const MOTION_END_THRESHOLD = 3;         // how many still frames to confirm no motion
 

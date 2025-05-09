@@ -1,6 +1,7 @@
 // src/components/Timer/Timer.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { useBehaviorDetection } from '../../hooks/useBehaviorDetection'; // adjust path as needed
 import './Timer.css';
 import DistractionModal from '../DistractionModal/DistractionModal';
 
@@ -45,7 +46,14 @@ export default function Timer({
   const sessionStartRef = useRef<number | null>(null);
   const progress = useMotionValue(0);
   const progressTransform = useTransform(progress, p => `${100 - p}%`);
-  const controlsRef = useRef<ReturnType<typeof animate> | null>(null);  // 🛠 Add
+  const controlsRef = useRef<ReturnType<typeof animate> | null>(null);  // Add
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const { startBehaviorDetection, stopBehaviorDetection } = useBehaviorDetection({
+    videoRef,
+    externalTimerControlsRef,
+    externalTimerStateRef,
+  });
 
   const computeElapsed = () => sessionStartRef.current
     ? Math.floor((Date.now() - sessionStartRef.current) / 1000)
@@ -100,12 +108,11 @@ export default function Timer({
     sessionStartRef.current = null;
 
     if (controlsRef.current) {
-      controlsRef.current.stop();    // 🛠 stop animation first
+      controlsRef.current.stop();    // stop animation first
     }
 
-    progress.set(0);                  // 🛠 reset progress to 0
+    progress.set(0);                  // reset progress to 0
 
-    // 🛠 Force update immediately after reset
     progress.clearListeners();
   };
 
@@ -138,8 +145,17 @@ export default function Timer({
     externalTimerStateRef.current.isRunning = false;
     onRunningChange(false);  // ✅ updates MainPage
     sessionStartRef.current = null;
+    stopBehaviorDetection(); // add this to stop behaviorDetection while modal displayed
     setDistractionVisible(true);
   };
+
+  useEffect(() => {
+    startBehaviorDetection();
+
+    return () => {
+      stopBehaviorDetection();
+    };
+  }, []);
 
   useEffect(() => {
     if (externalTimerControlsRef.current) {
@@ -165,7 +181,8 @@ export default function Timer({
       sessionStartRef.current = Date.now();
     }
 
-    const controls = animate(progress, 100, {
+    // instead of const controls = animate(...)
+    controlsRef.current = animate(progress, 100, {
       duration: remainingSeconds,
       ease: 'linear',
       onComplete: () => {
@@ -178,7 +195,7 @@ export default function Timer({
     }, 1000);
 
     return () => {
-      controls.stop();
+      controlsRef.current?.stop();
       clearInterval(ticker);
     };
   }, [isRunning, isFocus]);
@@ -233,6 +250,7 @@ export default function Timer({
         onDismiss={() => {
           setDistractionVisible(false);
           startTimer();
+          startBehaviorDetection();
         }}
       />
     </>

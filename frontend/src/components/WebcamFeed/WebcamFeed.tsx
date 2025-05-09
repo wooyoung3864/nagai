@@ -113,7 +113,7 @@ export default function WebcamFeed({
         cameraInitialized && (
           <div className="webcam-error">
             <p style={{ whiteSpace: 'pre-line' }}>{errorMessage}</p>
-            <button onClick={() => window.location.reload()}>Retry</button>
+            <button className='retry-camera-button' onClick={() => window.location.reload()}>Retry</button>
           </div>
         )
       )}

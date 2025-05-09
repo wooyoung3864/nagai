@@ -1,31 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 
-const API_KEY = "AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo"; // actual API key; DO NOT share with others.
-const GEMINI_CALL_ENABLED = true; // switch to false during testing/dev to save API calls
-const BASE_WIDTH = 64;   // canvas width for motion detection
-const BASE_HEIGHT = 48;
-const MOTION_SNAPSHOT_INTERVAL = 2000;   // 2s after motion
-const IDLE_SNAPSHOT_INTERVAL = 2 *1000;    // 12s when idle
-const MOTION_DETECTION_THRESHOLD = 2;  // how many motion frames to confirm motion
-const MOTION_END_THRESHOLD = 3;         // how many still frames to confirm no motion
+const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
+const GEMINI_CALL_ENABLED = false;                            // flip true in prod
 
-const prompts = {
-  stopped:
-    'From webcam snapshot: If fist is raised, return { "action": "START" }. Else do nothing. JSON only.',
+// ── motion-analysis constants ─────────────────────────────────────────────
+const BASE_WIDTH  = 64;          // down-sampled width for diffing
+const MOTION_SNAPSHOT_INTERVAL = 2_000;
+const IDLE_SNAPSHOT_INTERVAL   = 12_000;
+const MOTION_DETECTION_THRESHOLD = 2;    // frames
+const MOTION_END_THRESHOLD       = 3;    // frames
+// ──────────────────────────────────────────────────────────────────────────
 
-  running:
-    'From webcam snapshot: If palm is raised, return { "action": "STOP" }, if fist is raised, return { "action": "PAUSE" }. Else analyze focus: list focus (facing screen, eyes open, no phone, no talking, still) or distraction (looking away, closed eyes, phone, talking, absent). Score 0–100. Return JSON: { "focus_score": 0–100, "is_focused": true or false, "observed_behaviors": [], "explanation": "" }. JSON only.',
-
-  paused:
-    'From webcam snapshot: If palm is raised, return { "action": "STOP" }, if fist is raised, return { "action": "RESUME" }. Else do nothing. DO NOT analyze focus. JSON only.',
-
-  break:
-    'From webcam snapshot: If palm is raised, return { "action": "NEXT" }. Else do nothing. DO NOT analyze focus. JSON only.'
+const prompts: Record<'stopped'|'running'|'paused'|'break', string> = {
+  stopped: 'From webcam snapshot: If fist is raised, return { "action": "START" }. Else do nothing. JSON only.',
+  running: 'From webcam snapshot: If palm is raised, return { "action": "STOP" }, if fist is raised, return { "action": "PAUSE" }. Else analyze focus: list focus (facing screen, eyes open, no phone, no talking, still) or distraction (looking away, closed eyes, phone, talking, absent). Score 0–100. Return JSON: { "focus_score": 0–100, "is_focused": true/false, "observed_behaviors": [], "explanation": "" }. JSON only.',
+  paused : 'From webcam snapshot: If palm is raised, return { "action": "STOP" }, if fist is raised, return { "action": "RESUME" }. Else do nothing. JSON only.',
+  break  : 'From webcam snapshot: If palm is raised, return { "action": "NEXT" }. Else do nothing. JSON only.',
 };
+
 interface UseBehaviorDetectionProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   externalTimerControlsRef: React.RefObject<any>;
-  externalTimerStateRef: React.RefObject<any>;
+  externalTimerStateRef   : React.RefObject<any>;
 }
 
 export function useBehaviorDetection({
@@ -33,216 +29,251 @@ export function useBehaviorDetection({
   externalTimerControlsRef,
   externalTimerStateRef,
 }: UseBehaviorDetectionProps) {
-  const [cooldownActive, setCooldownActive] = useState(false);
-  const motionRef = useRef<HTMLCanvasElement | null>(null);
-  const motionDetectedCountRef = useRef(0);
-  const motionEndedCountRef = useRef(0);
+  const [cooldownActive]           = useState(false);   // reserved, still unused
+  const motionCanvasRef            = useRef<HTMLCanvasElement | null>(null);
+  const previousFrameDataRef       = useRef<Uint8ClampedArray | null>(null);
+  const motionDetectedCountRef     = useRef(0);
+  const motionEndedCountRef        = useRef(0);
+  const lastMotionDetectedRef      = useRef(false);
+  const nextSnapshotAllowedTimeRef = useRef(0);
 
-  const previousFrameData = useRef<Uint8ClampedArray | null>(null);
-  const detectionInterval = useRef<number | null>(null);
+  const isActiveRef = useRef(false);
+  const generationRef = useRef(0);  // 🔑 version counter
 
-  useEffect(() => {
-    return () => stopBehaviorDetection();
-  }, []);
+  /* clean-up on unmount */
+  useEffect(() => () => stopBehaviorDetection(), []);
 
+  // ───────────────────────────── control API ────────────────────────────
   function startBehaviorDetection() {
-    if (detectionInterval.current) return;
-    detectionInterval.current = setInterval(detectMotion, 500);
+    if (isActiveRef.current) return;
+    generationRef.current += 1;
+    isActiveRef.current   = true;
+    resetPerSessionState();
+    console.log('▶️ behavior detection started');
+    loop(generationRef.current);
   }
 
   function stopBehaviorDetection() {
-    if (detectionInterval.current) {
-      clearInterval(detectionInterval.current);
-      detectionInterval.current = null;
+    if (!isActiveRef.current) return;
+    isActiveRef.current = false;
+    generationRef.current += 1;
+    console.log('🛑 behavior detection stopped');
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
+  function resetPerSessionState() {
+    motionDetectedCountRef.current       = 0;
+    motionEndedCountRef.current          = 0;
+    lastMotionDetectedRef.current        = false;
+    previousFrameDataRef.current         = null;
+    nextSnapshotAllowedTimeRef.current   = Date.now();
+  }
+
+  async function loop(gen: number) {
+    if (!isActiveRef.current || gen !== generationRef.current) return;
+    await detectMotion(gen);
+    if (isActiveRef.current && gen === generationRef.current) {
+      setTimeout(() => loop(gen), 500);
     }
   }
 
-  const nextSnapshotAllowedTimeRef = useRef(Date.now());
-  const lastMotionDetectedRef = useRef(false);
-
-  async function detectMotion() {
-    if (!videoRef.current || cooldownActive) return;
+  async function detectMotion(gen: number) {
+    if (!videoRef.current ||
+        !isActiveRef.current ||
+        gen !== generationRef.current) return;
 
     const video = videoRef.current;
-    const videoAspectRatio = video.videoWidth / video.videoHeight || (16 / 9); // fallback
-    const canvasWidth = BASE_WIDTH;
-    const canvasHeight = Math.round(canvasWidth / videoAspectRatio);
+    if (video.videoWidth === 0 || video.videoHeight === 0) return;
 
-    const canvas = motionRef.current || document.createElement('canvas');
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+    const aspectRatio = video.videoWidth / video.videoHeight;
+    const w = BASE_WIDTH;
+    const h = Math.round(w / aspectRatio);
+
+    const canvas = motionCanvasRef.current ?? document.createElement('canvas');
+    motionCanvasRef.current = canvas;
+    canvas.width  = w;
+    canvas.height = h;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const currentData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    ctx.drawImage(video, 0, 0, w, h);
+    const pixels = ctx.getImageData(0, 0, w, h).data;
 
-    let now = Date.now();
-
-    if (previousFrameData.current) {
+    if (previousFrameDataRef.current) {
       let diff = 0;
-      for (let i = 0; i < currentData.length; i += 4) {
-        diff += Math.abs(currentData[i] - previousFrameData.current[i]);
+      for (let i = 0; i < pixels.length; i += 4) {
+        diff += Math.abs(pixels[i] - previousFrameDataRef.current[i]);
       }
-
-      const avgDiff = diff / (canvas.width * canvas.height);
+      const avgDiff = diff / (w * h);
+      const now = Date.now();
 
       if (avgDiff > 10) {
-        motionDetectedCountRef.current++;
-        motionEndedCountRef.current = 0;
+        motionDetectedCountRef.current += 1;
+        motionEndedCountRef.current     = 0;
 
-        if (motionDetectedCountRef.current >= MOTION_DETECTION_THRESHOLD && !lastMotionDetectedRef.current) {
-          console.log('⚡ Motion detected!');
+        if (motionDetectedCountRef.current >= MOTION_DETECTION_THRESHOLD &&
+            !lastMotionDetectedRef.current) {
           lastMotionDetectedRef.current = true;
+          console.log('⚡ motion detected');
         }
 
         if (now >= nextSnapshotAllowedTimeRef.current) {
-          console.log('📸 Motion snapshot captured!');
-          await captureSnapshotAndAnalyze();
-          nextSnapshotAllowedTimeRef.current = now + (MOTION_SNAPSHOT_INTERVAL + Math.random() * 2000);
+          await captureSnapshotAndAnalyze(gen);
+          nextSnapshotAllowedTimeRef.current =
+            now + MOTION_SNAPSHOT_INTERVAL + Math.random() * 2_000;
         }
       } else {
         motionDetectedCountRef.current = 0;
-        motionEndedCountRef.current++;
+        motionEndedCountRef.current   += 1;
 
-        if (motionEndedCountRef.current >= MOTION_END_THRESHOLD && lastMotionDetectedRef.current) {
-          console.log('😴 Motion ended.');
+        if (motionEndedCountRef.current >= MOTION_END_THRESHOLD &&
+            lastMotionDetectedRef.current) {
           lastMotionDetectedRef.current = false;
+          console.log('😴 motion ended');
         }
 
-        if (!lastMotionDetectedRef.current && now >= nextSnapshotAllowedTimeRef.current) {
-          console.log('💤 Idle snapshot captured!');
-          await captureSnapshotAndAnalyze();
-          nextSnapshotAllowedTimeRef.current = now + (IDLE_SNAPSHOT_INTERVAL + Math.random() * 3000);
+        if (!lastMotionDetectedRef.current &&
+            now >= nextSnapshotAllowedTimeRef.current) {
+          await captureSnapshotAndAnalyze(gen);
+          nextSnapshotAllowedTimeRef.current =
+            now + IDLE_SNAPSHOT_INTERVAL + Math.random() * 3_000;
         }
       }
     }
 
-    previousFrameData.current = currentData;
-    motionRef.current = canvas;
+    previousFrameDataRef.current = pixels;
   }
 
-  async function captureSnapshotAndAnalyze() {
+  // ─────────────────── snapshot + Gemini analysis ───────────────────────
+  async function captureSnapshotAndAnalyze(gen: number) {
+    if (!isActiveRef.current || gen !== generationRef.current) return;
     if (!videoRef.current) return;
 
+    const video = videoRef.current;
+    const square = 768;
     const canvas = document.createElement('canvas');
+    canvas.width  = square;
+    canvas.height = square;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const canvasSize = 768;
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
-
-    const video = videoRef.current;
-    const videoAspectRatio = video.videoWidth / video.videoHeight;
-    const drawWidth = videoAspectRatio > 1 ? canvasSize : canvasSize * videoAspectRatio;
-    const drawHeight = videoAspectRatio > 1 ? canvasSize / videoAspectRatio : canvasSize;
-    const offsetX = (canvasSize - drawWidth) / 2;
-    const offsetY = (canvasSize - drawHeight) / 2;
-
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvasSize, canvasSize);
-    ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
+    const ar = video.videoWidth / video.videoHeight;
+    const drawWidth  = ar > 1 ? square : square * ar;
+    const drawHeight = ar > 1 ? square / ar : square;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, square, square);
+    ctx.drawImage(
+      video,
+      (square - drawWidth ) / 2,
+      (square - drawHeight) / 2,
+      drawWidth,
+      drawHeight,
+    );
 
     canvas.toBlob(async (blob) => {
-      if (!blob) return;
+      if (!blob || gen !== generationRef.current || !isActiveRef.current) return;
+      if (!GEMINI_CALL_ENABLED) return;
 
-      if (GEMINI_CALL_ENABLED) {
-        try {
-          const base64 = await blobToBase64(blob);
-          const prompt = selectPrompt();
-          const result = await callGeminiAPI(base64.split(',')[1], prompt);
-          if (result) {
-            const parsed = parseGeminiResponse(result);
-            handleBehaviorResult(parsed);
-          }
-        } catch (err) {
-          console.error('Gemini API or parsing error:', err);
-        }
+      try {
+        const base64  = await blobToBase64(blob);
+        if (gen !== generationRef.current) return;
+
+        const prompt = selectPrompt();
+        // 📝 log the prompt and timer state
+        console.log('📝 Gemini prompt', { prompt, timerState: externalTimerStateRef.current });
+
+        const rawResp = await callGeminiAPI(base64.split(',')[1], prompt);
+        // 🔍 log the raw API response
+        console.log('🔍 Gemini raw response', { rawResp, gen, timerState: externalTimerStateRef.current });
+
+        if (!rawResp || gen !== generationRef.current) return;
+        const parsed = parseGeminiResponse(rawResp);
+        // ✅ log the parsed JSON result
+        console.log('✅ Parsed Gemini result', { parsed, gen, timerState: externalTimerStateRef.current });
+
+        handleBehaviorResult(parsed);
+
+        // ↩️ log timer state after handling
+        console.log('↩️ Timer state after handling', externalTimerStateRef.current);
+      } catch (e) {
+        console.error('Gemini error', e);
       }
     }, 'image/png');
   }
 
+  // ───────────────────────── Gemini helpers ─────────────────────────────
   function selectPrompt() {
     const { isRunning, isPaused, isDuringBreak } = externalTimerStateRef.current;
-    let res = '';
-    if (isDuringBreak) res = prompts.break;
-    else if (isRunning) res = prompts.running;
-    else if (isPaused) res = prompts.paused;
-    else res = prompts.stopped;
-
-    console.log(res);
-    return res;
+    return isDuringBreak ? prompts.break
+         : isRunning      ? prompts.running
+         : isPaused       ? prompts.paused
+         :                  prompts.stopped;
   }
 
   function parseGeminiResponse(raw: string) {
-    const cleaned = raw.replace(/```json/g, '').replace(/```/g, '').trim();
-    return JSON.parse(cleaned);
+    return JSON.parse(raw.replace(/```json|```/g, '').trim());
   }
 
-  async function blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result && typeof reader.result === 'string') {
-          resolve(reader.result);
-        } else {
-          reject(new Error('Failed to convert blob to base64'));
-        }
-      };
-      reader.readAsDataURL(blob);
+  const blobToBase64 = (blob: Blob) =>
+    new Promise<string>((res, rej) => {
+      const r = new FileReader();
+      r.onloadend = () =>
+        typeof r.result === 'string' ? res(r.result) : rej('b64 fail');
+      r.readAsDataURL(blob);
     });
-  }
 
-  async function callGeminiAPI(base64Image: string, prompt: string) {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-
+  async function callGeminiAPI(b64: string, prompt: string) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
     const body = {
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: prompt },
-            { inline_data: { mime_type: "image/png", data: base64Image } }
-          ]
-        }
-      ]
+      contents: [{
+        role: 'user',
+        parts: [
+          { text: prompt },
+          { inline_data: { mime_type: 'image/png', data: b64 } },
+        ],
+      }],
     };
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+    const resp = await fetch(url, {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify(body),
     });
+    // 🌐 log HTTP status
+    console.log('🌐 Gemini HTTP status', resp.status);
 
-    if (!response.ok) throw new Error(`Gemini API returned HTTP ${response.status}`);
+    if (!resp.ok) throw new Error(`Gemini HTTP ${resp.status}`);
+    const json = await resp.json();
+    // 📦 log full JSON payload
+    console.log('📦 Gemini JSON payload', json);
 
-    const result = await response.json();
-    return result.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    return json.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
   }
 
+  // ─────────────────────── behavior result handler ──────────────────────
   function handleBehaviorResult(result: any) {
-    console.log(JSON.stringify(result, null, 2));
-    if (result?.action) {
-      console.log("🎯 Action detected:", result.action);
-      const actions = {
-        START: () => externalTimerControlsRef.current.start?.(),
-        STOP: () => externalTimerControlsRef.current.stop?.(),
-        PAUSE: () => externalTimerControlsRef.current.pause?.(),
+    if (!result) return;
+    // 🎯 log the incoming result and timer state
+    console.log('🎯 handleBehaviorResult', { result, timerState: externalTimerStateRef.current });
+
+    if (result.action) {
+      const map = {
+        START : () => externalTimerControlsRef.current.start?.(),
+        STOP  : () => externalTimerControlsRef.current.stop?.(),
+        PAUSE : () => externalTimerControlsRef.current.pause?.(),
         RESUME: () => externalTimerControlsRef.current.resume?.(),
-        NEXT: () => externalTimerControlsRef.current.stop?.(),
+        NEXT  : () => externalTimerControlsRef.current.stop?.(),
       };
-      const action = result.action as keyof typeof actions;
-      console.log(externalTimerStateRef.current);
-      actions[action]?.();
-    } else if (!externalTimerStateRef.current.isDuringBreak && result?.is_focused === false) {
+      map[result.action as keyof typeof map]?.();
+      return;
+    }
+
+    if (!externalTimerStateRef.current.isDuringBreak && result.is_focused === false) {
       externalTimerControlsRef.current.distraction?.();
     }
   }
 
-  return {
-    startBehaviorDetection,
-    stopBehaviorDetection,
-  };
+  // ─────────────────────── exposed hook contract ────────────────────────
+  return { startBehaviorDetection, stopBehaviorDetection };
 }

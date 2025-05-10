@@ -29,7 +29,7 @@
 }
 
 .timer-text {
-  font-size: min(5vw, 2rem);
+  font-size: 2rem;
   font-weight: bold;
   color: white;
   z-index: 1;

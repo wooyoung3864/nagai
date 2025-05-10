@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
-const GEMINI_CALL_ENABLED = false;                            // flip true in prod
+const GEMINI_CALL_ENABLED = true;                            // flip true in prod
 
 // ── motion-analysis constants ─────────────────────────────────────────────
 const BASE_WIDTH = 96;          // up from 64 for better sensitivity
@@ -47,6 +47,11 @@ export function useBehaviorDetection({
   const isActiveRef = useRef(false);
   const generationRef = useRef(0);  // 🔑 version counter
 
+  // pause behaviorDetection while DistractionModal is active
+  const isModalVisibleRef = useRef(false);
+  const shouldSkipRef = useRef(false);
+  const abortControlRef = useRef<AbortController | null>(null);
+
   /* clean-up on unmount */
   useEffect(() => () => stopBehaviorDetection(), []);
 
@@ -64,6 +69,9 @@ export function useBehaviorDetection({
     if (!isActiveRef.current) return;
     isActiveRef.current = false;
     generationRef.current += 1;
+    // cancel previous Gemini API calls
+    // abortControlRef.current?.abort();
+
     console.log('🛑 behavior detection stopped');
   }
   // ──────────────────────────────────────────────────────────────────────────
@@ -85,7 +93,20 @@ export function useBehaviorDetection({
     }
   }
 
+  /**
+   * 05/10 (wyjung)
+   * Remaining issues:
+   * - Motion detection & Gemini API call  is not cancelled when the modal is opened
+   */
+
   async function detectMotion(gen: number) {
+    shouldSkipRef.current = isModalVisibleRef.current; // capture before evaluating shouldSkipRef
+    // early return to skip behaviorDetection while DistractionModal is active.
+    if (shouldSkipRef.current) {
+      console.log('Behavior detection paused: DistractionModal active.');
+      return;
+    }
+
     if (!videoRef.current ||
       !isActiveRef.current ||
       gen !== generationRef.current) return;
@@ -181,6 +202,13 @@ export function useBehaviorDetection({
 
   // ─────────────────── snapshot + Gemini analysis ───────────────────────
   async function captureSnapshotAndAnalyze(gen: number) {
+    shouldSkipRef.current = isModalVisibleRef.current; // capture before evaluating shouldSkipRef
+    // early return to skip behaviorDetection while DistractionModal is active.
+    if (shouldSkipRef.current) {
+      console.log('Behavior detection paused: DistractionModal active.');
+      return;
+    }
+
     if (!isActiveRef.current || gen !== generationRef.current) return;
     if (!videoRef.current) return;
 
@@ -205,9 +233,15 @@ export function useBehaviorDetection({
       drawHeight,
     );
 
+    shouldSkipRef.current = isModalVisibleRef.current; // capture before toBlob
+
     canvas.toBlob(async (blob) => {
       if (!blob || gen !== generationRef.current || !isActiveRef.current) return;
       if (!GEMINI_CALL_ENABLED) return;
+      if (shouldSkipRef.current) {
+        console.log('📵 Skipped Gemini API — modal was already visible');
+        return;
+      }
 
       try {
         const base64 = await blobToBase64(blob);
@@ -269,10 +303,15 @@ export function useBehaviorDetection({
       }],
     };
 
+    // cancel previous Gemini API calls
+    // abortControlRef.current?.abort();
+    abortControlRef.current = new AbortController();
+
     const resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      signal: abortControlRef.current.signal,
     });
     // 🌐 log HTTP status
     console.log('🌐 Gemini HTTP status', resp.status);
@@ -287,6 +326,13 @@ export function useBehaviorDetection({
 
   // ─────────────────────── behavior result handler ──────────────────────
   function handleBehaviorResult(result: any) {
+    shouldSkipRef.current = isModalVisibleRef.current; // capture before evaluating shouldSkipRef
+    // early return to skip behaviorDetection while DistractionModal is active.
+    if (shouldSkipRef.current) {
+      console.log('Behavior detection paused: DistractionModal active.');
+      return;
+    }
+
     if (!result) return;
     // 🎯 log the incoming result and timer state
     console.log('🎯 handleBehaviorResult', { result, timerState: externalTimerStateRef.current });
@@ -309,5 +355,12 @@ export function useBehaviorDetection({
   }
 
   // ─────────────────────── exposed hook contract ────────────────────────
-  return { startBehaviorDetection, stopBehaviorDetection };
+  return {
+    startBehaviorDetection,
+    stopBehaviorDetection,
+    setModalVisible: (visible: boolean) => {
+      isModalVisibleRef.current = visible;
+      console.log('Modal visibility changed:', isModalVisibleRef.current);
+    }
+  };
 }

@@ -103,6 +103,7 @@ export default function WebcamFeed({
                       <h2 className="overlay-text margin-left-2rem">{isMobile ? 'to pause.' : 'to pause timer.'}</h2>
                     </div>
                   </div>
+                  <h2 className='overlay-text margin-left-1rem'>Keep your hand up for 3 seconds.</h2>
                 </div>
               </div>
             </motion.div>

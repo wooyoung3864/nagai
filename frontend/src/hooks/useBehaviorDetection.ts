@@ -11,7 +11,7 @@ const MOTION_SENSITIVITY = 7;    // tuned threshold for pixel diff
 const MOTION_DETECTION_THRESHOLD = 2;    // frames
 const MOTION_END_THRESHOLD = 3;    // frames
 
-const HIGH_MOTION_THRESHOLD = 20;          // triggers instant Gemini snapshot
+const HIGH_MOTION_THRESHOLD = 10;          // triggers instant Gemini snapshot
 const HIGH_MOTION_COOLDOWN_MS = 3000;      // minimum delay between high-motion triggers in ms
 // ──────────────────────────────────────────────────────────────────────────
 
@@ -137,7 +137,7 @@ export function useBehaviorDetection({
       const avgDiff = diff / (w * h);
       const now = Date.now();
 
-      // 🚨 Instant override: High motion triggers snapshot immediately
+      // Instant override: High motion triggers snapshot immediately
       if (avgDiff > HIGH_MOTION_THRESHOLD &&
         now - lastHighMotionTriggerRef.current > HIGH_MOTION_COOLDOWN_MS &&
         !isAnalyzingRef.current) {

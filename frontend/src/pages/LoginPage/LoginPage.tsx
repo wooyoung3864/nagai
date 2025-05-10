@@ -1,26 +1,47 @@
-import React, { useEffect } from 'react';
-import logo from '../../assets/imgs/nagai_logo.png';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import '../../App.css';
-import './LoginPage.css';
+import React, { useEffect, useState } from "react";
+import logo from "../../assets/imgs/nagai_logo.png";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import "../../App.css";
+import "./LoginPage.css";
+import { Session } from "@supabase/supabase-js";
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
+
+// Correct import statement for Supabase
+import { supabase } from "../../../../backend/auth/supabaseClient"; 
 
 export default function LoginPage() {
+  const [session, setSession] = useState<Session | null>(null);
   const navigate = useNavigate();
 
   const handleLoginClick = () => {
-    navigate('/terms');
+    navigate("/terms");
   };
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      data?.subscription?.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
+      if (e.key === "Enter") {
         handleLoginClick();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   return (
@@ -34,6 +55,7 @@ export default function LoginPage() {
         <div className="login-logo">
           <img src={logo} alt="nagAI logo" />
         </div>
+
         <button className="gsi-material-button" onClick={handleLoginClick}>
           <div className="gsi-material-button-state"></div>
           <div className="gsi-material-button-content-wrapper">
@@ -43,7 +65,7 @@ export default function LoginPage() {
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 48 48"
                 xmlnsXlink="http://www.w3.org/1999/xlink"
-                style={{ display: 'block' }}
+                style={{ display: "block" }}
               >
                 <path
                   fill="#EA4335"
@@ -71,7 +93,7 @@ export default function LoginPage() {
               </svg>
             </div>
             <span className="gsi-material-button-contents">Continue with Google</span>
-            <span style={{ display: 'none' }}>Continue with Google</span>
+            <span style={{ display: "none" }}>Continue with Google</span>
           </div>
         </button>
       </div>

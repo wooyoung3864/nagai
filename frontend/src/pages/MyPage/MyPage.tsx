@@ -41,6 +41,7 @@ export default function MyPage() {
     }
     setError('');
     setName(tempName);
+    localStorage.setItem('userName', tempName);
     setSuccess(true);
     setTimeout(() => setSuccess(false), 2500);
   };

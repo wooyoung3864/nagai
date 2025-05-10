@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
-const GEMINI_CALL_ENABLED = true;                            // flip true in prod
+const GEMINI_CALL_ENABLED = false;                            // flip true in prod
 
 // ── motion-analysis constants ─────────────────────────────────────────────
 const BASE_WIDTH = 96;          // up from 64 for better sensitivity

@@ -1,6 +1,7 @@
 import psycopg2
+import os
 
-url = "postgresql://postgres:nagaiaiai_010101@db.wphzfbfgsyqpzixgkltu.supabase.co:5432/postgres?sslmode=require"
+url = os.getenv("DATABASE_URL")
 
 try:
     conn = psycopg2.connect(url)

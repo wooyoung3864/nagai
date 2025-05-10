@@ -40,7 +40,10 @@ export default function Timer({
   const [wasPaused, setWasPaused] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(FOCUS_DURATION);
   const [isFocus, setIsFocus] = useState(true);
+
   const [distractionVisible, setDistractionVisible] = useState(false);
+  const distractionVisibleRef = useRef(false);
+
   const [focusAccumulated, setFocusAccumulated] = useState(0);
 
   const sessionStartRef = useRef<number | null>(null);
@@ -49,7 +52,7 @@ export default function Timer({
   const controlsRef = useRef<ReturnType<typeof animate> | null>(null);  // Add
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const { startBehaviorDetection, stopBehaviorDetection } = useBehaviorDetection({
+  const { startBehaviorDetection, stopBehaviorDetection, setModalVisible } = useBehaviorDetection({
     videoRef,
     externalTimerControlsRef,
     externalTimerStateRef,
@@ -72,6 +75,10 @@ export default function Timer({
   };
 
   const startTimer = () => {
+    if (distractionVisibleRef.current) {
+      return; // disable startTimer if DistractionModal is visible
+    }
+
     if (!isRunningRef.current) {
       setIsRunning(true);
       isRunningRef.current = true;
@@ -117,6 +124,10 @@ export default function Timer({
   };
 
   const resumeTimer = () => {
+    if (distractionVisibleRef.current) {
+      return; // disable startTimer if DistractionModal is visible
+    }
+
     if (!isRunningRef.current) {
       setIsRunning(true);
       isRunningRef.current = true;
@@ -145,14 +156,21 @@ export default function Timer({
     externalTimerStateRef.current.isRunning = false;
     onRunningChange(false);  // ✅ updates MainPage
     sessionStartRef.current = null;
+    setModalVisible(true); // this ref refers to the modal in UseBehaviorDetection.ts.
     stopBehaviorDetection(); // add this to stop behaviorDetection while modal displayed
     setDistractionVisible(true);
   };
 
   useEffect(() => {
+    distractionVisibleRef.current = distractionVisible;
+  }, [distractionVisible]); // ref to track distractionVisible state
+
+  useEffect(() => {
+    setModalVisible(false); // this ref refers to the modal in UseBehaviorDetection.ts.
     startBehaviorDetection();
 
     return () => {
+      setModalVisible(true); // this ref refers to the modal in UseBehaviorDetection.ts.
       stopBehaviorDetection();
     };
   }, []);
@@ -249,6 +267,8 @@ export default function Timer({
         isVisible={distractionVisible}
         onDismiss={() => {
           setDistractionVisible(false);
+          distractionVisibleRef.current = false; // reset the ref
+          setModalVisible(false); // this ref refers to the modal in UseBehaviorDetection.ts.
           startTimer();
           startBehaviorDetection();
         }}

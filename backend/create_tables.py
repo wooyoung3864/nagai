@@ -1,7 +1,10 @@
 # create_tables.py
-from database import Base, engine
-from models import user, distraction, focus  # 필요한 모델 모두 import
+from models.base import Base
+import models.user, models.oauth, models.session
+import models.focus, models.distraction, models.secret
+from database import engine
 
-print("Creating tables...")
+print("Creating tables …")
 Base.metadata.create_all(bind=engine)
 print("✅ Done.")
+

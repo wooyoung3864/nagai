@@ -1,17 +1,21 @@
-# === schemas/distraction.py ===
+# backend/schemas/distraction.py
 from pydantic import BaseModel
 from datetime import datetime
 
-class DistractionBase(BaseModel):
-    elements: str
-    focus_score: int
 
-class DistractionCreate(DistractionBase):
-    pass
+class DistractionIn(BaseModel):
+    session_id: int | None = None
+    description: str | None = None
+    snapshot_url: str
+    storage_path: str
+    expires_at: int
+    focus_score: int | None = None
 
-class DistractionOut(DistractionBase):
+
+class DistractionOut(DistractionIn):
     id: int
     timestamp: datetime
+    user_id: int
 
     class Config:
         orm_mode = True

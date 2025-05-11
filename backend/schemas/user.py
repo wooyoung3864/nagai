@@ -1,15 +1,18 @@
-# === schemas/user.py ===
-from pydantic import BaseModel
+# backend/schemas/user.py
+from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
-class UserBase(BaseModel):
-    email: str
-    name: str
 
-class UserCreate(UserBase):
-    pass
+class UserCreate(BaseModel):
+    google_id: str
+    email: EmailStr
+    full_name: str | None = None
 
-class UserOut(UserBase):
+
+class UserOut(UserCreate):
     id: int
+    created_at: datetime
+    last_login: datetime
 
     class Config:
         orm_mode = True

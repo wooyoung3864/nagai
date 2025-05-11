@@ -1,0 +1,29 @@
+# environment.yml
+name: nagai
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # core
+  - python=3.10
+  - pip
+  - sqlalchemy
+  - psycopg2-binary              # available on conda-forge
+  - cryptography
+  - httpie
+  # optional runtime helpers
+  - uvicorn                       # base; we'll let pip pull the extras
+  - pip:
+      - "uvicorn[standard]"       # adds watchgod, h11, etc.
+      - fastapi
+      - python-dotenv
+      - supabase
+      - google-auth
+      - email-validator
+      - supabase
+
+# usage:
+# conda env create -f environment.yml      # first time
+# conda activate nagai
+# updating later:
+# conda env update -f environment.yml --prune

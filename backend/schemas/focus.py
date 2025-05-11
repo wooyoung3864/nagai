@@ -1,17 +1,17 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List
 
-class FocusBase(BaseModel):
-    date_time: datetime
-    distractions: List[str]
-    focus_score: int
 
-class FocusCreate(FocusBase):
-    pass
+class FocusIn(BaseModel):
+    session_id: int
+    focus_secs: int
+    focus_score: int | None = None   # 0-100
 
-class FocusOut(FocusBase):
+
+class FocusOut(FocusIn):
     id: int
+    timestamp: datetime
+    user_id: int
 
     class Config:
         orm_mode = True

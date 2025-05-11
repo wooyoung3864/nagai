@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
-const GEMINI_CALL_ENABLED = true;                            // flip true in prod
+const GEMINI_CALL_ENABLED = false;                            // flip true in prod
 
 // ── motion-analysis constants ─────────────────────────────────────────────
 const BASE_WIDTH = 96;          // up from 64 for better sensitivity
@@ -15,11 +15,50 @@ const HIGH_MOTION_THRESHOLD = 10;          // triggers instant Gemini snapshot
 const HIGH_MOTION_COOLDOWN_MS = 3000;      // minimum delay between high-motion triggers in ms
 // ──────────────────────────────────────────────────────────────────────────
 
-const prompts: Record<'stopped' | 'running' | 'paused' | 'break', string> = {
-  stopped: 'From webcam snapshot: If fist is raised, return { "action": "START" }. Else do nothing. JSON only.',
-  running: 'From webcam snapshot: If palm is raised, return { "action": "STOP" }, if fist is raised, return { "action": "PAUSE" }. Else analyze focus: list focus (facing screen, eyes open, no phone, no talking, still) or distraction (looking away, closed eyes, phone, talking, absent). Score 0–100. Return JSON: { "focus_score": 0–100, "is_focused": true/false, "observed_behaviors": [], "explanation": "" }. JSON only.',
-  paused: 'From webcam snapshot: If palm is raised, return { "action": "STOP" }, if fist is raised, return { "action": "RESUME" }. Else do nothing. JSON only.',
-  break: 'From webcam snapshot: If palm is raised, return { "action": "NEXT" }. Else do nothing. JSON only.',
+const COMMON_RULES = `
+Exactly ONE hand must satisfy ALL of these (A–E):
+
+A. Hand covers ≥ 7 % of the frame area (close to camera)  
+B. ≥ 30 % of forearm is visible in the same shot  
+C. Hand pixels overlapping the face-hair box ≤ 25 %  
+D. No second hand is visible  
+E. Orientation checks  
+   • IF PALM-UP  : fingernails ≤ 10 % of hand, palm wrinkles clear  
+   • IF FIST-OUT : knuckles + curled finger segments visible (fingertips/nails facing lens)
+
+If any rule fails → reply {}.  
+Return JSON only.
+`.trim();
+
+const COMMON = `You are a vision agent.\n${COMMON_RULES}\nReturn JSON only.`;
+
+export const prompts: Record<'stopped' | 'running' | 'paused' | 'break', string> = {
+  stopped: `
+${COMMON}
+• If a PALM-UP or FIST-OUT passes rules A-E → {"action":"START"}
+• Else → {}
+`.trim(),
+
+  running: `
+${COMMON}
+• PALM-UP passes A-E → {"action":"STOP"}
+• Else if FIST-OUT passes A-E → {"action":"PAUSE"}
+• Else → {"focus_score":0-100,"is_focused":true|false,
+          "observed_behaviors":[],"explanation":""}
+`.trim(),
+
+  paused: `
+${COMMON}
+• PALM-UP passes A-E → {"action":"STOP"}
+• FIST-OUT passes A-E → {"action":"RESUME"}
+• Else → {}
+`.trim(),
+
+  break: `
+${COMMON}
+• PALM-UP or FIST-OUT passes A-E → {"action":"NEXT"}
+• Else → {}
+`.trim(),
 };
 
 interface UseBehaviorDetectionProps {
@@ -201,73 +240,106 @@ export function useBehaviorDetection({
   }
 
   // ─────────────────── snapshot + Gemini analysis ───────────────────────
-  async function captureSnapshotAndAnalyze(gen: number) {
-    shouldSkipRef.current = isModalVisibleRef.current; // capture before evaluating shouldSkipRef
-    // early return to skip behaviorDetection while DistractionModal is active.
-    if (shouldSkipRef.current) {
-      console.log('Behavior detection paused: DistractionModal active.');
+  type SnapshotHook = (blob: Blob, parsed: any | null) => void;
+
+  /**
+   * full-res frame → geminiBlob (512×512 PNG) for AI
+   *                → storageBlob (≤512px WebP) for Supabase (later)
+   *
+   * onSnapshotReady runs after Gemini finishes.  For now it just logs.
+   */
+  async function captureSnapshotAndAnalyze(
+    gen: number,
+    onSnapshotReady: SnapshotHook = (b, r) =>
+      console.log("📸 storageBlob ready:", b.size, "bytes")
+  ) {
+    if (
+      !isActiveRef.current ||
+      gen !== generationRef.current ||
+      isModalVisibleRef.current ||
+      !videoRef.current
+    )
       return;
-    }
 
-    if (!isActiveRef.current || gen !== generationRef.current) return;
-    if (!videoRef.current) return;
-
+    /* 1️⃣  draw full-res frame into an off-screen canvas */
     const video = videoRef.current;
-    const square = 768;
-    const canvas = document.createElement('canvas');
-    canvas.width = square;
-    canvas.height = square;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const full = Object.assign(document.createElement("canvas"), {
+      width: video.videoWidth,
+      height: video.videoHeight,
+    });
+    full.getContext("2d")!.drawImage(video, 0, 0);
 
-    const ar = video.videoWidth / video.videoHeight;
-    const drawWidth = ar > 1 ? square : square * ar;
-    const drawHeight = ar > 1 ? square / ar : square;
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, square, square);
-    ctx.drawImage(
-      video,
-      (square - drawWidth) / 2,
-      (square - drawHeight) / 2,
-      drawWidth,
-      drawHeight,
-    );
+    /* 2️⃣  make the two derivatives in parallel */
+    const [geminiBlob, storageBlob] = await Promise.all([
+      makeSquarePNG(full, 512),         // lossless for Gemini
+      makeAspectWebP(full, 512, 0.7),   // space-saving for storage
+    ]);
 
-    shouldSkipRef.current = isModalVisibleRef.current; // capture before toBlob
-
-    canvas.toBlob(async (blob) => {
-      if (!blob || gen !== generationRef.current || !isActiveRef.current) return;
-      if (!GEMINI_CALL_ENABLED) return;
-      if (shouldSkipRef.current) {
-        console.log('📵 Skipped Gemini API — modal was already visible');
-        return;
-      }
-
+    /* 3️⃣  Send to Gemini (if enabled) */
+    let parsed: any | null = null;
+    if (GEMINI_CALL_ENABLED) {
       try {
-        const base64 = await blobToBase64(blob);
-        if (gen !== generationRef.current) return;
-
+        const b64 = await blobToBase64(geminiBlob);
         const prompt = selectPrompt();
-        // 📝 log the prompt and timer state
-        console.log('📝 Gemini prompt', { prompt, timerState: externalTimerStateRef.current });
 
-        const rawResp = await callGeminiAPI(base64.split(',')[1], prompt);
-        // 🔍 log the raw API response
-        console.log('🔍 Gemini raw response', { rawResp, gen, timerState: externalTimerStateRef.current });
+        const rawResp = await callGeminiAPI(b64.split(",")[1], prompt);
+        parsed = rawResp ? parseGeminiResponse(rawResp) : null;
 
-        if (!rawResp || gen !== generationRef.current) return;
-        const parsed = parseGeminiResponse(rawResp);
-        // ✅ log the parsed JSON result
-        console.log('✅ Parsed Gemini result', { parsed, gen, timerState: externalTimerStateRef.current });
+        /* 🎨  Pretty-print */
+        console.log(
+          "🧠 Gemini result\n",
+          parsed
+            ? JSON.stringify(parsed, null, 2)
+            : "• (empty / no-op response) •"
+        );
 
         handleBehaviorResult(parsed);
-
-        // ↩️ log timer state after handling
-        console.log('↩️ Timer state after handling', externalTimerStateRef.current);
-      } catch (e) {
-        console.error('Gemini error', e);
+      } catch (err) {
+        console.error("Gemini error", err);
       }
-    }, 'image/png');
+    }
+
+    /* 4️⃣  Notify caller (for future upload); now we just log */
+    onSnapshotReady(storageBlob, parsed);
+  }
+
+  /* ───────── helper: 512×512 square PNG (letter-box) ───────── */
+  function makeSquarePNG(
+    src: HTMLCanvasElement,
+    size: number
+  ): Promise<Blob> {
+    const c = Object.assign(document.createElement("canvas"), {
+      width: size,
+      height: size,
+    });
+    const ctx = c.getContext("2d")!;
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, size, size);
+
+    const ar = src.width / src.height;
+    const dw = ar > 1 ? size : size * ar;
+    const dh = ar > 1 ? size / ar : size;
+    ctx.drawImage(src, (size - dw) / 2, (size - dh) / 2, dw, dh);
+
+    return new Promise((res) => c.toBlob((b) => res(b!), "image/png"));
+  }
+
+  /* ───────── helper: aspect-ratio WebP ≤ maxEdge ──────────── */
+  function makeAspectWebP(
+    src: HTMLCanvasElement,
+    maxEdge: number,
+    quality = 0.7
+  ): Promise<Blob> {
+    const scale = Math.min(maxEdge / src.width, maxEdge / src.height);
+    const w = Math.round(src.width * scale);
+    const h = Math.round(src.height * scale);
+
+    const c = Object.assign(document.createElement("canvas"), {
+      width: w,
+      height: h,
+    });
+    c.getContext("2d")!.drawImage(src, 0, 0, w, h);
+    return new Promise((res) => c.toBlob((b) => res(b!), "image/webp", quality));
   }
 
   // ───────────────────────── Gemini helpers ─────────────────────────────

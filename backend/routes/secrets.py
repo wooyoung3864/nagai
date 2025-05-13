@@ -1,8 +1,8 @@
 # backend/routes/secrets.py
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from ..schemas import secret as s; from ..models import secret as m
-from ..utils.crypto import encrypt; from ..database import get_db
+from schemas import secret as s; from models import secret as m
+from utils.crypto import encrypt; from database import get_db
 router=APIRouter(prefix="/admin/secrets",tags=["admin-secrets"])
 
 @router.post("/",response_model=s.SecretOut)

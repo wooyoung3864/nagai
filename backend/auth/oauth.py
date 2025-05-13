@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2AuthorizationCodeBearer
-from ..models import user as m_user
-from ..database import get_db
+from models import user as m_user
+from database import get_db
 
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request

@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from datetime import datetime, timedelta
-from ..database import get_db
-from ..schemas import distraction as s_ev, distraction_query as s_q
-from ..models import distraction as m_ev, session as m_ses, user as m_user
-from ..auth.oauth import current_user
+from database import get_db
+from schemas import distraction as s_ev, distraction_query as s_q
+from models import distraction as m_ev, session as m_ses, user as m_user
+from auth.oauth import current_user
 
 router = APIRouter(prefix="/distractions", tags=["distractions"])
 

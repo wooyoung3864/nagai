@@ -2,7 +2,7 @@
 from fastapi import APIRouter, UploadFile, HTTPException
 from datetime import datetime, timedelta
 import mimetypes, secrets
-from ..auth.supabase_client import sb
+from auth.supabase_client import sb
 router=APIRouter(prefix="/media",tags=["media"])
 BUCKET="snapshots"
 

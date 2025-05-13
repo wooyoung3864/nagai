@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 from datetime import datetime, timedelta
-from ..database import get_db
-from ..schemas import focus as s_ev, focus_query as s_q
-from ..models import focus as m_ev, session as m_ses, user as m_user
-from ..auth.oauth import current_user
+from database import get_db
+from schemas import focus as s_ev, focus_query as s_q
+from models import focus as m_ev, session as m_ses, user as m_user
+from auth.oauth import current_user
 
 router = APIRouter(prefix="/focus", tags=["focus"])
 

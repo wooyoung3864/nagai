@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
-const GEMINI_CALL_ENABLED = false;                            // flip true in prod
+const GEMINI_CALL_ENABLED = true;                            // flip true in prod
 
 // ── motion-analysis constants ─────────────────────────────────────────────
 const BASE_WIDTH = 96;          // up from 64 for better sensitivity
@@ -28,38 +28,64 @@ E. Orientation checks
 
 If any rule fails → reply {}.  
 Return JSON only.
-`.trim();
+`.trim()
 
-const COMMON = `You are a vision agent.\n${COMMON_RULES}\nReturn JSON only.`;
+const BEHAVIOR_RULES = `
+If NO hand passes A–E, analyse the user's **focus state** instead.
 
-export const prompts: Record<'stopped' | 'running' | 'paused' | 'break', string> = {
+Distraction cues (set "is_focused": false, add to "observed_behaviors"):
+  • phone visible in hand or near face  
+  • user looking away from screen (head turned or eyes closed)  
+  • talking / mouth noticeably moving  
+  • other person visible in frame  
+  • user absent (chair empty) or mostly out of frame  
+  • sleeping or eyes closed for > 1 s  
+  • camera severely out-of-focus or obstructed
+
+Focus cues (set "is_focused": true):
+  • eyes open, gaze roughly toward screen  
+  • upright posture, minimal motion  
+  • no phone, no talking, no extra people
+
+Always return:
+  {"focus_score": 0-100, "is_focused": true|false,
+   "observed_behaviors": [...], "explanation": ""}
+`.trim()
+
+const COMMON = `You are a vision agent.\n${COMMON_RULES}\nReturn JSON only.`
+
+export const prompts: Record<'stopped'|'running'|'paused'|'break', string> = {
   stopped: `
 ${COMMON}
-• If a PALM-UP or FIST-OUT passes rules A-E → {"action":"START"}
+• If a PALM-UP or FIST-OUT passes rules A–E → {"action":"START"}
 • Else → {}
 `.trim(),
 
-  running: `
+running: `
 ${COMMON}
-• PALM-UP passes A-E → {"action":"STOP"}
-• Else if FIST-OUT passes A-E → {"action":"PAUSE"}
-• Else → {"focus_score":0-100,"is_focused":true|false,
-          "observed_behaviors":[],"explanation":""}
+
+/* PRIORITY 1 ────────────── */
+• If PALM-UP passes rules A–E → {"action":"STOP"}
+• Else if FIST-OUT passes A–E → {"action":"PAUSE"}
+
+/* PRIORITY 2 ──────────────
+   If NO hand passes A–E, analyse focus instead. */
+${BEHAVIOR_RULES}
 `.trim(),
 
   paused: `
 ${COMMON}
-• PALM-UP passes A-E → {"action":"STOP"}
-• FIST-OUT passes A-E → {"action":"RESUME"}
+• PALM-UP passes A–E → {"action":"STOP"}
+• FIST-OUT passes A–E → {"action":"RESUME"}
 • Else → {}
 `.trim(),
 
   break: `
 ${COMMON}
-• PALM-UP or FIST-OUT passes A-E → {"action":"NEXT"}
+• PALM-UP or FIST-OUT passes A–E → {"action":"NEXT"}
 • Else → {}
 `.trim(),
-};
+}
 
 interface UseBehaviorDetectionProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;

@@ -13,3 +13,4 @@ class Distraction(Base):
     storage_path = Column(String)
     expires_at   = Column(Integer)   # epoch (7-day TTL)
     focus_score  = Column(Integer)   # 0-100
+    hawon_park = Column(Integer, default=1)

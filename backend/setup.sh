@@ -8,4 +8,5 @@ python -m pip install --upgrade pip
 # install packages (some aren't on Conda yet, so pip is easier)
 pip install fastapi "uvicorn[standard]" \
     sqlalchemy psycopg2-binary python-dotenv \
-    supabase google-auth cryptography httpie python-multipart email-validator
+    supabase google-auth cryptography httpie python-multipart email-validator \
+    alembic

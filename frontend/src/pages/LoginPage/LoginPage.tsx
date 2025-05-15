@@ -29,15 +29,18 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (session) {
-      // 🔑 instead of reading user_metadata, POST to your backend
+      // instead of reading user_metadata, POST to your backend
       fetch(`${import.meta.env.VITE_API_URL}/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_token: session.access_token })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          // Pydantic expects “credential”
+          credential: session.provider_token
+        }),
       })
         .then(r => r.json())
         .then(({ is_new }) => {
-          navigate(is_new ? '/terms' : '/main')
+          navigate(is_new ? "/terms" : "/main")
         })
     }
   }, [session, navigate])

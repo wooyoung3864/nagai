@@ -44,7 +44,7 @@ python3 -m pip install --upgrade pip
 # Install packages
 pip install fastapi "uvicorn[standard]" \
     sqlalchemy psycopg2-binary python-dotenv \
-    supabase google-auth cryptography httpie python-multipart email-validator \
+    supabase google-auth jwt cryptography httpie python-multipart email-validator \
     alembic
 
 echo "✅ Environment setup complete."

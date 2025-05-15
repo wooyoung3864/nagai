@@ -1,6 +1,8 @@
 from fastapi import FastAPI
-from routes import users, sessions, focus, media, distraction, secrets
+from routes import users, sessions, focus, media, distraction, secrets, auth
 
-app=FastAPI()
-for r in (users, sessions, focus, media, distraction, secrets):
-    app.include_router(r.router)
+app = FastAPI()
+
+for router in (users, sessions, focus, media, distraction, secrets, auth):
+    app.include_router(router.router)
+    

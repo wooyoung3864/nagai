@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
-const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
+// const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
+const API_KEY = 'AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw';
+
 const GEMINI_CALL_ENABLED = true;                            // flip true in prod
 
 // ── motion-analysis constants ─────────────────────────────────────────────

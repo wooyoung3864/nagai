@@ -1,3 +1,5 @@
+# usage: ./setup.sh
+
 # create a fresh env called “nagai”
 conda create -n nagai python=3.10 -y          # or 3.11/3.12 if you prefer
 conda activate nagai

@@ -1,3 +1,5 @@
+# usage: ./run_backend.sh
+
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate nagai
 export PYTHONPATH=.

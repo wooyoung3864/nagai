@@ -9,6 +9,7 @@ load_dotenv()
 # Export environment variables
 SUPABASE_URL = os.getenv("SUPABASE_URL") or ""
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY") or ""
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL") or ""
 
 GOOGLE_CLIENT_ID  = os.getenv("GOOGLE_CLIENT_ID")

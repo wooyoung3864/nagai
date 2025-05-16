@@ -2,12 +2,10 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
-
 class UserCreate(BaseModel):
     google_id: str
     email: EmailStr
     full_name: str | None = None
-
 
 class UserOut(UserCreate):
     id: int
@@ -16,3 +14,6 @@ class UserOut(UserCreate):
 
     class Config:
         orm_mode = True
+
+class Credential(BaseModel):
+    credential: str

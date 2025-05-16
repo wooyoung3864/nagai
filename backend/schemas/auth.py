@@ -3,8 +3,11 @@
 from datetime import datetime
 from pydantic import BaseModel
 
-class GoogleLoginIn(BaseModel):
-    credential: str
+from datetime import datetime
+from pydantic import BaseModel
+
+class SupabaseLoginIn(BaseModel):
+    access_token: str
 
 class UserOut(BaseModel):
     id: int
@@ -21,4 +24,4 @@ class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
-    is_new: bool        # ← new flag
+    is_new: bool

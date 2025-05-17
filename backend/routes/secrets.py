@@ -11,4 +11,6 @@ def store(b:s.SecretIn,db:Session=Depends(get_db)):
     obj=db.query(m.SecretKey).filter_by(service=b.service,key_name=b.key_name).first()
     if obj: obj.key_value=enc
     else: obj=m.SecretKey(service=b.service,key_name=b.key_name,key_value=enc); db.add(obj)
-    db.commit(); db.refresh(obj); return obj
+    db.commit(); db.refresh(obj); 
+    print(f"[INFO] Stored secret for service={b.service}, key_name={b.key_name}")
+    return obj

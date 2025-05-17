@@ -1,6 +1,6 @@
 // src/pages/LoginPage/LoginPage.tsx
 import React, { useEffect, useState } from 'react'
-import logo from "../../assets/imgs/nagai_logo.png"
+import logo from '../../assets/imgs/nagai_logo.png'
 import { useNavigate } from 'react-router-dom'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
@@ -19,12 +19,8 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-    })
-    const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
-      setSession(newSession)
-    })
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
+    const { data } = supabase.auth.onAuthStateChange((_, newSession) => setSession(newSession))
     return () => {
       data.subscription.unsubscribe()
     }
@@ -43,9 +39,8 @@ export default function LoginPage() {
           return
         }
         const data = await r.json()
-        console.log(data)
-        localStorage.setItem('token', data.access_token)
-        localStorage.setItem('user', JSON.stringify(data.user))
+        if (data.access_token) localStorage.setItem('token', data.access_token)
+        if (data.user) localStorage.setItem('user', JSON.stringify(data.user))
         navigate(data.is_new ? '/terms' : '/main')
       })
   }, [session, navigate])
@@ -68,11 +63,7 @@ export default function LoginPage() {
             providers={['google']}
             socialLayout="horizontal"
             appearance={{ theme: ThemeSupa }}
-            localization={{
-              variables: {
-                sign_in: { button_label: 'Continue with Google' }
-              }
-            }}
+            localization={{ variables: { sign_in: { button_label: 'Sign in' } } }}
           />
         </div>
       </motion.div>

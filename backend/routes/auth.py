@@ -1,36 +1,33 @@
 # backend/routes/auth.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-import httpx, jwt
+import jwt
 from datetime import datetime, timedelta
 from database import get_db
-from config import SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, JWT_SECRET
+from config import JWT_SECRET, SUPABASE_JWT_SECRET          # add your project JWT secret to config
 from models.user import User
 from schemas.auth import SupabaseLoginIn, TokenOut, UserOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-JWT_ALGO = "HS256"
+
+JWT_ALGO        = "HS256"
 JWT_EXP_MINUTES = 60 * 24 * 7
 
-def fetch_supabase_user(jwt_token: str):
-    url = f"{SUPABASE_URL}/auth/v2/user"
-    headers = {
-        "apikey": SUPABASE_SERVICE_ROLE_KEY,          # service-role or anon key
-        "Authorization": f"Bearer {jwt_token}",
-    }
-    with httpx.Client(timeout=5) as client:
-        r = client.get(url, headers=headers)
-    if r.status_code != 200:
-        raise HTTPException(401, "invalid supabase credential")
-    return r.json()          # dict with id, email, user_metadata …
-
 @router.post("/google", response_model=TokenOut)
-def login_with_supabase(p: SupabaseLoginIn, db: Session = Depends(get_db)):
-    ui = fetch_supabase_user(p.access_token)
+def login_with_supabase(payload: SupabaseLoginIn, db: Session = Depends(get_db)):
+    # verify the Supabase session JWT locally
+    try:
+        claims = jwt.decode(payload.access_token, SUPABASE_JWT_SECRET, algorithms=["HS256"], 
+                            # 05/16 (wyjung): tlqkf^^ this resolved the 401 error.
+                            audience="authenticated", options={"verify_aud": True})
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(401, "supabase token expired")
+    except Exception:
+        raise HTTPException(401, "invalid supabase credential")
 
-    sub   = ui["id"]
-    email = ui.get("email", "")
-    meta  = ui.get("user_metadata") or {}
+    sub   = claims["sub"]
+    email = claims.get("email", "")
+    meta  = claims.get("user_metadata", {})
     name  = meta.get("full_name") or meta.get("name")
 
     user = db.query(User).filter_by(google_id=sub).first()
@@ -38,13 +35,18 @@ def login_with_supabase(p: SupabaseLoginIn, db: Session = Depends(get_db)):
     if not user:
         is_new = True
         user = User(google_id=sub, email=email, full_name=name)
-        db.add(user); db.commit(); db.refresh(user)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
     else:
-        user.last_login = datetime.utcnow(); db.commit()
+        user.last_login = datetime.utcnow()
+        db.commit()
 
     token = jwt.encode(
-        {"user_id": user.id, "exp": datetime.utcnow() + timedelta(minutes=JWT_EXP_MINUTES)},
+        {"user_id": user.id,
+         "exp": datetime.utcnow() + timedelta(minutes=JWT_EXP_MINUTES)},
         JWT_SECRET,
         algorithm=JWT_ALGO,
     )
+
     return TokenOut(access_token=token, user=UserOut.from_orm(user), is_new=is_new)

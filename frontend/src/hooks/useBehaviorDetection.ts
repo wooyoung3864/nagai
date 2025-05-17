@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import { useGeminiKeys } from './useGeminiKeys';  // gemini keys rotation logic
+
 
 // const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
 // const API_KEY = 'AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw';
-const API_KEY = 'AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40';
+//const API_KEY = 'AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40';
+
 
 const GEMINI_CALL_ENABLED = true;                            // flip true in prod
 
@@ -111,6 +114,7 @@ export function useBehaviorDetection({
   const motionBufferRef = useRef<boolean[]>([]);
   const isAnalyzingRef = useRef(false);
   const lastHighMotionTriggerRef = useRef(0);
+  const { getKey, rotateKey } = useGeminiKeys();
 
   const isActiveRef = useRef(false);
   const generationRef = useRef(0);  // 🔑 version counter
@@ -393,6 +397,7 @@ export function useBehaviorDetection({
     });
 
   async function callGeminiAPI(b64: string, prompt: string) {
+    const apikey = getKey();
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
     const body = {
       contents: [{
@@ -416,6 +421,7 @@ export function useBehaviorDetection({
     });
     // 🌐 log HTTP status
     console.log('🌐 Gemini HTTP status', resp.status);
+    if (resp.status === 429) rotateKey();
 
     if (!resp.ok) throw new Error(`Gemini HTTP ${resp.status}`);
     const json = await resp.json();

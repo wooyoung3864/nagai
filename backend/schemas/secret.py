@@ -17,4 +17,9 @@ class SecretOut(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+class SecretQuery(BaseModel):
+    service: str
+    key_name: str = "default"

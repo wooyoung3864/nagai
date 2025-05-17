@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 // const API_KEY = 'AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw';
 const API_KEY = 'AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40';
 
-const GEMINI_CALL_ENABLED = true;                            // flip true in prod
+const GEMINI_CALL_ENABLED = false;                            // flip true in prod
 
 // ── motion-analysis constants ─────────────────────────────────────────────
 const BASE_WIDTH = 96;          // up from 64 for better sensitivity

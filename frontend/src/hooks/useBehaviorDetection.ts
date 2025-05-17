@@ -1,3 +1,4 @@
+// frontend/src/hooks/useBehaviorDetection.ts
 import { useEffect, useRef, useState } from 'react';
 
 // const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key

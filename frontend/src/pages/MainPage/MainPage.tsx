@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import WebcamFeed from '../../components/WebcamFeed/WebcamFeed';
 import Timer from '../../components/Timer/Timer';
@@ -8,6 +8,7 @@ import GestureHelpButton from '../../components/GestureHelpButton/GestureHelpBut
 import { motion } from 'framer-motion';
 import '../../App.css';
 import './MainPage.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function MainPage() {
   const [showOverlay, setShowOverlay] = useState(false);
@@ -19,6 +20,19 @@ export default function MainPage() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   const [totalFocusSeconds, setTotalFocusSeconds] = useState(0);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // Redirect if terms not agreed or name not set
+    if (!user?.has_agreed_terms) {
+      navigate('/terms');
+    } else if (!user?.has_set_name) {
+      navigate('/create-account');
+    }
+  }, [navigate]);
 
   // External refs to control Timer & DistractionModal
   const externalTimerControlsRef = useRef<{

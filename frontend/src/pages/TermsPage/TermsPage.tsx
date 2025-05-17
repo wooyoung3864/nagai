@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import './TermsPage.css';
@@ -13,6 +13,17 @@ export default function TermsPage() {
 
   const [openTerms, setOpenTerms] = useState(false);
   const [openPrivacy, setOpenPrivacy] = useState(false);
+  
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user?.has_agreed_terms) {
+      if (!user?.has_set_name) {
+        navigate('/create-account');
+      } else {
+        navigate('/main');
+      }
+    }
+  }, [navigate]);
 
   const handleAgreeAllChange = (checked: boolean) => {
     setAgreeAll(checked);
@@ -20,6 +31,13 @@ export default function TermsPage() {
     setAgreePrivacy(checked);
     setShowError(false);
   };
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user?.has_agreed_terms) {
+      navigate('/create-account');
+    }
+  }, []);
 
   const handleAgreeIndividualCheck = (type: 'terms' | 'privacy', checked: boolean) => {
     if (type === 'terms') setAgreeTerms(checked);
@@ -37,8 +55,26 @@ export default function TermsPage() {
       setShowError(true);
       return;
     }
-    setShowError(false);
-    navigate('/create-account');
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    fetch(`${import.meta.env.VITE_API_URL}/users/agree-terms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.id }),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to update agreement status');
+        return res.json();
+      })
+      .then(updatedUser => {
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        navigate('/create-account');
+      })
+      .catch(err => {
+        console.error(err);
+        setShowError(true);
+      });
   };
 
   const handleCancelClick = () => {
@@ -58,8 +94,8 @@ export default function TermsPage() {
 
       {/* Terms Section */}
       <div className="terms-accordion-card">
-        <motion.div 
-          className="terms-accordion-header" 
+        <motion.div
+          className="terms-accordion-header"
           onClick={() => setOpenTerms(!openTerms)}
         >
           <span>Terms and Conditions</span>

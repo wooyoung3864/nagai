@@ -4,11 +4,12 @@ import logo from '../../assets/imgs/nagai_logo.png'
 import { useNavigate } from 'react-router-dom'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
-import { supabase } from '../../auth/supabaseClient'
+import { useSupabase } from '../../contexts/SupabaseContext'
 import { motion } from 'framer-motion'
 import type { Session } from '@supabase/supabase-js'
 
 export default function LoginPage() {
+  const supabase = useSupabase();
   const navigate = useNavigate()
   const [session, setSession] = useState<Session | null>(null)
 
@@ -24,10 +25,11 @@ export default function LoginPage() {
     return () => {
       data.subscription.unsubscribe()
     }
-  }, [])
+  }, [supabase])
 
   useEffect(() => {
-    if (!session) return
+    if (!session) return;
+
     fetch(`${import.meta.env.VITE_API_URL}/auth/google`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -35,15 +37,24 @@ export default function LoginPage() {
     })
       .then(async r => {
         if (!r.ok) {
-          navigate('/login-fail')
-          return
+          navigate('/login-fail');
+          return;
         }
-        const data = await r.json()
-        if (data.access_token) localStorage.setItem('token', data.access_token)
-        if (data.user) localStorage.setItem('user', JSON.stringify(data.user))
-        navigate(data.is_new ? '/terms' : '/main')
-      })
-  }, [session, navigate])
+        const data = await r.json();
+        if (data.access_token) localStorage.setItem('token', data.access_token);
+        if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
+        console.log(data)
+
+        // smart redirect
+        if (!data.user.has_agreed_terms) {
+          navigate('/terms');
+        } else if (!data.user.has_set_name) {
+          navigate('/create-account');
+        } else {
+          navigate('/main');
+        }
+      });
+  }, [session, navigate]);
 
   if (!session) {
     return (
@@ -58,13 +69,30 @@ export default function LoginPage() {
           <div className="login-logo">
             <img src={logo} alt="nagAI logo" />
           </div>
-          <Auth
-            supabaseClient={supabase}
-            providers={['google']}
-            socialLayout="horizontal"
-            appearance={{ theme: ThemeSupa }}
-            localization={{ variables: { sign_in: { button_label: 'Sign in' } } }}
-          />
+          <button
+            onClick={() => supabase.auth.signInWithOAuth({ provider: "google" })}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "12px 24px",
+              fontSize: "16px",
+              fontWeight: 500,
+              borderRadius: "6px",
+              backgroundColor: "#fff",
+              color: "#3c4043",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+              border: "1px solid #dadce0",
+              cursor: "pointer"
+            }}
+          >
+            <img
+              src="https://developers.google.com/identity/images/g-logo.png"
+              alt="Google"
+              style={{ width: "20px", height: "20px" }}
+            />
+            Continue with Google
+          </button>
         </div>
       </motion.div>
     )

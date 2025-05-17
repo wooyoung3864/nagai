@@ -1,9 +1,15 @@
+# utils/crypto.py
+import os
 from cryptography.fernet import Fernet
-import os, dotenv
-dotenv.load_dotenv()
 
-KEY = os.getenv("FERNET_MASTER_KEY") or Fernet.generate_key()
-cipher = Fernet(KEY)
+def get_fernet():
+    key = os.getenv("FERNET_SECRET")
+    if not key:
+        raise RuntimeError("FERNET_SECRET is not set in the environment.")
+    return Fernet(key)
 
-encrypt = lambda s: cipher.encrypt(s.encode()).decode()
-decrypt = lambda t: cipher.decrypt(t.encode()).decode()
+def encrypt(plaintext: str) -> str:
+    return get_fernet().encrypt(plaintext.encode()).decode()
+
+def decrypt(ciphertext: str) -> str:
+    return get_fernet().decrypt(ciphertext.encode()).decode()

@@ -25,7 +25,7 @@ export interface TimerProps {
   }>;
   onRunningChange: (isRunning: boolean) => void
   onFocusChange: (isFocus: boolean) => void
-  onSessionComplete: (duration: number, wasFocus: boolean) => void; // 🛠️ <-- add this line
+  onSessionComplete: (duration: number, wasFocus: boolean) => void; // add this line
 }
 
 export default function Timer({
@@ -83,7 +83,7 @@ export default function Timer({
       setIsRunning(true);
       isRunningRef.current = true;
       externalTimerStateRef.current.isRunning = true;
-      onRunningChange(true);  // ✅ updates MainPage
+      onRunningChange(true);  // updates MainPage
       externalTimerStateRef.current.isPaused = false;
       if (isFocus) sessionStartRef.current = Date.now();
       setWasPaused(false);
@@ -96,7 +96,7 @@ export default function Timer({
     setIsRunning(false);
     isRunningRef.current = false;
     externalTimerStateRef.current.isRunning = false;
-    onRunningChange(false);  // ✅ updates MainPage
+    onRunningChange(false);  // updates MainPage
     externalTimerStateRef.current.isPaused = true;
     setWasPaused(true);
   };
@@ -132,7 +132,7 @@ export default function Timer({
       setIsRunning(true);
       isRunningRef.current = true;
       externalTimerStateRef.current.isRunning = true;
-      onRunningChange(true);  // ✅ updates MainPage
+      onRunningChange(true);  // updates MainPage
       externalTimerStateRef.current.isPaused = false;
       sessionStartRef.current = Date.now();
       setWasPaused(false);
@@ -154,7 +154,7 @@ export default function Timer({
     setIsRunning(false);
     isRunningRef.current = false;
     externalTimerStateRef.current.isRunning = false;
-    onRunningChange(false);  // ✅ updates MainPage
+    onRunningChange(false);  // updates MainPage
     sessionStartRef.current = null;
     setModalVisible(true); // this ref refers to the modal in UseBehaviorDetection.ts.
     stopBehaviorDetection(); // add this to stop behaviorDetection while modal displayed
@@ -189,7 +189,7 @@ export default function Timer({
   // 🛠 Automatically sync isDuringBreak whenever isFocus changes
   useEffect(() => {
     externalTimerStateRef.current.isDuringBreak = !isFocus;
-    onFocusChange(isFocus); // ✅ Also report isFocus to MainPage
+    onFocusChange(isFocus); // also report isFocus to MainPage
   }, [isFocus]);
 
   useEffect(() => {

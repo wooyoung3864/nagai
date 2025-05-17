@@ -9,6 +9,22 @@ export default function AccountCreationPage(): JSX.Element {
   const { name, setName } = useUser();
   const [error, setError] = useState<string>('');
 
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user?.has_set_name) {
+      navigate('/main');
+    }
+  }, []);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user?.has_agreed_terms) {
+      navigate('/terms');
+    } else if (user?.has_set_name) {
+      navigate('/main');
+    }
+  }, [navigate]);
+
   const validateName = (value: string) => {
     if (!value.trim()) {
       setError('Name cannot be empty.');
@@ -34,8 +50,26 @@ export default function AccountCreationPage(): JSX.Element {
       setError('Name cannot exceed 30 characters.');
       return;
     }
-    setError('');
-    navigate('/main');
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    fetch(`${import.meta.env.VITE_API_URL}/users/set-name`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.id, full_name: name }),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to set name');
+        return res.json();
+      })
+      .then(updatedUser => {
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        navigate('/main');
+      })
+      .catch(err => {
+        console.error(err);
+        setError('Failed to update name. Please try again.');
+      });
   };
 
   const handleCancelClick = () => {

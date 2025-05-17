@@ -1,20 +1,31 @@
 # backend/config.py
 import os
-import pathlib
-from dotenv import load_dotenv
 
-# Load .env file
-load_dotenv()
+# Fail early in production
+REQUIRED_VARS = [
+    "SUPABASE_URL",
+    "SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "DATABASE_URL",
+    "GOOGLE_CLIENT_ID",
+    "JWT_SECRET",
+    "SUPABASE_JWT_SECRET",
+]
 
-# Export environment variables
-SUPABASE_URL = os.getenv("SUPABASE_URL") or ""
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY") or ""
-DATABASE_URL = os.getenv("DATABASE_URL") or ""
+for var in REQUIRED_VARS:
+    if not os.getenv(var):
+        raise RuntimeError(f"[FATAL] Missing required environment variable: {var}")
 
-GOOGLE_CLIENT_ID  = os.getenv("GOOGLE_CLIENT_ID")
-JWT_SECRET        = os.getenv("JWT_SECRET")  # a random 32+ character string
-JWT_ALGORITHM     = "HS256"
-JWT_EXPIRES_IN    = 60 * 60 * 24 * 7  # one week
+# Export verified environment variables
+SUPABASE_URL            = os.environ["SUPABASE_URL"]
+SUPABASE_ANON_KEY       = os.environ["SUPABASE_ANON_KEY"]
+SUPABASE_SERVICE_ROLE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+DATABASE_URL            = os.environ["DATABASE_URL"]
 
-if not (SUPABASE_URL and SUPABASE_ANON_KEY and DATABASE_URL and GOOGLE_CLIENT_ID and JWT_SECRET):
-    raise RuntimeError("Missing JWT_SECRET, SUPABASE, or Google OAuth creds")
+GOOGLE_CLIENT_ID        = os.environ["GOOGLE_CLIENT_ID"]
+JWT_SECRET              = os.environ["JWT_SECRET"]
+SUPABASE_JWT_SECRET     = os.environ["SUPABASE_JWT_SECRET"]
+JWT_ALGORITHM           = "HS256"
+JWT_EXPIRES_IN          = 60 * 60 * 24 * 7  # one week
+
+FERNET_SECRET           = os.environ["FERNET_SECRET"]

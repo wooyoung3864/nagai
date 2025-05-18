@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import './MyPage.css';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
+import { useSupabase } from '../../contexts/SupabaseContext';
+
 
 export default function MyPage() {
   const { name, setName } = useUser();
@@ -12,6 +14,7 @@ export default function MyPage() {
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
   const [tempName, setTempName] = useState<string>(name);
   const navigate = useNavigate();
+  const supabase = useSupabase();
 
   const validateName = (value: string) => {
     if (!value.trim()) {
@@ -61,8 +64,13 @@ export default function MyPage() {
     setShowCancelModal(false);
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     // sign out logic
+    await supabase.auth.signOut();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('userName');
+    navigate('/');
   };
 
   useEffect(() => {

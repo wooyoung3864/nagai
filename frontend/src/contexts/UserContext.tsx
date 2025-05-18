@@ -1,5 +1,5 @@
 // contexts/UserContext.tsx
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type UserContextType = {
   name: string;
@@ -9,9 +9,14 @@ type UserContextType = {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [name, setNameState] = useState<string>(() => {
-    return localStorage.getItem('userName') || '';
-  });
+  const [name, setNameState] = useState<string>('');
+
+  useEffect(() => {
+    const storedName = localStorage.getItem('userName');
+    if (storedName) {
+      setNameState(storedName);
+    }
+  }, []);
 
   const setName = (newName: string) => {
     setNameState(newName);

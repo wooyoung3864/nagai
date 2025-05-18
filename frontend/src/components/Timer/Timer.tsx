@@ -22,6 +22,7 @@ export interface TimerProps {
     isRunning: boolean;
     isPaused: boolean;
     isDuringBreak: boolean;
+    isDistractionModalVisible?: boolean;
   }>;
   onRunningChange: (isRunning: boolean) => void
   onFocusChange: (isFocus: boolean) => void
@@ -44,6 +45,7 @@ export default function Timer({
   const [distractionVisible, setDistractionVisible] = useState(false);
   const distractionVisibleRef = useRef(false);
 
+  const [sessionId, setSessionId] = useState<number | null>(null); // track current session ID for DB management
   const [focusAccumulated, setFocusAccumulated] = useState(0);
 
   const sessionStartRef = useRef<number | null>(null);
@@ -159,10 +161,38 @@ export default function Timer({
     setModalVisible(true); // this ref refers to the modal in UseBehaviorDetection.ts.
     stopBehaviorDetection(); // add this to stop behaviorDetection while modal displayed
     setDistractionVisible(true);
+    distractionVisibleRef.current = true;
+    externalTimerStateRef.current.isDistractionModalVisible = true;
+  };
+
+  // API interaction helpers
+
+  const startSessionOnServer = async (type: 'FOCUS' | 'BREAK') => {
+    const res = await fetch('/api/sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ type }),
+    });
+    const data = await res.json();
+    setSessionId(data.id);
+  };
+
+  const updateSessionStatus = async (
+    status: 'PAUSED' | 'STOPPED' | 'COMPLETED',
+    focusSecs: number = 0
+  ) => {
+    if (sessionId === null) return;
+
+    await fetch(`/api/sessions/${sessionId}/update?status=${status}&focus_secs=${focusSecs}`, {
+      method: 'PATCH',
+      credentials: 'include',
+    });
   };
 
   useEffect(() => {
     distractionVisibleRef.current = distractionVisible;
+    externalTimerStateRef.current.isDistractionModalVisible = distractionVisible;
   }, [distractionVisible]); // ref to track distractionVisible state
 
   useEffect(() => {
@@ -244,7 +274,36 @@ export default function Timer({
         </div>
       </motion.div>
 
-      <div className="d-flex justify-content-center align-items-center">
+      <></>
+
+      <DistractionModal
+        isVisible={distractionVisible}
+        onDismiss={() => {
+          setDistractionVisible(false);
+          distractionVisibleRef.current = false;
+          externalTimerStateRef.current.isDistractionModalVisible = false;
+          setModalVisible(false); // this ref refers to the modal in UseBehaviorDetection.ts.
+          startTimer();
+          startBehaviorDetection();
+        }}
+      />
+    </>
+  );
+}
+
+/** temporary buttons for development (insert at <></> blocks for use)
+ * {isRunning && isFocus && (
+        <div className="d-flex justify-content-center mb-3">
+          <button
+            className="timer-btn-temp distract-btn-overlay"
+            onClick={handleDistraction}
+          >
+            Distract Me!
+          </button>
+        </div>
+      )}
+
+ * <div className="d-flex justify-content-center align-items-center">
         {!isRunning ? (
           <button className="timer-btn-temp" onClick={startTimer}>
             {wasPaused ? 'Resume' : 'Start'}
@@ -262,17 +321,4 @@ export default function Timer({
           </>
         )}
       </div>
-
-      <DistractionModal
-        isVisible={distractionVisible}
-        onDismiss={() => {
-          setDistractionVisible(false);
-          distractionVisibleRef.current = false; // reset the ref
-          setModalVisible(false); // this ref refers to the modal in UseBehaviorDetection.ts.
-          startTimer();
-          startBehaviorDetection();
-        }}
-      />
-    </>
-  );
-}
+ */

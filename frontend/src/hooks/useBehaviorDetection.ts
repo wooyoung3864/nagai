@@ -3,12 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useGeminiKeys } from './useGeminiKeys';  // gemini keys rotation logic
 
 
-// const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
+ const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
 // const API_KEY = 'AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw';
 //const API_KEY = 'AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40';
 
 
-const GEMINI_CALL_ENABLED = false;                            // flip true in prod
+const GEMINI_CALL_ENABLED = true;                            // flip true in prod
 
 // ── motion-analysis constants ─────────────────────────────────────────────
 const BASE_WIDTH = 96;          // up from 64 for better sensitivity
@@ -100,6 +100,38 @@ interface UseBehaviorDetectionProps {
   externalTimerStateRef: React.RefObject<any>;
 }
 
+/*
+  Jiwoo Kim
+  05/18
+  Gemini result
+ {
+  "action": "STOP",
+  "focus_score": 95,
+  "is_focused": true,
+  "observed_behaviors": [],
+  "explanation": "A single hand is visible, palm up, and satisfies all criteria A-E."
+}
+*/
+  
+const sendDataToBackend = async (data:JSON) => {
+  try {
+    const response = await fetch("http://localhost:8000/api/gemini", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", // Send as JSON
+      },
+      body: JSON.stringify(data), // Convert JS object to JSON string
+    });
+
+    console.log("data da 101: "+data);
+
+    const result = await response.json(); // Read the response
+    console.log("BACKEND HAHAHAHAHA : "+result);
+  } catch (error) {
+    console.error("Error sending data:", error);
+  }
+};
+
 export function useBehaviorDetection({
   videoRef,
   externalTimerControlsRef,
@@ -128,6 +160,7 @@ export function useBehaviorDetection({
   /* clean-up on unmount */
   useEffect(() => () => stopBehaviorDetection(), []);
 
+  
   // ───────────────────────────── control API ────────────────────────────
   function startBehaviorDetection() {
     if (isActiveRef.current) return;
@@ -326,6 +359,8 @@ export function useBehaviorDetection({
             ? JSON.stringify(parsed, null, 2)
             : "• (empty / no-op response) •"
         );
+
+        sendDataToBackend(parsed);
 
         handleBehaviorResult(parsed);
       } catch (err) {

@@ -111,10 +111,10 @@ interface UseBehaviorDetectionProps {
 }
 
 export function useBehaviorDetection({
-    videoRef,
-    externalTimerControlsRef,
-    externalTimerStateRef,
-  }: UseBehaviorDetectionProps) {
+  videoRef,
+  externalTimerControlsRef,
+  externalTimerStateRef,
+}: UseBehaviorDetectionProps) {
   const [cooldownActive] = useState(false);   // reserved, still unused
   const motionCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const previousFrameDataRef = useRef<Uint8ClampedArray | null>(null);
@@ -439,7 +439,7 @@ export function useBehaviorDetection({
   }
 
   // ─────────────────────── behavior result handler ──────────────────────
-  function handleBehaviorResult(result: any) {
+  async function handleBehaviorResult(result: any) {
     shouldSkipRef.current = externalTimerStateRef.current?.isDistractionModalVisible ?? false; // capture before evaluating shouldSkipRef
     // early return to skip behaviorDetection while DistractionModal is active.
     if (shouldSkipRef.current) {
@@ -459,12 +459,18 @@ export function useBehaviorDetection({
         RESUME: () => externalTimerControlsRef.current.resume?.(),
         NEXT: () => externalTimerControlsRef.current.stop?.(),
       };
-      map[result.action as keyof typeof map]?.();
+      await map[result.action as keyof typeof map]?.();
       return;
     }
 
+    let lastDistractionTime = 0;
+
     if (!externalTimerStateRef.current.isDuringBreak && result.is_focused === false) {
-      externalTimerControlsRef.current.distraction?.();
+      const now = Date.now();
+      if (now - lastDistractionTime > 5000) {
+        lastDistractionTime = now;
+        await externalTimerControlsRef.current.distraction?.();
+      }
     }
   }
 

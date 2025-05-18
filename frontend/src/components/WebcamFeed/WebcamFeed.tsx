@@ -96,7 +96,7 @@ export default function WebcamFeed({
                   <div className="overlay-grid-row">
                     <div className="overlay-grid-cell">
                       <img src={palmImg} className="palm-icon" alt="Palm" />
-                      <h2 className="overlay-text margin-left-2rem">{isMobile ? 'to stop.' : 'to stop timer/break.'}</h2>
+                      <h2 className="overlay-text margin-left-2rem">{isMobile ? 'to stop.' : 'to start/stop timer.'}</h2>
                     </div>
                     <div className="overlay-grid-cell">
                       <img src={fistImg} className="fist-icon" alt="Fist" />

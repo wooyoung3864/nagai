@@ -1,3 +1,4 @@
+// frontend/src/components/FocusLog/FocusLog.tsx
 import React, { useEffect } from 'react';
 import './FocusLog.css';
 import Calendar from '../Calendar/Calendar';

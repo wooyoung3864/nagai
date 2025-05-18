@@ -45,6 +45,7 @@ export default function Timer({
   const [distractionVisible, setDistractionVisible] = useState(false);
   const distractionVisibleRef = useRef(false);
 
+  const [sessionId, setSessionId] = useState<number | null>(null); // track current session ID for DB management
   const [focusAccumulated, setFocusAccumulated] = useState(0);
 
   const sessionStartRef = useRef<number | null>(null);
@@ -162,6 +163,31 @@ export default function Timer({
     setDistractionVisible(true);
     distractionVisibleRef.current = true;
     externalTimerStateRef.current.isDistractionModalVisible = true;
+  };
+
+  // API interaction helpers
+
+  const startSessionOnServer = async (type: 'FOCUS' | 'BREAK') => {
+    const res = await fetch('/api/sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ type }),
+    });
+    const data = await res.json();
+    setSessionId(data.id);
+  };
+
+  const updateSessionStatus = async (
+    status: 'PAUSED' | 'STOPPED' | 'COMPLETED',
+    focusSecs: number = 0
+  ) => {
+    if (sessionId === null) return;
+
+    await fetch(`/api/sessions/${sessionId}/update?status=${status}&focus_secs=${focusSecs}`, {
+      method: 'PATCH',
+      credentials: 'include',
+    });
   };
 
   useEffect(() => {

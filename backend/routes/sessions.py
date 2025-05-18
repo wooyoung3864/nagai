@@ -22,15 +22,24 @@ def start(
     return obj
 
 
-@router.patch("/{sid}/stop", response_model=s.SessionOut)
-def stop(sid: int,
-         user: m_user.User = Depends(current_user),
-         db: Session = Depends(get_db)):
+@router.patch("/{sid}/update", response_model=s.SessionOut)
+def update_session_status(
+    sid: int,
+    status: s.SessionStatus,
+    focus_secs: int | None = None,
+    user: m_user.User = Depends(current_user),
+    db: Session = Depends(get_db)
+):
     obj = db.get(m.Session, sid) or HTTPException(404)
     if obj.user_id != user.id:
-        raise HTTPException(status_code=403)
-    obj.status = m.SessionStatus.STOPPED
-    obj.end_time = datetime.utcnow()
+        raise HTTPException(403)
+
+    obj.status = m.SessionStatus(status)
+    if status in [s.SessionStatus.STOPPED, s.SessionStatus.COMPLETED]:
+        obj.end_time = datetime.utcnow()
+    if focus_secs is not None:
+        obj.focus_secs = focus_secs
+
     db.commit()
     db.refresh(obj)
     return obj

@@ -6,7 +6,7 @@ import { useGeminiKeys } from './useGeminiKeys';  // gemini keys rotation logic
 // const API_KEY = 'AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw';
 //const API_KEY = 'AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40';
 
-const GEMINI_CALL_ENABLED = false;                            // flip true in prod
+const GEMINI_CALL_ENABLED = true;                            // flip true in prod
 
 // ── motion-analysis constants ─────────────────────────────────────────────
 const BASE_WIDTH = 96;          // up from 64 for better sensitivity
@@ -144,7 +144,7 @@ export function useBehaviorDetection({
     generationRef.current += 1;
     isActiveRef.current = true;
     resetPerSessionState();
-    console.log('▶️ behavior detection started');
+    // console.log('▶️ behavior detection started');
     loop(generationRef.current);
   }
 
@@ -155,7 +155,7 @@ export function useBehaviorDetection({
     // cancel previous Gemini API calls
     // abortControlRef.current?.abort();
 
-    console.log('🛑 behavior detection stopped');
+    // console.log('🛑 behavior detection stopped');
   }
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -474,7 +474,7 @@ export function useBehaviorDetection({
     stopBehaviorDetection,
     setModalVisible: (visible: boolean) => {
       isModalVisibleRef.current = visible;
-      console.log('Modal visibility changed:', isModalVisibleRef.current);
+      // console.log('Modal visibility changed:', isModalVisibleRef.current);
     }
   };
 }

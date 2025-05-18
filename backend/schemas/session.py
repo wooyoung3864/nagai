@@ -13,6 +13,7 @@ class SessionStatus(str, Enum):
     RUNNING = "RUNNING"
     PAUSED = "PAUSED"
     STOPPED = "STOPPED"
+    COMPLETED = "COMPLETED"
 
 
 class SessionCreate(BaseModel):

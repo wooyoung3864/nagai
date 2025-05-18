@@ -4,6 +4,11 @@ import { motion } from 'framer-motion';
 import './MyPage.css';
 import { useUser } from '../../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
+<<<<<<< HEAD
+=======
+import { useSupabase } from '../../contexts/SupabaseContext';
+
+>>>>>>> d33dfa6a714403b4391b7cdbc6ca32a154d199fd
 
 export default function MyPage() {
   const { name, setName } = useUser();
@@ -12,6 +17,10 @@ export default function MyPage() {
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
   const [tempName, setTempName] = useState<string>(name);
   const navigate = useNavigate();
+<<<<<<< HEAD
+=======
+  const supabase = useSupabase();
+>>>>>>> d33dfa6a714403b4391b7cdbc6ca32a154d199fd
 
   const validateName = (value: string) => {
     if (!value.trim()) {
@@ -61,8 +70,18 @@ export default function MyPage() {
     setShowCancelModal(false);
   };
 
+<<<<<<< HEAD
   const handleSignOut = () => {
     // sign out logic
+=======
+  const handleSignOut = async () => {
+    // sign out logic
+    await supabase.auth.signOut();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('userName');
+    navigate('/');
+>>>>>>> d33dfa6a714403b4391b7cdbc6ca32a154d199fd
   };
 
   useEffect(() => {

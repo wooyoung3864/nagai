@@ -1,4 +1,5 @@
 // src/pages/LoginPage/LoginPage.tsx
+<<<<<<< HEAD
 import { useEffect, useState } from 'react'
 import logo from '../../assets/imgs/nagai_logo.png'
 import { useNavigate } from 'react-router-dom'
@@ -10,6 +11,23 @@ export default function LoginPage() {
   const supabase = useSupabase();
   const navigate = useNavigate()
   const [session, setSession] = useState<Session | null>(null)
+=======
+import React, { useEffect, useState } from 'react'
+import logo from '../../assets/imgs/nagai_logo.png'
+import { useNavigate } from 'react-router-dom'
+import { Auth } from '@supabase/auth-ui-react'
+import { ThemeSupa } from '@supabase/auth-ui-shared'
+import { useSupabase } from '../../contexts/SupabaseContext'
+import { motion } from 'framer-motion'
+import type { Session } from '@supabase/supabase-js'
+import { useUser } from '../../contexts/UserContext';
+
+export default function LoginPage() {
+  const supabase = useSupabase();
+  const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+  const { setName } = useUser();
+>>>>>>> d33dfa6a714403b4391b7cdbc6ca32a154d199fd
 
   const variants = {
     initial: { opacity: 0, y: 20 },
@@ -40,7 +58,17 @@ export default function LoginPage() {
         }
         const data = await r.json();
         if (data.access_token) localStorage.setItem('token', data.access_token);
+<<<<<<< HEAD
         if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
+=======
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          if (data.user.full_name) {
+            setName(data.user.full_name);
+            localStorage.setItem('userName', data.user.full_name);
+          }
+        } 
+>>>>>>> d33dfa6a714403b4391b7cdbc6ca32a154d199fd
         console.log(data)
 
         // smart redirect

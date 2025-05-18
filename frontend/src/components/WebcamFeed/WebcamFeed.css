@@ -2,9 +2,8 @@
 
 .webcam-feed {
   width: 100% !important;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 10;
   height: auto;
-
   display: flex;
   align-items: center;
   justify-content: center;

@@ -14,6 +14,9 @@ secrets = [
     {"service": "google", "key_name": "client_id", "plaintext_key": "101034724311-6jj0pbgu2cimrsat2q6b7puqf6p19h84.apps.googleusercontent.com"},
     {"service": "google", "key_name": "client_secret", "plaintext_key": "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"},
     {"service": "fernet", "key_name": "secret", "plaintext_key": "GqKBSmmyseW5Z0nY0xWkHxiLgQ-rpFCfyhShhpZDR7g="},
+    {"service": "gemini", "key_name": "api_key_1", "plaintext_key": "AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo"},
+    {"service": "gemini", "key_name": "api_key_2", "plaintext_key": "AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw"},
+    {"service": "gemini", "key_name": "api_key_3", "plaintext_key": "AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40"},
 ]
 
 for s in secrets:

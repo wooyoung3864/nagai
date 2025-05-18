@@ -25,7 +25,7 @@ class Credential(BaseModel):
     credential: str
 
 class AgreeTermsRequest(BaseModel):
-    user_id: int
+        user_id: int
 
 
 class SetNameRequest(BaseModel):

@@ -22,6 +22,7 @@ export interface TimerProps {
     isRunning: boolean;
     isPaused: boolean;
     isDuringBreak: boolean;
+    isDistractionModalVisible?: boolean;
   }>;
   onRunningChange: (isRunning: boolean) => void
   onFocusChange: (isFocus: boolean) => void
@@ -159,10 +160,13 @@ export default function Timer({
     setModalVisible(true); // this ref refers to the modal in UseBehaviorDetection.ts.
     stopBehaviorDetection(); // add this to stop behaviorDetection while modal displayed
     setDistractionVisible(true);
+    distractionVisibleRef.current = true;
+    externalTimerStateRef.current.isDistractionModalVisible = true;
   };
 
   useEffect(() => {
     distractionVisibleRef.current = distractionVisible;
+    externalTimerStateRef.current.isDistractionModalVisible = distractionVisible;
   }, [distractionVisible]); // ref to track distractionVisible state
 
   useEffect(() => {
@@ -244,7 +248,36 @@ export default function Timer({
         </div>
       </motion.div>
 
-      <div className="d-flex justify-content-center align-items-center">
+      <></>
+
+      <DistractionModal
+        isVisible={distractionVisible}
+        onDismiss={() => {
+          setDistractionVisible(false);
+          distractionVisibleRef.current = false;
+          externalTimerStateRef.current.isDistractionModalVisible = false;
+          setModalVisible(false); // this ref refers to the modal in UseBehaviorDetection.ts.
+          startTimer();
+          startBehaviorDetection();
+        }}
+      />
+    </>
+  );
+}
+
+/** temporary buttons for development (insert at <></> blocks for use)
+ * {isRunning && isFocus && (
+        <div className="d-flex justify-content-center mb-3">
+          <button
+            className="timer-btn-temp distract-btn-overlay"
+            onClick={handleDistraction}
+          >
+            Distract Me!
+          </button>
+        </div>
+      )}
+
+ * <div className="d-flex justify-content-center align-items-center">
         {!isRunning ? (
           <button className="timer-btn-temp" onClick={startTimer}>
             {wasPaused ? 'Resume' : 'Start'}
@@ -262,17 +295,4 @@ export default function Timer({
           </>
         )}
       </div>
-
-      <DistractionModal
-        isVisible={distractionVisible}
-        onDismiss={() => {
-          setDistractionVisible(false);
-          distractionVisibleRef.current = false; // reset the ref
-          setModalVisible(false); // this ref refers to the modal in UseBehaviorDetection.ts.
-          startTimer();
-          startBehaviorDetection();
-        }}
-      />
-    </>
-  );
-}
+ */

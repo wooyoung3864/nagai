@@ -23,4 +23,3 @@ load_secrets_to_env()
 
 import os
 print("[DEBUG] Effective FERNET_SECRET:", os.getenv("FERNET_SECRET"))
-

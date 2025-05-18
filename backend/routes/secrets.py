@@ -34,7 +34,7 @@ def retrieve_secret(query: s.SecretQuery, db: Session = Depends(get_db)):
         service=query.service, key_name=query.key_name).first()
     print(obj)
     if not obj:
-        raise HTTPException(404, detail="Secret not found")
+        raise HTTPException(404, detaail="Secret not found")
     return decrypt(obj.key_value)
 
 

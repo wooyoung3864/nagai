@@ -2,11 +2,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGeminiKeys } from './useGeminiKeys';  // gemini keys rotation logic
 
-
 // const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
 // const API_KEY = 'AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw';
 //const API_KEY = 'AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40';
-
 
 const GEMINI_CALL_ENABLED = false;                            // flip true in prod
 
@@ -61,14 +59,14 @@ Always return:
 
 const COMMON = `You are a vision agent.\n${COMMON_RULES}\nReturn JSON only.`
 
-export const prompts: Record<'stopped'|'running'|'paused'|'break', string> = {
+export const prompts: Record<'stopped' | 'running' | 'paused' | 'break', string> = {
   stopped: `
 ${COMMON}
 • If a PALM-UP or FIST-OUT passes rules A–E → {"action":"START"}
 • Else → {}
 `.trim(),
 
-running: `
+  running: `
 ${COMMON}
 
 /* PRIORITY 1 ────────────── */
@@ -96,15 +94,27 @@ ${COMMON}
 
 interface UseBehaviorDetectionProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  externalTimerControlsRef: React.RefObject<any>;
-  externalTimerStateRef: React.RefObject<any>;
+  externalTimerControlsRef: React.RefObject<{
+    start?: () => void;
+    pause?: () => void;
+    stop?: () => void;
+    resume?: () => void;
+    nextSession?: () => void;
+    distraction?: () => void;
+  }>;
+  externalTimerStateRef: React.RefObject<{
+    isRunning: boolean;
+    isPaused: boolean;
+    isDuringBreak: boolean;
+    isDistractionModalVisible?: boolean;
+  }>;
 }
 
 export function useBehaviorDetection({
-  videoRef,
-  externalTimerControlsRef,
-  externalTimerStateRef,
-}: UseBehaviorDetectionProps) {
+    videoRef,
+    externalTimerControlsRef,
+    externalTimerStateRef,
+  }: UseBehaviorDetectionProps) {
   const [cooldownActive] = useState(false);   // reserved, still unused
   const motionCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const previousFrameDataRef = useRef<Uint8ClampedArray | null>(null);
@@ -169,14 +179,15 @@ export function useBehaviorDetection({
   /**
    * 05/10 (wyjung)
    * Remaining issues:
-   * - Motion detection & Gemini API call  is not cancelled when the modal is opened
+   * - Motion detection & Gemini API calls are not canceled when the modal is opened
    */
 
   async function detectMotion(gen: number) {
-    shouldSkipRef.current = isModalVisibleRef.current; // capture before evaluating shouldSkipRef
+    shouldSkipRef.current = externalTimerStateRef.current?.isDistractionModalVisible ?? false; // capture before evaluating shouldSkipRef
     // early return to skip behaviorDetection while DistractionModal is active.
+    // console.log(`shouldSkipRef.current: ${shouldSkipRef.current}`)
     if (shouldSkipRef.current) {
-      console.log('Behavior detection paused: DistractionModal active.');
+      // console.log('Behavior detection paused: DistractionModal active.');
       return;
     }
 
@@ -398,8 +409,8 @@ export function useBehaviorDetection({
     });
 
   async function callGeminiAPI(b64: string, prompt: string) {
-    const apikey = getKey();
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    const apiKey = getKey();
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     const body = {
       contents: [{
         role: 'user',
@@ -410,15 +421,10 @@ export function useBehaviorDetection({
       }],
     };
 
-    // cancel previous Gemini API calls
-    // abortControlRef.current?.abort();
-    abortControlRef.current = new AbortController();
-
     const resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-      signal: abortControlRef.current.signal,
     });
     // 🌐 log HTTP status
     console.log('🌐 Gemini HTTP status', resp.status);
@@ -434,7 +440,7 @@ export function useBehaviorDetection({
 
   // ─────────────────────── behavior result handler ──────────────────────
   function handleBehaviorResult(result: any) {
-    shouldSkipRef.current = isModalVisibleRef.current; // capture before evaluating shouldSkipRef
+    shouldSkipRef.current = externalTimerStateRef.current?.isDistractionModalVisible ?? false; // capture before evaluating shouldSkipRef
     // early return to skip behaviorDetection while DistractionModal is active.
     if (shouldSkipRef.current) {
       console.log('Behavior detection paused: DistractionModal active.');

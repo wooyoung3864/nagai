@@ -8,6 +8,8 @@ import DistractionModal from '../DistractionModal/DistractionModal';
 const FOCUS_DURATION = 30;
 const BREAK_DURATION = 15;
 
+// backend API base URL
+
 // Timer.tsx
 export interface TimerProps {
   externalTimerControlsRef: React.RefObject<{
@@ -64,47 +66,60 @@ export default function Timer({
     ? Math.floor((Date.now() - sessionStartRef.current) / 1000)
     : 0;
 
-  const commitFocusTime = () => {
+  const commitFocusTime = async () => {
     if (isFocus && sessionStartRef.current) {
       const delta = computeElapsed();
-      setFocusAccumulated(prev => prev + delta);
+      const updatedTotal = focusAccumulated + delta;
 
-      // report accumulated focus time to MainPage
+      setFocusAccumulated(updatedTotal);
       onSessionComplete(delta, true);
-
       sessionStartRef.current = null;
+
+      if (sessionId !== null) {
+        await updateSessionStatus('RUNNING', updatedTotal);
+      }
     }
   };
 
-  const startTimer = () => {
-    if (distractionVisibleRef.current) {
-      return; // disable startTimer if DistractionModal is visible
+  const startTimer = async () => {
+    if (distractionVisibleRef.current || isRunningRef.current) return;
+
+    const sessionStartSuccess = await startSessionOnServer(isFocus ? 'FOCUS' : 'BREAK');
+
+    if (!sessionStartSuccess) {
+      console.error("Error starting session.");
+      return;
     }
 
-    if (!isRunningRef.current) {
-      setIsRunning(true);
-      isRunningRef.current = true;
-      externalTimerStateRef.current.isRunning = true;
-      onRunningChange(true);  // updates MainPage
-      externalTimerStateRef.current.isPaused = false;
-      if (isFocus) sessionStartRef.current = Date.now();
-      setWasPaused(false);
-    }
+    setIsRunning(true);
+    isRunningRef.current = true;
+    externalTimerStateRef.current.isRunning = true;
+    onRunningChange(true);
+    externalTimerStateRef.current.isPaused = false;
+
+    sessionStartRef.current = Date.now();
+    setWasPaused(false);
   };
 
-  const pauseTimer = () => {
+  const pauseTimer = async () => {
     if (!isRunningRef.current) return;
-    if (isFocus) commitFocusTime();
+    if (isFocus) await commitFocusTime();
+
+    await updateSessionStatus('PAUSED', focusAccumulated);
+
     setIsRunning(false);
     isRunningRef.current = false;
     externalTimerStateRef.current.isRunning = false;
-    onRunningChange(false);  // updates MainPage
+    onRunningChange(false);
     externalTimerStateRef.current.isPaused = true;
     setWasPaused(true);
   };
 
-  const stopTimer = () => {
-    if (isRunning && isFocus) commitFocusTime();
+  const stopTimer = async () => {
+    if (isRunning && isFocus) await commitFocusTime();
+
+    await updateSessionStatus('STOPPED', focusAccumulated);
+
     setIsRunning(false);
     setWasPaused(false);
     isRunningRef.current = false;
@@ -116,50 +131,62 @@ export default function Timer({
     externalTimerStateRef.current.isPaused = false;
     sessionStartRef.current = null;
 
-    if (controlsRef.current) {
-      controlsRef.current.stop();    // stop animation first
-    }
-
-    progress.set(0);                  // reset progress to 0
-
+    controlsRef.current?.stop();
+    progress.set(0);
     progress.clearListeners();
   };
 
-  const resumeTimer = () => {
-    if (distractionVisibleRef.current) {
-      return; // disable startTimer if DistractionModal is visible
-    }
+  const resumeTimer = async () => {
+    if (distractionVisibleRef.current || isRunningRef.current) return;
 
-    if (!isRunningRef.current) {
-      setIsRunning(true);
-      isRunningRef.current = true;
-      externalTimerStateRef.current.isRunning = true;
-      onRunningChange(true);  // updates MainPage
-      externalTimerStateRef.current.isPaused = false;
-      sessionStartRef.current = Date.now();
-      setWasPaused(false);
+    setIsRunning(true);
+    isRunningRef.current = true;
+    externalTimerStateRef.current.isRunning = true;
+    onRunningChange(true);
+    externalTimerStateRef.current.isPaused = false;
+
+    sessionStartRef.current = Date.now();
+    setWasPaused(false);
+
+    if (sessionId !== null) {
+      await updateSessionStatus('RUNNING');
+    } else {
+      await startSessionOnServer(isFocus ? 'FOCUS' : 'BREAK');
     }
   };
 
-  const nextSession = () => {
-    if (isRunningRef.current && isFocus) commitFocusTime();
-    setIsFocus(prev => !prev);
-    setRemainingSeconds(isFocus ? BREAK_DURATION : FOCUS_DURATION);
-    externalTimerStateRef.current.isDuringBreak = !isFocus;
+  const nextSession = async () => {
+    if (isRunningRef.current && isFocus) {
+      await commitFocusTime();
+      await updateSessionStatus('COMPLETED', focusAccumulated);
+    }
+
+    const nextIsFocus = !isFocus;
+    setIsFocus(nextIsFocus);
+    setRemainingSeconds(nextIsFocus ? FOCUS_DURATION : BREAK_DURATION);
+    externalTimerStateRef.current.isDuringBreak = !nextIsFocus;
     sessionStartRef.current = Date.now();
     setFocusAccumulated(0);
     progress.set(0);
+
+    await startSessionOnServer(nextIsFocus ? 'FOCUS' : 'BREAK');
   };
 
-  const handleDistraction = () => {
-    if (isRunning && isFocus) commitFocusTime();
+  const handleDistraction = async () => {
+    if (isRunning && isFocus) {
+      await commitFocusTime();
+      await updateSessionStatus('STOPPED', focusAccumulated);
+    }
+
     setIsRunning(false);
     isRunningRef.current = false;
     externalTimerStateRef.current.isRunning = false;
-    onRunningChange(false);  // updates MainPage
+    onRunningChange(false);
     sessionStartRef.current = null;
-    setModalVisible(true); // this ref refers to the modal in UseBehaviorDetection.ts.
-    stopBehaviorDetection(); // add this to stop behaviorDetection while modal displayed
+
+    setModalVisible(true);
+    stopBehaviorDetection();
+
     setDistractionVisible(true);
     distractionVisibleRef.current = true;
     externalTimerStateRef.current.isDistractionModalVisible = true;
@@ -167,27 +194,44 @@ export default function Timer({
 
   // API interaction helpers
 
-  const startSessionOnServer = async (type: 'FOCUS' | 'BREAK') => {
-    const res = await fetch('/api/sessions', {
+  const startSessionOnServer = async (type: 'FOCUS' | 'BREAK'): Promise<boolean> => {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/sessions/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({ type }),
     });
+
+    if (!res.ok) {
+      console.error('Failed to start session');
+      return false;
+    }
+
     const data = await res.json();
     setSessionId(data.id);
+    return true;
   };
 
   const updateSessionStatus = async (
-    status: 'PAUSED' | 'STOPPED' | 'COMPLETED',
-    focusSecs: number = 0
+    status: 'PAUSED' | 'STOPPED' | 'COMPLETED' | 'RUNNING',
+    focusSecs?: number
   ) => {
     if (sessionId === null) return;
 
-    await fetch(`/api/sessions/${sessionId}/update?status=${status}&focus_secs=${focusSecs}`, {
+    const url = new URL(`/sessions/${sessionId}/update`, window.location.origin);
+    url.searchParams.set('status', status);
+    if (focusSecs !== undefined) {
+      url.searchParams.set('focus_secs', focusSecs.toString());
+    }
+
+    const res = await fetch(url.toString(), {
       method: 'PATCH',
       credentials: 'include',
     });
+
+    if (!res.ok) {
+      console.error(`Failed to update session to ${status}`);
+    }
   };
 
   useEffect(() => {

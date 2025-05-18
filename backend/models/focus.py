@@ -1,4 +1,4 @@
-# backend/models/focus_log.py
+# backend/models/focus.py
 from sqlalchemy import Column, DateTime, Integer, ForeignKey
 from datetime import datetime
 from .base import Base

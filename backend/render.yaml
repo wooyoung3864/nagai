@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: nagai-backend
+    env: python
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SUPABASE_URL
+        value: https://wphzfbfgsyqpzixgkltu.supabase.co/
+      - key: SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHpmYmZnc3lxcHppeGdrbHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwMjIwOTQsImV4cCI6MjA2MTU5ODA5NH0.fnz0wju8X95U56pknwL81k2uwsF4Vpja7nuRqEerOJA
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHpmYmZnc3lxcHppeGdrbHR1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjAyMjA5NCwiZXhwIjoyMDYxNTk4MDk0fQ.BSwSl6SItLy-e9QITdhUsk3ggj5YR6D-6EBh_LEgsQA
+      - key: SUPABASE_JWT_SECRET
+        value: BCBqt6+5BNRJad1fbdRetFDPt3HjpKVfmnkBf4UFHkfi1DQV02TFBTfAlzKeawImJVqI4l1/SfOC1J8l3b217w==
+      - key: DATABASE_URL
+        value: postgresql://postgres.wphzfbfgsyqpzixgkltu:nagaiaiai_010101@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?sslmode=require
+      - key: GOOGLE_CLIENT_ID
+        value: 101034724311-6jj0pbgu2cimrsat2q6b7puqf6p19h84.apps.googleusercontent.com
+      - key: JWT_SECRET
+        value: LgNLlNduwEZJjYHYquaMV59n0wbVOTgO9LNsIpR5id3HyYVz0Ls4z3jDd2s8M8b6W0k2M1M4_8gzRbCPY8doHw
+      - key: FERNET_SECRET
+        value: GqKBSmmyseW5Z0nY0xWkHxiLgQ-rpFCfyhShhpZDR7g=
+      - key: GEMINI_API_KEY_1
+        value: AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo
+      - key: GEMINI_API_KEY_2
+        value: AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw
+      - key: GEMINI_API_KEY_3
+        value: AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40
+
+    autoDeploy: true

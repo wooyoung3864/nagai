@@ -22,10 +22,7 @@ export interface TimerProps {
     isRunning: boolean;
     isPaused: boolean;
     isDuringBreak: boolean;
-<<<<<<< HEAD
     isDistractionModalVisible?: boolean;
-=======
->>>>>>> d33dfa6a714403b4391b7cdbc6ca32a154d199fd
   }>;
   onRunningChange: (isRunning: boolean) => void
   onFocusChange: (isFocus: boolean) => void

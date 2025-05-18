@@ -15,6 +15,28 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 JWT_ALGO        = "HS256"
 JWT_EXP_MINUTES = 60 * 24 * 7
 
+def get_user_from_token(token: str, db: Session) -> User:
+    try:
+        claims = jwt.decode(
+            token,
+            SUPABASE_JWT_SECRET,
+            algorithms=["HS256"],
+            audience="authenticated",
+            options={"verify_aud": True},
+        )
+        sub = claims.get("sub")
+        if not sub:
+            raise HTTPException(401, "Invalid Supabase token (no sub)")
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(401, "Token expired")
+    except Exception as e:
+        raise HTTPException(401, "Invalid token")
+
+    user = db.query(User).filter_by(google_id=sub).first()
+    if not user:
+        raise HTTPException(404, "User not found")
+    return user
+
 @router.post("/google", response_model=TokenOut)
 def login_with_supabase(payload: SupabaseLoginIn, db: Session = Depends(get_db)):
     try:

@@ -12,6 +12,7 @@ class SessionStatus(str, PyEnum):
     RUNNING="RUNNING"
     PAUSED="PAUSED"
     STOPPED="STOPPED"
+    COMPLETED="COMPLETED"
 
 class Session(Base):
     __tablename__ = "sessions"

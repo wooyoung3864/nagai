@@ -15,10 +15,12 @@ class SessionStatus(str, Enum):
     STOPPED = "STOPPED"
     COMPLETED = "COMPLETED"
 
-
-class SessionCreate(BaseModel):
+class SessionStartInput(BaseModel):
     type: SessionType
+    access_token: str
 
+class SessionUpdateInput(BaseModel):
+    access_token: str
 
 class SessionOut(BaseModel):
     id: int

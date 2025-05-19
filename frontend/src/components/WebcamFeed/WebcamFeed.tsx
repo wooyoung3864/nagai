@@ -56,33 +56,43 @@ export default function WebcamFeed({
   const streamRef = useRef<MediaStream | null>(null); // Keep stream alive globally
 
   useEffect(() => {
-    (async () => {
+    const initCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        streamRef.current = stream;
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            console.log("Camera access granted", stream);
+          })
+          .catch(err => {
+            console.error("Camera access denied or failed", err);
+          });
+
+        streamRef.current = stream; // prevent GC (garbage collection)
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-
-          /* 2️⃣  Wait for metadata before playing */
-          const onMeta = () => {
-            videoRef.current?.play().catch(console.error);
-            setCameraAvailable(true);        // mount-time check
-            videoRef.current?.removeEventListener('loadedmetadata', onMeta);
-          };
-          videoRef.current.addEventListener('loadedmetadata', onMeta);
+          await videoRef.current.play().catch(console.warn);
         }
+
+        setCameraAvailable(stream.active);
+        setErrorMessage(stream.active ? '' : 'Stream is inactive.\nPlease try again.');
       } catch (err: any) {
-        console.error('[Webcam] getUserMedia failed:', err);
+        console.error('webcam error:', err.name, err.message);
         setCameraAvailable(false);
-        setErrorMessage('Could not access webcam.\nCheck permissions.');
+        setErrorMessage('Webcam access error.\nPlease check camera permissions.');
       } finally {
         setCameraInitialized(true);
       }
-    })();
+    };
 
-    /* 🔌  Clean-up */
-    return () => streamRef.current?.getTracks().forEach(t => t.stop());
+    initCamera();
+
+    // Optional cleanup to stop camera when component unmounts
+    return () => {
+      streamRef.current?.getTracks().forEach(track => track.stop());
+    };
   }, []);
+
   useEffect(() => {
     return () => {
       streamRef.current?.getTracks().forEach(track => track.stop());

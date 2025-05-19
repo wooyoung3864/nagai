@@ -236,7 +236,7 @@ export default function Timer({
       return;
     }
 
-    const url = new URL(`${import.meta.env.VITE_API_URL}/sessions/${sessionIdRef.current}/update`);
+    const url = new URL(`https://${import.meta.env.VITE_API_URL}/sessions/${sessionIdRef.current}/update`);
     url.searchParams.set('status', status);
     if (focusSecs !== undefined) {
       url.searchParams.set('focus_secs', focusSecs.toString());

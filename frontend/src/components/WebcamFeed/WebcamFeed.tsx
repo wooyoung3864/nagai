@@ -76,20 +76,8 @@ export default function WebcamFeed({
   }, []);
 
   useEffect(() => {
-    if (!videoRef.current) return;
-
-    let rafId: number;
-
-    const tick = () => {
-      videoRef.current!.requestVideoFrameCallback(() => {
-        // Schedule the next tick
-        rafId = requestAnimationFrame(tick);
-      });
-    };
-
-    rafId = requestAnimationFrame(tick);
-
-    return () => cancelAnimationFrame(rafId);
+    if (cameraAvailable && videoRef.current) startBehaviorDetection();
+    else stopBehaviorDetection();
   }, [cameraAvailable]);
 
   return (

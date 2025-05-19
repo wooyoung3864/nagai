@@ -100,6 +100,23 @@ export default function WebcamFeed({
   }, []);
 
   useEffect(() => {
+    const v = videoRef.current;
+    console.log(`videoRef.current: ${videoRef.current}`)
+    if (!v) return;
+
+    const onErr = () => {
+      console.error(
+        '[VIDEO-ERROR]',
+        v.error?.code,
+        v.error?.message || 'no msg'
+      );
+    };
+    v.addEventListener('error', onErr);
+
+    return () => v.removeEventListener('error', onErr);
+  }, []);
+
+  useEffect(() => {
     if (cameraAvailable && videoRef.current) startBehaviorDetection();
     else stopBehaviorDetection();
   }, [cameraAvailable]);

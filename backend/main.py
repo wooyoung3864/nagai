@@ -12,6 +12,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173",
                     "http://127.0.0.1:5173",
+                    "http://nagai-3gvig48a8-wooyoung3864s-projects.vercel.app/", 
                     "https://nagai-3gvig48a8-wooyoung3864s-projects.vercel.app/", 
                     ],  
     allow_credentials=True,

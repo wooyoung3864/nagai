@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './DistractionsButton.css';
 import '../../App.css';
 import DistractionLog from '../DistractionLog/DistractionLog';
 
 export default function DistractionsButton() {
-    const [cnt, setCnt] = useState(30);
+    const [cnt, _] = useState(30);
     const [isDistractionLogOpen, setDistractionLogOpen] = useState(false);
 
     return (

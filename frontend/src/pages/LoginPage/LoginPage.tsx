@@ -1,9 +1,9 @@
 // src/pages/LoginPage/LoginPage.tsx
-import React, { useEffect, useState } from 'react'
+import  { useEffect, useState } from 'react'
 import logo from '../../assets/imgs/nagai_logo.png'
 import { useNavigate } from 'react-router-dom'
-import { Auth } from '@supabase/auth-ui-react'
-import { ThemeSupa } from '@supabase/auth-ui-shared'
+// import { Auth } from '@supabase/auth-ui-react'
+// import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { useSupabase } from '../../contexts/SupabaseContext'
 import { motion } from 'framer-motion'
 import type { Session } from '@supabase/supabase-js'

@@ -34,7 +34,7 @@ export interface WebcamFeedProps {
 
 export default function WebcamFeed({
   showOverlay,
-  setShowOverlay,
+  // setShowOverlay,
   setCameraAvailable,
   setErrorMessage,
   cameraAvailable,

@@ -1,5 +1,5 @@
 // src/contexts/SupabaseContext.tsx
-import React, {
+import {
   createContext,
   useContext,
   useEffect,

@@ -1,5 +1,4 @@
 // src/components/GestureHelpButton/GestureHelpButton.tsx
-import React from 'react';
 import './GestureHelpButton.css';
 
 interface GestureHelpButtonProps {

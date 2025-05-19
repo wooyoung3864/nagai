@@ -4,7 +4,7 @@ import { Table } from 'react-bootstrap';
 import Pagination from 'react-bootstrap/Pagination';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { motion } from 'framer-motion';
-import DistractionLogEntry from './DistractionLogEntry/DistractionLogEntry';
+// import DistractionLogEntry from './DistractionLogEntry/DistractionLogEntry';
 
 interface FocusLogProps {
     isOpen: boolean;

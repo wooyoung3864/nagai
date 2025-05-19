@@ -17,7 +17,7 @@ export default function MainPage() {
   const [cameraInitialized, setCameraInitialized] = useState(false);
 
   const [isFocus, setIsFocus] = useState(true);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [_, setIsTimerRunning] = useState(false);
 
   const [totalFocusSeconds, setTotalFocusSeconds] = useState(0);
 

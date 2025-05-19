@@ -49,7 +49,7 @@ export default function Timer({
   const [distractionVisible, setDistractionVisible] = useState(false);
   const distractionVisibleRef = useRef(false);
 
-  const [sessionId, setSessionId] = useState<number | null>(null); // track current session ID for DB management
+  const [_, setSessionId] = useState<number | null>(null); // track current session ID for DB management
   const sessionIdRef = useRef<number | null>(null);
 
   const [focusAccumulated, setFocusAccumulated] = useState(0);

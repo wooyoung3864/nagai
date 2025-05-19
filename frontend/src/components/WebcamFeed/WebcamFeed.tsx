@@ -57,12 +57,14 @@ export default function WebcamFeed({
     const initCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) videoRef.current.srcObject = stream;
-
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play().catch(console.warn);
+        }
         setCameraAvailable(stream.active);
         setErrorMessage(stream.active ? '' : 'Stream is inactive.\nPlease try again.');
-      } catch (err) {
-        console.error('webcam error:', err);
+      } catch (err: any) {
+        console.error('webcam error:', err.name, err.message);
         setCameraAvailable(false);
         setErrorMessage('Webcam access error.\nPlease check camera permissions.');
       } finally {
@@ -74,8 +76,20 @@ export default function WebcamFeed({
   }, []);
 
   useEffect(() => {
-    if (cameraAvailable && videoRef.current) startBehaviorDetection();
-    else stopBehaviorDetection();
+    if (!videoRef.current) return;
+
+    let rafId: number;
+
+    const tick = () => {
+      videoRef.current!.requestVideoFrameCallback(() => {
+        // Schedule the next tick
+        rafId = requestAnimationFrame(tick);
+      });
+    };
+
+    rafId = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(rafId);
   }, [cameraAvailable]);
 
   return (

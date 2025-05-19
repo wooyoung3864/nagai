@@ -20,6 +20,7 @@ export function useGeminiKeys() {
           ]),
         });
         const data = await res.json();
+        console.log(data)
         setKeys([
           data.GEMINI_API_KEY_1,
           data.GEMINI_API_KEY_2,

@@ -5,7 +5,7 @@ psycopg2-binary==2.9.9
 python-dotenv==1.0.1
 aiofiles==23.2.1              # for static/CORS middleware support
 email-validator==2.1.0.post1  # FastAPI request model validation
-python-jose==3.3.0            # for JWT decoding (preferred over raw 'jwt')
+PyJWT==2.8.0
 httpx==0.23.3                 # async requests (e.g., for Supabase)
 cryptography==42.0.5          # required by python-jose & some auth flows
 google-auth==2.29.0           # Google login

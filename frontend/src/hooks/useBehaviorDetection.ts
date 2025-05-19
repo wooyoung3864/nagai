@@ -125,7 +125,7 @@ export function useBehaviorDetection({
   const motionBufferRef = useRef<boolean[]>([]);
   const isAnalyzingRef = useRef(false);
   const lastHighMotionTriggerRef = useRef(0);
-  const { getKey, rotateKey } = useGeminiKeys();
+  const { getKey, rotateKey, loaded: keysLoaded } = useGeminiKeys();
 
   const isActiveRef = useRef(false);
   const generationRef = useRef(0);  // 🔑 version counter
@@ -410,6 +410,11 @@ export function useBehaviorDetection({
 
   async function callGeminiAPI(b64: string, prompt: string) {
     const apiKey = getKey();
+    console.log(apiKey)
+    if (!apiKey) {
+      console.error('[Gemini] No API key available (keys still loading?)');
+      return null;
+    }
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     const body = {
       contents: [{

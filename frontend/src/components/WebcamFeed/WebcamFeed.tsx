@@ -53,14 +53,20 @@ export default function WebcamFeed({
     externalTimerStateRef,
   });
 
+  const streamRef = useRef<MediaStream | null>(null); // Keep stream alive globally
+
   useEffect(() => {
     const initCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        console.log(navigator.mediaDevices?.getUserMedia);
+        streamRef.current = stream; // prevent GC (garbage collection)
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           await videoRef.current.play().catch(console.warn);
         }
+
         setCameraAvailable(stream.active);
         setErrorMessage(stream.active ? '' : 'Stream is inactive.\nPlease try again.');
       } catch (err: any) {
@@ -73,6 +79,17 @@ export default function WebcamFeed({
     };
 
     initCamera();
+
+    // Optional cleanup to stop camera when component unmounts
+    return () => {
+      streamRef.current?.getTracks().forEach(track => track.stop());
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach(track => track.stop());
+    };
   }, []);
 
   useEffect(() => {

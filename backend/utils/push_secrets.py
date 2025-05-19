@@ -17,6 +17,9 @@ secrets = [
     {"service": "gemini", "key_name": "api_key_1", "plaintext_key": "AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo"},
     {"service": "gemini", "key_name": "api_key_2", "plaintext_key": "AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw"},
     {"service": "gemini", "key_name": "api_key_3", "plaintext_key": "AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40"},
+    {"service": "gemini", "key_name": "api_key_4", "plaintext_key": "AIzaSyBLc2ZJKUppbyajxfJ3A5hwbDBBcJhoxzs"},
+    {"service": "gemini", "key_name": "api_key_5", "plaintext_key": "AIzaSyD1xUKLO25hTABaSxvd5r0jKebQ6PQ9MTo"},
+    {"service": "gemini", "key_name": "api_key_6", "plaintext_key": "AIzaSyB3gTytoOHRP8nNPwtdOUTMgHHiqEG22DE"},
 ]
 
 for s in secrets:

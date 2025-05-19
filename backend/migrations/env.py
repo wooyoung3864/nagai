@@ -1,31 +1,43 @@
 # migrations/env.py
-import os, sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
-from alembic import context
-
-# load your .env if you like
+import models.secret                     # → SecretKey
+import models.distraction               # → Distraction
+import models.session                   # → Session, enums
+import models.user                      # → User
+from models.base import Base            # your DeclarativeBase
 from dotenv import load_dotenv
-load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
+from alembic import context
+from sqlalchemy import engine_from_config, pool
+from logging.config import fileConfig
+import os
+import sys
+import startup_env # load FERNET_KEY and all secret keys from DB
+sys.path.insert(0, os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..")))
 
 # Alembic Config
 config = context.config
-if os.getenv("DATABASE_URL"):
-    config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
+raw = os.environ["DATABASE_URL"]
+print("[DEBUG] raw DATABASE_URL:", raw)
+
+# Strip prefix if present
+db_url = raw.split("=", 1)[1] if raw.startswith("DATABASE_URL=") else raw
+
+if not db_url.startswith("postgresql://"):
+    raise RuntimeError("Malformed DATABASE_URL")
+
+config.set_main_option("sqlalchemy.url", db_url)
+
+if not db_url:
+    raise RuntimeError(
+        "DATABASE_URL is not set or could not be loaded from .env")
+
+config.set_main_option("sqlalchemy.url", db_url)
 
 # ——— IMPORT YOUR MODELS SO THEY REGISTER WITH Base.metadata ———
-from models.base import Base            # your DeclarativeBase
-import models.user                      # → User
-import models.session                   # → Session, enums
-import models.focus                     # → Focus
-import models.distraction               # → Distraction
-import models.oauth                      # → OAuthService
-import models.secret                     # → SecretKey
 
 # now Base.metadata has **all** of your tables
 target_metadata = Base.metadata
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.

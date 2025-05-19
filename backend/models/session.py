@@ -23,3 +23,4 @@ class Session(Base):
     end_time    = Column(DateTime)
     status      = Column(Enum(SessionStatus), default=SessionStatus.RUNNING)
     focus_secs  = Column(Integer, default=0)          # accumulated focus; updated via FocusEvent
+    avg_score    = Column(Integer)                # Gemini-derived average focus score (0–100)

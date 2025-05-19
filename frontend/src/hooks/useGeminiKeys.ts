@@ -7,6 +7,7 @@ export function useGeminiKeys() {
   useEffect(() => {
     const load = async () => {
       try {
+        console.log(import.meta.env.VITE_API_URL)
         const res = await fetch(`http://${import.meta.env.VITE_API_URL}/admin/secrets/frontend-env`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

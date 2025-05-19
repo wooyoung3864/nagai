@@ -31,8 +31,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!session) return;
-
-    fetch(`${import.meta.env.VITE_API_URL}/auth/google`, {
+    console.log(`${import.meta.env.VITE_API_URL}`)
+    fetch(`https://${import.meta.env.VITE_API_URL}/auth/google`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ access_token: session.access_token })

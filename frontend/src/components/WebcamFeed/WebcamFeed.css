@@ -30,8 +30,8 @@
   flex-shrink: 0;
 }
 
-.webcam-feed video--hidden {
-  display: none;
+.webcam-feed .video--hidden {
+  display: none !important;
 }
 
 .webcam-error {

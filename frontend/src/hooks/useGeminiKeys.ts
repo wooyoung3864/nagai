@@ -21,6 +21,9 @@ export function useGeminiKeys() {
           data.GEMINI_API_KEY_1,
           data.GEMINI_API_KEY_2,
           data.GEMINI_API_KEY_3,
+          data.GEMINI_API_KEY_4,
+          data.GEMINI_API_KEY_5,
+          data.GEMINI_API_KEY_6,
         ]);
       } catch (err) {
         console.error("Failed to load Gemini keys", err);

@@ -6,7 +6,7 @@ python-dotenv==1.0.1
 aiofiles==23.2.1              # for static/CORS middleware support
 email-validator==2.1.0.post1  # FastAPI request model validation
 python-jose==3.3.0            # for JWT decoding (preferred over raw 'jwt')
-httpx==0.27.0                 # async requests (e.g., for Supabase)
+httpx==0.23.3                 # async requests (e.g., for Supabase)
 cryptography==42.0.5          # required by python-jose & some auth flows
 google-auth==2.29.0           # Google login
 supabase==1.0.3               # Supabase Python client

@@ -1,6 +1,7 @@
 // frontend/src/hooks/useBehaviorDetection.ts
 import { useEffect, useRef, useState } from 'react';
 import { useGeminiKeys } from './useGeminiKeys';  // gemini keys rotation logic
+import { supabase } from '../../../backend/auth/supabaseClient'
 
 
  const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
@@ -124,20 +125,34 @@ interface UseBehaviorDetectionProps {
 }
 */
   
-const sendDataToBackend = async (data:JSON) => {
+const sendDataToBackend = async (gemini_data:JSON) => {
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    console.error("No active session or token is expired", error);
+    return;
+  }
+
+  const accessToken = session.access_token;
+  console.log("access token: " + accessToken);
   try {
-    const response = await fetch("http://localhost:8000/api/gemini", {
+    const response = await fetch("http://localhost:8000/distractions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json", // Send as JSON
+        'Authorization': `Bearer ${accessToken}`,
       },
-      body: JSON.stringify(data), // Convert JS object to JSON string
+      
+      body: JSON.stringify(gemini_data), // Convert JS object to JSON string
     });
 
-    console.log("data da 101: "+data);
+    console.log("data da 101: "+JSON.stringify(gemini_data));
 
     const result = await response.json(); // Read the response
-    console.log("BACKEND HAHAHAHAHA : "+result);
+    console.log("BACKEND HAHAHAHAHA : "+JSON.stringify(result));
   } catch (error) {
     console.error("Error sending data:", error);
   }

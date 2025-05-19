@@ -18,7 +18,7 @@ import useIsMobile from '../../hooks/useIsMobile';
 /* ────────────────────────── prop types ────────────────────────── */
 export interface WebcamFeedProps {
   showOverlay: boolean;
-  // setShowOverlay: (value: (prev: boolean) => boolean) => void;
+  setShowOverlay: (value: (prev: boolean) => boolean) => void;
   setCameraAvailable: (value: boolean) => void;
   setErrorMessage: (value: string) => void;
   cameraAvailable: boolean;

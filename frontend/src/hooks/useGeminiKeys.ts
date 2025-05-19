@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 export function useGeminiKeys() {
   const [keys, setKeys] = useState<string[]>([]);
   const currentIndex = useRef(0);
-
+  // TODO: debug
   useEffect(() => {
     const load = async () => {
       try {

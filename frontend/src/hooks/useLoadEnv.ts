@@ -11,7 +11,7 @@ export function useLoadEnv() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch("http://localhost:8000/admin/secrets/frontend-env", {
+        const res = await fetch(`http://${import.meta.env.VITE_API_URL}/admin/secrets/frontend-env`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(["supabase.url", "supabase.anon_key"]),

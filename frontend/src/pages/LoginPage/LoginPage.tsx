@@ -1,9 +1,9 @@
 // src/pages/LoginPage/LoginPage.tsx
-import React, { useEffect, useState } from 'react'
+import  { useEffect, useState } from 'react'
 import logo from '../../assets/imgs/nagai_logo.png'
 import { useNavigate } from 'react-router-dom'
-import { Auth } from '@supabase/auth-ui-react'
-import { ThemeSupa } from '@supabase/auth-ui-shared'
+// import { Auth } from '@supabase/auth-ui-react'
+// import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { useSupabase } from '../../contexts/SupabaseContext'
 import { motion } from 'framer-motion'
 import type { Session } from '@supabase/supabase-js'
@@ -31,8 +31,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!session) return;
-
-    fetch(`${import.meta.env.VITE_API_URL}/auth/google`, {
+    console.log(`${import.meta.env.VITE_API_URL}`)
+    fetch(`https://${import.meta.env.VITE_API_URL}/auth/google`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ access_token: session.access_token })

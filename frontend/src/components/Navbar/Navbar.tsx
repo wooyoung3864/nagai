@@ -1,4 +1,3 @@
-import React from 'react';
 import logo from '../../assets/imgs/nagai_logo.png';
 import { useUser } from '../../contexts/UserContext';
 

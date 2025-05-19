@@ -12,7 +12,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173",
                     "http://127.0.0.1:5173",
-                    "https://your-vercel-app.vercel.app", # ⬅️ when deployed],  # TODO: add link to Vercel-hosted production frontend
+                    "http://nagai-ewle8xhhc-wooyoung3864s-projects.vercel.app", 
+                    "https://nagai-ewle8xhhc-wooyoung3864s-projects.vercel.app", 
+                    "http://nagai-pi.vercel.app",
+                    "https://nagai-pi.vercel.app"
                     ],  
     allow_credentials=True,
     allow_methods=["*"],
@@ -26,3 +29,7 @@ load_secrets_to_env()
 
 import os
 print("[DEBUG] Effective FERNET_SECRET:", os.getenv("FERNET_SECRET"))
+
+@app.get("/")
+def root():
+    return {"status": "Backend is live!"}

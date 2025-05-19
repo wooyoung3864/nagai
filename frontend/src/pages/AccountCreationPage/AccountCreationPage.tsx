@@ -1,4 +1,4 @@
-import React, { ChangeEvent, JSX, useState, useEffect } from 'react';
+import { ChangeEvent, JSX, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 import { motion } from 'framer-motion';
@@ -53,7 +53,7 @@ export default function AccountCreationPage(): JSX.Element {
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-    fetch(`${import.meta.env.VITE_API_URL}/users/set-name`, {
+    fetch(`https://${import.meta.env.VITE_API_URL}/users/set-name`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: user.id, full_name: name }),

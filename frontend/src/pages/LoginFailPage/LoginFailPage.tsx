@@ -1,4 +1,3 @@
-import React from 'react';
 import logo from '../../assets/imgs/nagai_logo.png';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion'; 

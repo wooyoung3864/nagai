@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import './TermsPage.css';
@@ -57,8 +57,8 @@ export default function TermsPage() {
     }
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-
-    fetch(`${import.meta.env.VITE_API_URL}/users/agree-terms`, {
+    
+    fetch(`https://${import.meta.env.VITE_API_URL}/users/agree-terms`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: user.id }),

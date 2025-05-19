@@ -1,5 +1,4 @@
 // pages/NotFoundPage/NotFoundPage.tsx
-import React from 'react';
 import logo from '../../assets/imgs/nagai_logo.png';
 import './NotFoundPage.css';
 

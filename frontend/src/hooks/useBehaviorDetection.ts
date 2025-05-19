@@ -1,5 +1,5 @@
 // frontend/src/hooks/useBehaviorDetection.ts
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useGeminiKeys } from './useGeminiKeys';  // gemini keys rotation logic
 import { supabase } from '../../../backend/auth/supabaseClient'
 
@@ -163,7 +163,7 @@ export function useBehaviorDetection({
   externalTimerControlsRef,
   externalTimerStateRef,
 }: UseBehaviorDetectionProps) {
-  const [cooldownActive] = useState(false);   // reserved, still unused
+  // const [cooldownActive] = useState(false);   // reserved, still unused
   const motionCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const previousFrameDataRef = useRef<Uint8ClampedArray | null>(null);
   const motionDetectedCountRef = useRef(0);
@@ -181,7 +181,7 @@ export function useBehaviorDetection({
   // pause behaviorDetection while DistractionModal is active
   const isModalVisibleRef = useRef(false);
   const shouldSkipRef = useRef(false);
-  const abortControlRef = useRef<AbortController | null>(null);
+  // const abortControlRef = useRef<AbortController | null>(null);
 
   /* clean-up on unmount */
   useEffect(() => () => stopBehaviorDetection(), []);
@@ -344,7 +344,7 @@ export function useBehaviorDetection({
    */
   async function captureSnapshotAndAnalyze(
     gen: number,
-    onSnapshotReady: SnapshotHook = (b, r) =>
+    onSnapshotReady: SnapshotHook = (b, _) => // TODO: replace _ with r later
       console.log("📸 storageBlob ready:", b.size, "bytes")
   ) {
     if (

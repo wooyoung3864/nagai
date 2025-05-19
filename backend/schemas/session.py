@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from enum import Enum
 from datetime import datetime
 
-
 class SessionType(str, Enum):
     FOCUS = "FOCUS"
     BREAK = "BREAK"
@@ -29,6 +28,7 @@ class SessionOut(BaseModel):
     end_time: datetime | None
     status: SessionStatus
     focus_secs: int
+    avg_score: int | None
 
     class Config:
         from_attributes = True

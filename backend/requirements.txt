@@ -1,11 +1,14 @@
-# requirements.txt
-# usage: pip install -r requirements.txt
-
 fastapi==0.110.1
 uvicorn[standard]==0.29.0
 sqlalchemy==2.0.40
 psycopg2-binary==2.9.9
 python-dotenv==1.0.1
-
-# for CORS middleware (optional)
-aiofiles==23.2.1
+aiofiles==23.2.1              # for static/CORS middleware support
+email-validator==2.1.0.post1  # FastAPI request model validation
+PyJWT==2.8.0
+httpx==0.23.3                 # async requests (e.g., for Supabase)
+cryptography==42.0.5          # required by python-jose & some auth flows
+google-auth==2.29.0           # Google login
+supabase==1.0.3               # Supabase Python client
+alembic==1.13.1               # DB migrations
+python-multipart==0.0.9

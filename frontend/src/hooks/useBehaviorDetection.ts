@@ -125,7 +125,7 @@ export function useBehaviorDetection({
   const motionBufferRef = useRef<boolean[]>([]);
   const isAnalyzingRef = useRef(false);
   const lastHighMotionTriggerRef = useRef(0);
-  const { getKey, rotateKey, loaded: keysLoaded } = useGeminiKeys();
+  const { getKey, rotateKey } = useGeminiKeys();
 
   const isActiveRef = useRef(false);
   const generationRef = useRef(0);  // 🔑 version counter

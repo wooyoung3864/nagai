@@ -119,6 +119,7 @@ export default function WebcamFeed({
         autoPlay
         muted
         playsInline
+        className={cameraAvailable ? '' : 'video--hidden'}
       />
 
       {cameraAvailable && showOverlay && (

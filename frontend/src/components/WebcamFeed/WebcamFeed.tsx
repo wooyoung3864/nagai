@@ -59,7 +59,14 @@ export default function WebcamFeed({
     const initCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        console.log(navigator.mediaDevices?.getUserMedia);
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            console.log("Camera access granted", stream);
+          })
+          .catch(err => {
+            console.error("Camera access denied or failed", err);
+          });
+
         streamRef.current = stream; // prevent GC (garbage collection)
 
         if (videoRef.current) {

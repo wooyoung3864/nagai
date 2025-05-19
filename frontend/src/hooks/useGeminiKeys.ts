@@ -14,6 +14,9 @@ export function useGeminiKeys() {
             "gemini.api_key_1",
             "gemini.api_key_2",
             "gemini.api_key_3",
+            "gemini.api_key_4",
+            "gemini.api_key_5",
+            "gemini.api_key_6",
           ]),
         });
         const data = await res.json();

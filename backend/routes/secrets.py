@@ -38,6 +38,11 @@ def retrieve_secret(query: s.SecretQuery, db: Session = Depends(get_db)):
     return decrypt(obj.key_value)
 
 
+@router.options("/frontend-env", include_in_schema=False)
+def options_frontend_env():
+    return
+
+
 @router.post("/frontend-env", response_model=dict)
 def frontend_env(keys: list[str] = Body(...), db: Session = Depends(get_db)):
     result = {}

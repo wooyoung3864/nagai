@@ -56,43 +56,57 @@ export default function WebcamFeed({
   const streamRef = useRef<MediaStream | null>(null); // Keep stream alive globally
 
   useEffect(() => {
+    let mounted = true;
+
     const initCamera = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => {
-            console.log("Camera access granted", stream);
-          })
-          .catch(err => {
-            console.error("Camera access denied or failed", err);
-          });
+        // 1 · get the stream
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user' }
+        });
+        streamRef.current = stream;
 
-        streamRef.current = stream; // prevent GC (garbage collection)
+        // 2 · attach to <video>
+        const video = videoRef.current;
+        if (!video) return;
+        video.srcObject = stream;
 
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play().catch(console.warn);
+        // 3 · wait until metadata => dimensions are known
+        await new Promise<void>(resolve => {
+          if (video.readyState >= 1) resolve();                    // HAVE_METADATA
+          else video.onloadedmetadata = () => resolve();
+        });
+
+        // 4 · NOW call play()
+        await video.play().catch(console.warn);
+
+        if (mounted) {
+          setCameraAvailable(true);
+          setErrorMessage('');
         }
-
-        setCameraAvailable(stream.active);
-        setErrorMessage(stream.active ? '' : 'Stream is inactive.\nPlease try again.');
       } catch (err: any) {
-        console.error('webcam error:', err.name, err.message);
-        setCameraAvailable(false);
-        setErrorMessage('Webcam access error.\nPlease check camera permissions.');
+        console.error('[getUserMedia] error:', err.name, err.message);
+        if (mounted) {
+          setCameraAvailable(false);
+          setErrorMessage(
+            err.name === 'NotReadableError'
+              ? 'Camera is busy. Close Zoom/Teams/etc., then click Retry.'
+              : 'Webcam access error.\nPlease check camera permissions.'
+          );
+        }
       } finally {
-        setCameraInitialized(true);
+        mounted && setCameraInitialized(true);
       }
     };
 
     initCamera();
 
-    // Optional cleanup to stop camera when component unmounts
+    // Clean-up when component unmounts
     return () => {
-      streamRef.current?.getTracks().forEach(track => track.stop());
+      mounted = false;
+      streamRef.current?.getTracks().forEach(t => t.stop());
     };
-  }, []);
-
+  }, []);   // ← run once
   useEffect(() => {
     return () => {
       streamRef.current?.getTracks().forEach(track => track.stop());

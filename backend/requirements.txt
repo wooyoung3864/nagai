@@ -11,3 +11,4 @@ cryptography==42.0.5          # required by python-jose & some auth flows
 google-auth==2.29.0           # Google login
 supabase==1.0.3               # Supabase Python client
 alembic==1.13.1               # DB migrations
+python-multipart==0.0.9

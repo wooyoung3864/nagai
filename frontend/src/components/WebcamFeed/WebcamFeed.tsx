@@ -60,7 +60,6 @@ export default function WebcamFeed({
   externalTimerStateRef,
   supabase,
   sessionIdRef,
-  setSessionId,
   trackFocusScore
 }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);

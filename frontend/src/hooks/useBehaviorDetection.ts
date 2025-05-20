@@ -353,8 +353,8 @@ export function useBehaviorDetection({
         ...gemini_data,
       };
 
-      console.log("da payload 101: ", JSON.stringify(payload))
-      console.log("access token: " + access_token)
+      // console.log("da payload 101: ", JSON.stringify(payload))
+      // console.log("access token: " + access_token)
 
       try {
         const res = await fetch(

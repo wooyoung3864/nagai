@@ -6,52 +6,49 @@ type SessionType   = "FOCUS" | "BREAK";
 type SessionStatus = "PAUSED" | "STOPPED" | "COMPLETED" | "RUNNING";
 
 export interface SessionHandler {
-  /** POST /sessions  – creates a new session if none exists */
   startSessionOnServer: (type: SessionType) => Promise<boolean>;
-  /** PATCH /sessions/:id/update */
   updateSessionStatus : (status: SessionStatus, focusSecs?: number) => Promise<void>;
-  /** shareable refs to let Timer keep its existing logic */
+  trackFocusScore     : (score: number) => void;                 // <-- NEW
+  flushAvgToSession   : (status?: SessionStatus) => Promise<void>; // <-- NEW
   sessionIdRef        : React.MutableRefObject<number | null>;
   setSessionId        : React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export function useSessionHandler(): SessionHandler {
   const supabase = useSupabase();
-  const base     = import.meta.env.VITE_API_URL as string; // should already include https://
+  const base     = `${import.meta.env.VITE_API_URL as string}`;  
 
-  /* expose these so Timer’s existing state lines stay intact */
-  const [_, setSessionId]   = useState<number | null>(null);
-  const sessionIdRef                = useRef<number | null>(null);
+  const [, setSessionId] = useState<number | null>(null);
+  const sessionIdRef     = useRef<number | null>(null);
 
-  /* -------------------- helpers -------------------- */
-  const tokenHeader = async () => {
+  /* focus-score accumulators */
+  const scoreSumRef = useRef(0);
+  const scoreCntRef = useRef(0);
+
+  const getAccessToken = async () => {
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
     if (!token) throw new Error("No access token");
-    return { "Content-Type": "application/json" };
+    return token;
   };
 
-  /* -------------------- API calls ------------------ */
+  /* ---------------- POST /sessions ---------------- */
   const startSessionOnServer = async (type: SessionType): Promise<boolean> => {
-    /* duplicate-session guard */
-    if (sessionIdRef.current !== null) {
-      console.warn("Session already exists, skipping POST.");
-      return true;
-    }
+    if (sessionIdRef.current) { console.warn("Session already exists."); return true; }
 
     try {
-      const res = await fetch(`${base}/sessions/`, {
+      const access_token = await getAccessToken();
+      const res = await fetch(`https://${base}/sessions/`, {
         method : "POST",
-        headers: await tokenHeader(),
-        body   : JSON.stringify({ type }),
+        headers: { "Content-Type": "application/json" },
+        body   : JSON.stringify({ type, access_token }),
       });
-      if (!res.ok) {
-        console.error("Failed to start session");
-        return false;
-      }
+      if (!res.ok) return false;
       const { id } = await res.json();
       setSessionId(id);
       sessionIdRef.current = id;
+      /* reset score accumulators for the new session */
+      scoreSumRef.current = scoreCntRef.current = 0;
       return true;
     } catch (err) {
       console.error("Error starting session:", err);
@@ -59,34 +56,59 @@ export function useSessionHandler(): SessionHandler {
     }
   };
 
+  /* ------------- PATCH /sessions/:id/update -------- */
   const updateSessionStatus = async (
     status    : SessionStatus,
     focusSecs?: number,
   ) => {
-    if (sessionIdRef.current === null) return;
+    if (!sessionIdRef.current) return;
 
-    const url = new URL(
-      `/sessions/${sessionIdRef.current}/update`,
-      base,
-    );
+    const url = new URL(`/sessions/${sessionIdRef.current}/update`, `https://${base}`);
     url.searchParams.set("status", status);
-    if (focusSecs !== undefined) {
-      url.searchParams.set("focus_secs", focusSecs.toString());
-    }
+    if (focusSecs !== undefined) url.searchParams.set("focus_secs", String(focusSecs));
 
-    try {
-      const res = await fetch(url.toString(), {
-        method : "PATCH",
-        headers: await tokenHeader(),
-        body   : JSON.stringify({}),   // token already in header via cookie/JWT
-      });
-      if (!res.ok) {
-        console.error(`Failed to update session to ${status}`);
-      }
-    } catch (err) {
-      console.error(`Error updating session to ${status}:`, err);
-    }
+    const access_token = await getAccessToken();
+    await fetch(url.toString(), {
+      method : "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body   : JSON.stringify({ access_token }),
+    });
   };
 
-  return { startSessionOnServer, updateSessionStatus, sessionIdRef, setSessionId };
+  /* ---------------- focus-score logic -------------- */
+  const trackFocusScore = (score: number) => {
+    if (!sessionIdRef.current) return;            // ignore if no active session
+    scoreSumRef.current += score;
+    scoreCntRef.current += 1;
+  };
+
+  const flushAvgToSession = async (status: SessionStatus = "RUNNING") => {
+    if (!sessionIdRef.current || scoreCntRef.current === 0) return;
+
+    const avg = scoreSumRef.current / scoreCntRef.current;
+    
+    if (status === "STOPPED" || status === "COMPLETED") {
+      scoreSumRef.current = scoreCntRef.current = 0; // reset after flush
+    }
+
+    const url = new URL(`/sessions/${sessionIdRef.current}/update`, base);
+    url.searchParams.set("status", status);
+    url.searchParams.set("avg_score", avg.toFixed(2));
+
+    const access_token = await getAccessToken();
+    await fetch(url.toString(), {
+      method : "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body   : JSON.stringify({ access_token }),
+    });
+  };
+
+  return {
+    startSessionOnServer,
+    updateSessionStatus,
+    trackFocusScore,
+    flushAvgToSession,
+    sessionIdRef,
+    setSessionId,
+  };
 }

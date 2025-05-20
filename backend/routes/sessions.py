@@ -32,6 +32,7 @@ def update_session_status(
     sid: int,
     status: s.SessionStatus = Query(..., description="New session status"),
     focus_secs: int | None = Query(None, description="Optional updated focus seconds"),
+    avg_score : float | None = Query(None, description="Average focus-score"),
     payload: s.SessionUpdateInput = Body(...),
     db: Session = Depends(get_db),
 ):
@@ -50,6 +51,9 @@ def update_session_status(
 
     if focus_secs is not None:
         session.focus_secs = focus_secs
+        
+    if avg_score is not None:
+        session.avg_score = avg_score
 
     db.commit()
     db.refresh(session)

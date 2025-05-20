@@ -14,6 +14,7 @@ import fistImg from '../../assets/imgs/fist.png';
 
 import { useBehaviorDetection } from '../../hooks/useBehaviorDetection';
 import useIsMobile from '../../hooks/useIsMobile';
+import { useSessionHandler } from '../../hooks/useSessionHandler';   // ← new
 import { SupabaseClient } from '@supabase/supabase-js';
 
 /* ────────────────────────── prop types ────────────────────────── */
@@ -56,19 +57,26 @@ export default function WebcamFeed({
   externalTimerStateRef,
   supabase
 }: WebcamFeedProps) {
-  const videoRef   = useRef<HTMLVideoElement>(null);
-  const streamRef  = useRef<MediaStream | null>(null);   // keep stream alive
-  const isMobile   = useIsMobile();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);   // keep stream alive
+  const isMobile = useIsMobile();
+
+  const {
+    trackFocusScore,
+    sessionIdRef
+  } = useSessionHandler();
 
   const behaviorDetection = useBehaviorDetection({
     videoRef,
     externalTimerControlsRef,
     externalTimerStateRef,
-    supabase
+    supabase,
+    onFocusScore: trackFocusScore,
+    sessionIdRef
   });
   const {
-    startBehaviorDetection = () => {},
-    stopBehaviorDetection = () => {},
+    startBehaviorDetection = () => { },
+    stopBehaviorDetection = () => { },
   } = behaviorDetection || {};
 
   /* ───────────── initialize camera once ───────────── */
@@ -106,7 +114,7 @@ export default function WebcamFeed({
   /* ─────── start / stop behaviour detection ─────── */
   useEffect(() => {
     if (cameraAvailable) startBehaviorDetection();
-    else                 stopBehaviorDetection();
+    else stopBehaviorDetection();
   }, [cameraAvailable, startBehaviorDetection, stopBehaviorDetection]);
 
   /* optional: log media errors */

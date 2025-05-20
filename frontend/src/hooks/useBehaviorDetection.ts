@@ -110,6 +110,9 @@ interface UseBehaviorDetectionProps {
     isDistractionModalVisible?: boolean;
   }>;
   supabase: SupabaseClient;
+  /** push every valid focus_score upward so SessionHandler can average */
+  onFocusScore: (score: number) => void;
+  sessionIdRef: React.MutableRefObject<number | null>;
 }
 
 /*
@@ -129,7 +132,9 @@ export function useBehaviorDetection({
   videoRef,
   externalTimerControlsRef,
   externalTimerStateRef,
-  supabase
+  supabase,
+  // onFocusScore,
+  sessionIdRef, 
 }: UseBehaviorDetectionProps) {
   // const [cooldownActive] = useState(false);   // reserved, still unused
   const motionCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -336,27 +341,38 @@ export function useBehaviorDetection({
       makeAspectWebP(full, 512, 0.7),   // space-saving for storage
     ]);
 
-    const sendDataToBackend = async (gemini_data: JSON) => {
+    const sendDataToBackend = async (gemini_data: any) => {
       const { data } = await supabase.auth.getSession();
       const access_token = data.session?.access_token;
       if (!access_token) {
         console.error("No access token found");
-        return false;
+        return;
       }
 
-      try {
-        const response = await fetch("http://localhost:8000/distractions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ access_token, gemini_data }),
-        });
+      // include session_id & access_token in body
+      const payload = {
+        access_token,
+        session_id: sessionIdRef.current,  // make sure you pass sessionIdRef from useSessionHandler
+        gemini_data,
+      };
 
-        const result = await response.json();
-        console.log("Backend result:", result);
-      } catch (error) {
-        console.error("Error sending data:", error);
+      try {
+        const res = await fetch(
+          `https://${import.meta.env.VITE_API_URL}/distractions/`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
+        if (!res.ok) {
+          console.error("Failed to log distraction", await res.text());
+          return;
+        }
+        const result = await res.json();
+        console.log("Distraction logged:", result);
+      } catch (err) {
+        console.error("Error sending data:", err);
       }
     };
 

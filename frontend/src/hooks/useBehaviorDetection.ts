@@ -351,7 +351,7 @@ export function useBehaviorDetection({
 
       // include session_id & access_token in body
       const payload = {
-        access_token,
+        // access_token,
         session_id: sessionIdRef.current,  // make sure you pass sessionIdRef from useSessionHandler
         gemini_data,
       };
@@ -361,7 +361,9 @@ export function useBehaviorDetection({
           `https://${import.meta.env.VITE_API_URL}/distractions/`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json",
+              "Authorization": `Bearer ${access_token}`,
+             },
             body: JSON.stringify(payload),
           }
         );

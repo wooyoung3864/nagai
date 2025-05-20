@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from datetime import datetime, timedelta
 from database import get_db
-from schemas import distraction as s_ev, distraction_query as s_q
+from schemas import distraction as s_ev
 from models import distraction as m_ev, session as m_ses, user as m_user
 from routes.auth import get_user_from_token
 

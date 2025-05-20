@@ -458,6 +458,11 @@ export function useBehaviorDetection({
 
   async function callGeminiAPI(b64: string, prompt: string) {
     const apiKey = getKey();
+    console.log(apiKey)
+    if (!apiKey) {
+      console.error('[Gemini] No API key available (keys still loading?)');
+      return null;
+    }
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     const body = {
       contents: [{

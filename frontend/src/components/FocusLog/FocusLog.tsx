@@ -10,7 +10,7 @@ interface FocusLogProps {
 }
 
 interface DailyData {
-  date: string; // e.g., "2025-01-03"
+  date: string; // e.g., "2025-01-03" 
   focusTime: string;
   focusCycle: number;
 }

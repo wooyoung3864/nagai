@@ -1,7 +1,7 @@
 # push_secrets.py (예시)
-from models.secret import Secret
+from models.secret import SecretKey as Secret
 from database import SessionLocal
-from utils.crypto import encrypt_key
+from utils.crypto import encrypt as encrypt_key
 
 def push_gemini_secrets():
     db = SessionLocal()

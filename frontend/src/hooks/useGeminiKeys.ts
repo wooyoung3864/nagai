@@ -31,7 +31,7 @@ export function useGeminiKeys() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const json = await res.json();           // whatever shape comes back
-        console.log(json)
+        // console.log(json)
         const vals = Object.values(json).filter(Boolean) as string[];
 
         if (!vals.length) throw new Error('No keys in response');

@@ -1,10 +1,10 @@
 // frontend/src/hooks/useBehaviorDetection.ts
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGeminiKeys } from './useGeminiKeys';  // gemini keys rotation logic
 
 // const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
 // const API_KEY = 'AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw';
-//const API_KEY = 'AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40';
+// const API_KEY = 'AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40';
 
 const GEMINI_CALL_ENABLED = true;                            // flip true in prod
 
@@ -115,7 +115,7 @@ export function useBehaviorDetection({
   externalTimerControlsRef,
   externalTimerStateRef,
 }: UseBehaviorDetectionProps) {
-  // const [cooldownActive] = useState(false);   // reserved, still unused
+  const [cooldownActive] = useState(false);   // reserved, still unused
   const motionCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const previousFrameDataRef = useRef<Uint8ClampedArray | null>(null);
   const motionDetectedCountRef = useRef(0);
@@ -133,10 +133,16 @@ export function useBehaviorDetection({
   // pause behaviorDetection while DistractionModal is active
   const isModalVisibleRef = useRef(false);
   const shouldSkipRef = useRef(false);
-  // const abortControlRef = useRef<AbortController | null>(null);
 
   /* clean-up on unmount */
   useEffect(() => () => stopBehaviorDetection(), []);
+
+  shouldSkipRef.current = externalTimerStateRef.current?.isDistractionModalVisible ?? false; // capture before evaluating shouldSkipRef
+    // early return to skip behaviorDetection while DistractionModal is active.
+    if (shouldSkipRef.current) {
+      console.log('Behavior detection paused: DistractionModal active.');
+      return;
+    }
 
   // ───────────────────────────── control API ────────────────────────────
   function startBehaviorDetection() {
@@ -295,7 +301,7 @@ export function useBehaviorDetection({
    */
   async function captureSnapshotAndAnalyze(
     gen: number,
-    onSnapshotReady: SnapshotHook = (b, _) => // TODO: replace _ with r later
+    onSnapshotReady: SnapshotHook = (b, r) =>
       console.log("📸 storageBlob ready:", b.size, "bytes")
   ) {
     if (
@@ -410,11 +416,6 @@ export function useBehaviorDetection({
 
   async function callGeminiAPI(b64: string, prompt: string) {
     const apiKey = getKey();
-    console.log(apiKey)
-    if (!apiKey) {
-      console.error('[Gemini] No API key available (keys still loading?)');
-      return null;
-    }
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     const body = {
       contents: [{

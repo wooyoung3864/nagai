@@ -47,6 +47,7 @@ export function useSessionHandler(): SessionHandler {
       const { id } = await res.json();
       setSessionId(id);
       sessionIdRef.current = id;
+      // console.log(sessionIdRef.current);
       /* reset score accumulators for the new session */
       scoreSumRef.current = scoreCntRef.current = 0;
       return true;

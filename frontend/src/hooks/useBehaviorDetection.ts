@@ -134,7 +134,7 @@ export function useBehaviorDetection({
   externalTimerStateRef,
   supabase,
   // onFocusScore,
-  sessionIdRef, 
+  sessionIdRef,
 }: UseBehaviorDetectionProps) {
   // const [cooldownActive] = useState(false);   // reserved, still unused
   const motionCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -341,7 +341,14 @@ export function useBehaviorDetection({
       makeAspectWebP(full, 512, 0.7),   // space-saving for storage
     ]);
 
-    const sendDataToBackend = async (gemini_data: any) => {
+    const sendDistractionDataToBackend = async (gemini_data: any) => {
+      // ① don’t even try logging if no session yet
+      //console.log(sessionIdRef.current)
+      if (!sessionIdRef.current) {
+        console.debug("No active session, skipping log distraction");
+        return;
+      }
+
       const { data } = await supabase.auth.getSession();
       const access_token = data.session?.access_token;
       if (!access_token) {
@@ -349,11 +356,13 @@ export function useBehaviorDetection({
         return;
       }
 
+      console.log(`sessionIdRef.current: ${sessionIdRef.current}`);
+
       // include session_id & access_token in body
       const payload = {
         access_token,
         session_id: sessionIdRef.current,  // make sure you pass sessionIdRef from useSessionHandler
-        gemini_data,
+        ...gemini_data,
       };
 
       try {
@@ -395,9 +404,12 @@ export function useBehaviorDetection({
             : "• (empty / no-op response) •"
         );
 
-        console.log("data going to be sent");
-        sendDataToBackend(parsed);
-        console.log("data sent");
+
+        if ('is_focused' in parsed && parsed.is_focused === false) {
+          console.log("data going to be sent");
+          sendDistractionDataToBackend(parsed);
+          console.log("data sent");
+        }
 
         handleBehaviorResult(parsed);
       } catch (err) {

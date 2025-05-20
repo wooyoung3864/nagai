@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import './DistractionLog.css';
 import { Button } from 'react-bootstrap';
+import distractionImg from '../../assets/imgs/joo_studying.jpg';
 
 interface LogEntry {
   id: number;
@@ -33,6 +34,9 @@ const DistractionLogDetail: React.FC<DetailModalProps> = ({ log, onBack, closeLo
           <p><strong>Date & Time:</strong> {log.timestamp}</p>
           <p><strong>Distraction Elements:</strong> {log.events}</p>
           <p><strong>Focus Score:</strong> {log.focusScore}</p>
+        </div>
+        <div  className='justify-content-center'>
+            <img className='distraction-img' src={distractionImg} alt='Images are deleted after 7 days'></img>
         </div>
         <div className="modal-footer justify-content-center">
           <Button variant="secondary" onClick={onBack}>← Back to Log</Button>

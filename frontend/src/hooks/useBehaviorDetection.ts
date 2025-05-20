@@ -115,18 +115,6 @@ interface UseBehaviorDetectionProps {
   sessionIdRef: React.MutableRefObject<number | null>;
 }
 
-/*
-  Jiwoo Kim
-  05/18
-  Gemini result
- {
-  "action": "STOP",
-  "focus_score": 95,
-  "is_focused": true,
-  "observed_behaviors": [],
-  "explanation": "A single hand is visible, palm up, and satisfies all criteria A-E."
-}
-*/
 
 export function useBehaviorDetection({
   videoRef,
@@ -365,6 +353,9 @@ export function useBehaviorDetection({
         ...gemini_data,
       };
 
+      console.log("da payload 101: ", JSON.stringify(payload))
+      console.log("access token: " + access_token)
+
       try {
         const res = await fetch(
           `https://${import.meta.env.VITE_API_URL}/distractions/`,
@@ -388,7 +379,6 @@ export function useBehaviorDetection({
     /* 3️⃣  Send to Gemini (if enabled) */
     let parsed: any | null = null;
     if (GEMINI_CALL_ENABLED) {
-      console.log("GEMINI CALL ENABLED GERWEGRTTJYUTREWCRVETBRYNTMUYUK<")
       try {
         const b64 = await blobToBase64(geminiBlob);
         const prompt = selectPrompt();

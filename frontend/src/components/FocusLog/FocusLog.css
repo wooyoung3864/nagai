@@ -52,4 +52,12 @@
     font-size: 1rem;
     font-weight: 700;
   }
+
+  .average-score {
+  margin-top: 15px;
+  font-size: 1.1rem;
+  text-align: center;
+  color: #444;
+}
+
   

@@ -1,12 +1,10 @@
 // frontend/src/hooks/useBehaviorDetection.ts
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGeminiKeys } from './useGeminiKeys';  // gemini keys rotation logic
-import { supabase } from '../../../backend/auth/supabaseClient'
 
-
- const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
+// const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
 // const API_KEY = 'AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw';
-//const API_KEY = 'AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40';
+// const API_KEY = 'AIzaSyA5E2RqP-utLkqvdmjogAnG1g2VHAPyT40';
 
 const GEMINI_CALL_ENABLED = true;                            // flip true in prod
 
@@ -112,52 +110,12 @@ interface UseBehaviorDetectionProps {
   }>;
 }
 
-/*
-  Jiwoo Kim
-  05/18
-  Gemini result
- {
-  "action": "STOP",
-  "focus_score": 95,
-  "is_focused": true,
-  "observed_behaviors": [],
-  "explanation": "A single hand is visible, palm up, and satisfies all criteria A-E."
-}
-*/
-  
-const sendDataToBackend = async (gemini_data:JSON) => {
-  const { data } = await supabase.auth.getSession();
-  const access_token = data.session?.access_token;
-  if (!access_token) {
-    console.error('No access token found');
-    return false;
-  }
-
-  console.log("access token: " + access_token);
-  try {
-    const response = await fetch("http://localhost:8000/distractions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json", // Send as JSON
-      },
-      body: JSON.stringify({access_token, gemini_data}), // Convert JS object to JSON string
-    });
-
-    console.log("data da 101: "+JSON.stringify(gemini_data));
-
-    const result = await response.json(); // Read the response
-    console.log("BACKEND HAHAHAHAHA : "+JSON.stringify(result));
-  } catch (error) {
-    console.error("Error sending data:", error);
-  }
-};
-
 export function useBehaviorDetection({
   videoRef,
   externalTimerControlsRef,
   externalTimerStateRef,
 }: UseBehaviorDetectionProps) {
-  // const [cooldownActive] = useState(false);   // reserved, still unused
+  const [cooldownActive] = useState(false);   // reserved, still unused
   const motionCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const previousFrameDataRef = useRef<Uint8ClampedArray | null>(null);
   const motionDetectedCountRef = useRef(0);
@@ -175,12 +133,17 @@ export function useBehaviorDetection({
   // pause behaviorDetection while DistractionModal is active
   const isModalVisibleRef = useRef(false);
   const shouldSkipRef = useRef(false);
-  // const abortControlRef = useRef<AbortController | null>(null);
 
   /* clean-up on unmount */
   useEffect(() => () => stopBehaviorDetection(), []);
 
-  
+  shouldSkipRef.current = externalTimerStateRef.current?.isDistractionModalVisible ?? false; // capture before evaluating shouldSkipRef
+    // early return to skip behaviorDetection while DistractionModal is active.
+    if (shouldSkipRef.current) {
+      console.log('Behavior detection paused: DistractionModal active.');
+      return;
+    }
+
   // ───────────────────────────── control API ────────────────────────────
   function startBehaviorDetection() {
     if (isActiveRef.current) return;
@@ -338,7 +301,7 @@ export function useBehaviorDetection({
    */
   async function captureSnapshotAndAnalyze(
     gen: number,
-    onSnapshotReady: SnapshotHook = (b, _) => // TODO: replace _ with r later
+    onSnapshotReady: SnapshotHook = (b, r) =>
       console.log("📸 storageBlob ready:", b.size, "bytes")
   ) {
     if (
@@ -366,7 +329,6 @@ export function useBehaviorDetection({
     /* 3️⃣  Send to Gemini (if enabled) */
     let parsed: any | null = null;
     if (GEMINI_CALL_ENABLED) {
-      console.log("GEMINI CALL ENABLED GERWEGRTTJYUTREWCRVETBRYNTMUYUK<")
       try {
         const b64 = await blobToBase64(geminiBlob);
         const prompt = selectPrompt();
@@ -381,10 +343,6 @@ export function useBehaviorDetection({
             ? JSON.stringify(parsed, null, 2)
             : "• (empty / no-op response) •"
         );
-
-        console.log("data going to be sent");
-        sendDataToBackend(parsed);
-        console.log("data sent");
 
         handleBehaviorResult(parsed);
       } catch (err) {
@@ -458,11 +416,6 @@ export function useBehaviorDetection({
 
   async function callGeminiAPI(b64: string, prompt: string) {
     const apiKey = getKey();
-    console.log(apiKey)
-    if (!apiKey) {
-      console.error('[Gemini] No API key available (keys still loading?)');
-      return null;
-    }
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     const body = {
       contents: [{

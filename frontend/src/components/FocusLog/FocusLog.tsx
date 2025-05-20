@@ -22,9 +22,21 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (!isOpen) return;
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
     const fetchFocusData = async () => {
       try {
-        const userId = localStorage.getItem('user_id');  
+        const userId = localStorage.getItem('user_id');
         const token = localStorage.getItem('token');
 
         if (!userId || !token) {

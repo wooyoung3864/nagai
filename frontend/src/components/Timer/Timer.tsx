@@ -81,7 +81,7 @@ export default function Timer({
     externalTimerStateRef,
     supabase,
     sessionIdRef,
-    onFocusScore: () => {}, // no-op handler to satisfy required prop
+    onFocusScore: () => { }, // no-op handler to satisfy required prop
   }) || {};
 
 
@@ -108,16 +108,16 @@ export default function Timer({
     if (distractionVisibleRef.current || isRunningRef.current) return;
 
     // if session already exists, just resume it
-   // if (sessionIdRef.current !== null) {
+    // if (sessionIdRef.current !== null) {
     //  await updateSessionStatus('RUNNING');
     //} else {
-      const success = await startSessionOnServer(isFocus ? 'FOCUS' : 'BREAK');
-      // console.log('Timer sessionIdRef.current:', sessionIdRef.current);
-      if (!success) {
-        console.error("Error starting session.");
-        return;
-      }
-   // }
+    const success = await startSessionOnServer(isFocus ? 'FOCUS' : 'BREAK');
+    // console.log('Timer sessionIdRef.current:', sessionIdRef.current);
+    if (!success) {
+      console.error("Error starting session.");
+      return;
+    }
+    // }
 
     setIsRunning(true);
     isRunningRef.current = true;
@@ -155,6 +155,10 @@ export default function Timer({
     if (!isRunningRef.current) return;
     if (isFocus) {
       await commitFocusTime('PAUSED');
+
+      if (sessionIdRef.current !== null) {
+        await updateSessionStatus('PAUSED', focusAccumulated);
+      }
     }
 
 
@@ -231,7 +235,7 @@ export default function Timer({
       externalTimerControlsRef.current.pause = pauseTimer;
       externalTimerControlsRef.current.stop = stopTimer;
       externalTimerControlsRef.current.resume = resumeTimer;
-      externalTimerControlsRef.current.nextSession = startTimer; // instead of nextSession
+      externalTimerControlsRef.current.nextSession = nextSession
       externalTimerControlsRef.current.distraction = handleDistraction;
     }
   }, []);

@@ -60,11 +60,15 @@ export default function Timer({
   const controlsRef = useRef<ReturnType<typeof animate> | null>(null);  // Add
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const { startBehaviorDetection, stopBehaviorDetection, setModalVisible } = useBehaviorDetection({
+  const {
+    startBehaviorDetection = () => {},
+    stopBehaviorDetection = () => {},
+    setModalVisible = () => {},
+  } = useBehaviorDetection({
     videoRef,
     externalTimerControlsRef,
     externalTimerStateRef,
-  });
+  }) || {};
 
   const computeElapsed = () => sessionStartRef.current
     ? Math.floor((Date.now() - sessionStartRef.current) / 1000)

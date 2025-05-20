@@ -57,11 +57,15 @@ export default function WebcamFeed({
   const streamRef  = useRef<MediaStream | null>(null);   // keep stream alive
   const isMobile   = useIsMobile();
 
-  const { startBehaviorDetection, stopBehaviorDetection } = useBehaviorDetection({
+  const behaviorDetection = useBehaviorDetection({
     videoRef,
     externalTimerControlsRef,
     externalTimerStateRef,
   });
+  const {
+    startBehaviorDetection = () => {},
+    stopBehaviorDetection = () => {},
+  } = behaviorDetection || {};
 
   /* ───────────── initialize camera once ───────────── */
   useEffect(() => {

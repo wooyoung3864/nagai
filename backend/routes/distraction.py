@@ -21,7 +21,7 @@ def add(
     if not ses or ses.user_id != user.id:
         raise HTTPException(403)
 
-    obj = s_ev.Distraction(
+    obj = m_ev.Distraction(
         user_id           = user.id,
         session_id        = payload.session_id,
         timestamp         = payload.timestamp,

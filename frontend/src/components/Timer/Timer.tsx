@@ -6,6 +6,7 @@ import { useSessionHandler } from '../../hooks/useSessionHandler';
 import './Timer.css';
 import DistractionModal from '../DistractionModal/DistractionModal';
 import { useSupabase } from '../../contexts/SupabaseContext';
+import { SessionHandler } from '../../hooks/useSessionHandler';
 
 const FOCUS_DURATION = 30;
 const BREAK_DURATION = 10;
@@ -33,6 +34,13 @@ export interface TimerProps {
   onRunningChange: (isRunning: boolean) => void
   onFocusChange: (isFocus: boolean) => void
   onSessionComplete: (duration: number, wasFocus: boolean) => void; // add this line
+  // Add these fields from sessionHandler:
+  startSessionOnServer: SessionHandler['startSessionOnServer'];
+  updateSessionStatus: SessionHandler['updateSessionStatus'];
+  trackFocusScore: SessionHandler['trackFocusScore'];
+  flushAvgToSession: SessionHandler['flushAvgToSession'];
+  sessionIdRef: SessionHandler['sessionIdRef'];
+  setSessionId: SessionHandler['setSessionId'];
 }
 
 export default function Timer({
@@ -40,7 +48,13 @@ export default function Timer({
   externalTimerStateRef,
   onRunningChange,
   onFocusChange,
-  onSessionComplete
+  onSessionComplete,
+  startSessionOnServer,
+  updateSessionStatus,
+  trackFocusScore,
+  flushAvgToSession,
+  sessionIdRef,
+  setSessionId,
 }: TimerProps) {
   const supabase = useSupabase();
   const [isRunning, setIsRunning] = useState(false);
@@ -60,15 +74,6 @@ export default function Timer({
   const controlsRef = useRef<ReturnType<typeof animate> | null>(null);  // Add
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  const {
-    startSessionOnServer,
-    updateSessionStatus,
-    trackFocusScore,
-    flushAvgToSession,
-    sessionIdRef,
-    setSessionId,
-  } = useSessionHandler();
 
   const {
     startBehaviorDetection = () => { },
@@ -111,6 +116,7 @@ export default function Timer({
       await updateSessionStatus('RUNNING');
     } else {
       const success = await startSessionOnServer(isFocus ? 'FOCUS' : 'BREAK');
+      // console.log('Timer sessionIdRef.current:', sessionIdRef.current);
       if (!success) {
         console.error("Error starting session.");
         return;

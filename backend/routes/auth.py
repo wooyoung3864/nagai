@@ -45,7 +45,7 @@ def login_with_supabase(payload: SupabaseLoginIn, db: Session = Depends(get_db))
             SUPABASE_JWT_SECRET,
             algorithms=["HS256"],
             audience="authenticated",
-            options={"verify_aud": True}
+            options={"verify_aud": True} # added these two lines to resolve auth error
         )
     except jwt.ExpiredSignatureError:
         raise HTTPException(401, "supabase token expired")

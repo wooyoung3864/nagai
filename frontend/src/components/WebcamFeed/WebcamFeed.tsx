@@ -14,7 +14,7 @@ import fistImg from '../../assets/imgs/fist.png';
 
 import { useBehaviorDetection } from '../../hooks/useBehaviorDetection';
 import useIsMobile from '../../hooks/useIsMobile';
-import { useSessionHandler } from '../../hooks/useSessionHandler';   // ← new
+import { SessionHandler } from '../../hooks/useSessionHandler';   // ← new
 import { SupabaseClient } from '@supabase/supabase-js';
 
 /* ────────────────────────── prop types ────────────────────────── */
@@ -41,6 +41,9 @@ export interface WebcamFeedProps {
     isDuringBreak: boolean;
   }>;
   supabase: SupabaseClient
+  sessionIdRef: SessionHandler['sessionIdRef'];
+  setSessionId: SessionHandler['setSessionId'];
+  trackFocusScore: SessionHandler['trackFocusScore'];
 }
 
 /* ─────────────────────────── component ────────────────────────── */
@@ -55,16 +58,14 @@ export default function WebcamFeed({
   setCameraInitialized,
   externalTimerControlsRef,
   externalTimerStateRef,
-  supabase
+  supabase,
+  sessionIdRef,
+  setSessionId,
+  trackFocusScore
 }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);   // keep stream alive
   const isMobile = useIsMobile();
-
-  const {
-    trackFocusScore,
-    sessionIdRef
-  } = useSessionHandler();
 
   const behaviorDetection = useBehaviorDetection({
     videoRef,

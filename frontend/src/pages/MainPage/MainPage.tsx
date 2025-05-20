@@ -10,6 +10,7 @@ import '../../App.css';
 import './MainPage.css';
 import { useNavigate } from 'react-router-dom';
 import { useSupabase } from '../../contexts/SupabaseContext';
+import { useSessionHandler } from '../../hooks/useSessionHandler';
 
 export default function MainPage() {
   const [showOverlay, setShowOverlay] = useState(false);
@@ -25,6 +26,8 @@ export default function MainPage() {
   const navigate = useNavigate();
 
   const supabase = useSupabase();
+
+  const sessionHandler = useSessionHandler();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -97,6 +100,9 @@ export default function MainPage() {
                   externalTimerControlsRef={externalTimerControlsRef}
                   externalTimerStateRef={externalTimerStateRef}
                   supabase={supabase}
+                  sessionIdRef={sessionHandler.sessionIdRef}
+                  setSessionId={sessionHandler.setSessionId}
+                  trackFocusScore={sessionHandler.trackFocusScore}
                 />
                 {(!externalTimerStateRef.current.isRunning || !isFocus) && <DistractionsButton />}
               </div>
@@ -115,6 +121,13 @@ export default function MainPage() {
                     onRunningChange={setIsTimerRunning}   // ✅ pass the update functions
                     onFocusChange={setIsFocus}             // ✅ pass the update functions
                     onSessionComplete={handleSessionComplete}
+                    // Pass all sessionHandler fields
+                    startSessionOnServer={sessionHandler.startSessionOnServer}
+                    updateSessionStatus={sessionHandler.updateSessionStatus}
+                    trackFocusScore={sessionHandler.trackFocusScore}
+                    flushAvgToSession={sessionHandler.flushAvgToSession}
+                    sessionIdRef={sessionHandler.sessionIdRef}
+                    setSessionId={sessionHandler.setSessionId}
                   />
                 </div>
 

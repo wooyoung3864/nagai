@@ -70,6 +70,7 @@ export default function MyPage() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('userName');
+    localStorage.removeItem('supabase.auth.nagai');
     navigate('/');
   };
 

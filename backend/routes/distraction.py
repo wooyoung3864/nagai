@@ -10,10 +10,14 @@ from routes.auth import get_user_from_token
 router = APIRouter(prefix="/distractions", tags=["distractions"])
 
 
-@router.post("/", response_model=s_ev.s_ev.DistractionOut)
-def add(payload: s_ev.DistractionIn, db: Session = Depends(get_db)):
+@router.post("/", response_model=s_ev.DistractionOut)
+def add(
+    payload: s_ev.DistractionIn, 
+    db: Session = Depends(get_db)):
     user = get_user_from_token(payload.access_token, db)
-    ses  = db.get(m_ses.Session, payload.session_id)
+    ses  = db.get(m_ses.Session, payload.session_id
+    )
+    
     if not ses or ses.user_id != user.id:
         raise HTTPException(403)
 

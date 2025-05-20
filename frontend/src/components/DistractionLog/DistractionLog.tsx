@@ -83,6 +83,11 @@ const DistractionLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
 
     if (!isOpen && !selectedLog) return null;
 
+    const handleClose = () => {
+        handleBackToTable();
+        onClose();
+    }
+
     return (
         <>
             {!selectedLog && (
@@ -140,7 +145,7 @@ const DistractionLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
                 </div>
             )}
             {selectedLog && (
-                <DistractionLogDetail log={selectedLog} onBack={handleBackToTable} closeLog={onClose}/>
+                <DistractionLogDetail log={selectedLog} onBack={handleBackToTable} closeLog={handleClose}/>
             )}
         </>
     );

@@ -9,31 +9,29 @@ from routes.auth import get_user_from_token
 
 router = APIRouter(prefix="/distractions", tags=["distractions"])
 
-
 @router.post("/", response_model=s_ev.DistractionOut)
 def add(
     payload: s_ev.DistractionIn, 
-    db: Session = Depends(get_db)):
+    db: Session = Depends(get_db)
+):
     user = get_user_from_token(payload.access_token, db)
-    ses  = db.get(m_ses.Session, payload.session_id
-    )
-    
+    ses  = db.get(m_ses.Session, payload.session_id)
     if not ses or ses.user_id != user.id:
         raise HTTPException(403)
 
     obj = m_ev.Distraction(
-        user_id           = user.id,
-        session_id        = payload.session_id,
-        timestamp         = payload.timestamp,
-        focus_score       = payload.focus_score,
-        is_focused        = payload.is_focused,
-        observed_behaviors= payload.observed_behaviors,
-        explanation       = payload.explanation,
+        user_id            = user.id,
+        session_id         = payload.session_id,
+        timestamp          = payload.timestamp,
+        focus_score        = payload.focus_score,
+        is_focused         = payload.is_focused,
+        observed_behaviors = payload.observed_behaviors,
+        explanation        = payload.explanation,
     )
     db.add(obj)
     db.commit()
     db.refresh(obj)
-    return obj
+    return obj    # This will now correctly map to DistractionOut
 
 @router.post("/query", response_model=list[s_ev.DistractionOut])
 def query(

@@ -5,8 +5,7 @@ from typing import List, Optional
 from database import SessionLocal
 
 
-class DistractionIn(BaseModel):
-    access_token: str
+class DistractionBase(BaseModel):
     session_id: int
     timestamp: Optional[datetime] = None
     focus_score: Optional[int] = None
@@ -15,10 +14,17 @@ class DistractionIn(BaseModel):
     explanation: Optional[str] = None
 
 
-class DistractionOut(DistractionIn):
+class DistractionIn(DistractionBase):
+    access_token: str     # Only for input!
+
+
+class DistractionOut(DistractionBase):
     id: int
     timestamp: datetime
     user_id: int
+
+    class Config:
+        from_attributes = True
 
     class Config:
         from_attributes = True

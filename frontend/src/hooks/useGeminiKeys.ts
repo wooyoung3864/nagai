@@ -35,7 +35,7 @@ export function useGeminiKeys() {
         const vals = Object.values(json).filter(Boolean) as string[];
 
         if (!vals.length) throw new Error('No keys in response');
-        console.log(vals)
+        //console.log(vals)
         setKeys(vals);
         setOk(true);
       } catch (err) {
@@ -48,7 +48,7 @@ export function useGeminiKeys() {
   /* 🔍  Log once the keys array has been populated ------------------ */
   useEffect(() => {
     if (keys.length) {
-      console.log('[Gemini] keys now in state', keys);
+      //console.log('[Gemini] keys now in state', keys);
     }
   }, [keys]);
 

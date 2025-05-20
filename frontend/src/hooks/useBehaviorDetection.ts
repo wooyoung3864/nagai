@@ -126,27 +126,21 @@ interface UseBehaviorDetectionProps {
 */
   
 const sendDataToBackend = async (gemini_data:JSON) => {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
-
-  if (!session) {
-    console.error("No active session or token is expired", error);
-    return;
+  const { data } = await supabase.auth.getSession();
+  const access_token = data.session?.access_token;
+  if (!access_token) {
+    console.error('No access token found');
+    return false;
   }
 
-  const accessToken = session.access_token;
-  console.log("access token: " + accessToken);
+  console.log("access token: " + access_token);
   try {
     const response = await fetch("http://localhost:8000/distractions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json", // Send as JSON
-        'Authorization': `Bearer ${accessToken}`,
       },
-      
-      body: JSON.stringify(gemini_data), // Convert JS object to JSON string
+      body: JSON.stringify({access_token, gemini_data}), // Convert JS object to JSON string
     });
 
     console.log("data da 101: "+JSON.stringify(gemini_data));
@@ -372,6 +366,7 @@ export function useBehaviorDetection({
     /* 3️⃣  Send to Gemini (if enabled) */
     let parsed: any | null = null;
     if (GEMINI_CALL_ENABLED) {
+      console.log("GEMINI CALL ENABLED GERWEGRTTJYUTREWCRVETBRYNTMUYUK<")
       try {
         const b64 = await blobToBase64(geminiBlob);
         const prompt = selectPrompt();
@@ -387,7 +382,9 @@ export function useBehaviorDetection({
             : "• (empty / no-op response) •"
         );
 
+        console.log("data going to be sent");
         sendDataToBackend(parsed);
+        console.log("data sent");
 
         handleBehaviorResult(parsed);
       } catch (err) {

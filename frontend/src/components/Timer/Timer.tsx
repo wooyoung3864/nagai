@@ -8,7 +8,7 @@ import DistractionModal from '../DistractionModal/DistractionModal';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { SessionHandler } from '../../hooks/useSessionHandler';
 
-const FOCUS_DURATION = 30;
+const FOCUS_DURATION = 10;
 const BREAK_DURATION = 10;
 const FLUSH_INTERVAL_MS =
   (FOCUS_DURATION * 60 * 1000) / 5;   // 2 s in dev, 5 min in prod
@@ -108,16 +108,16 @@ export default function Timer({
     if (distractionVisibleRef.current || isRunningRef.current) return;
 
     // if session already exists, just resume it
-    if (sessionIdRef.current !== null) {
-      await updateSessionStatus('RUNNING');
-    } else {
+   // if (sessionIdRef.current !== null) {
+    //  await updateSessionStatus('RUNNING');
+    //} else {
       const success = await startSessionOnServer(isFocus ? 'FOCUS' : 'BREAK');
       // console.log('Timer sessionIdRef.current:', sessionIdRef.current);
       if (!success) {
         console.error("Error starting session.");
         return;
       }
-    }
+   // }
 
     setIsRunning(true);
     isRunningRef.current = true;
@@ -167,7 +167,7 @@ export default function Timer({
   };
 
   const stopTimer = async () => {
-    if (isRunning && isFocus) {
+    if (isRunning) {
       await commitFocusTime();
       await updateSessionStatus('STOPPED', focusAccumulated);
     }
@@ -231,7 +231,7 @@ export default function Timer({
       externalTimerControlsRef.current.pause = pauseTimer;
       externalTimerControlsRef.current.stop = stopTimer;
       externalTimerControlsRef.current.resume = resumeTimer;
-      externalTimerControlsRef.current.nextSession = stopTimer; // instead of nextSession
+      externalTimerControlsRef.current.nextSession = startTimer; // instead of nextSession
       externalTimerControlsRef.current.distraction = handleDistraction;
     }
   }, []);

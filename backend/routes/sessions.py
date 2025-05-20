@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, Depends, Body, Query
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timedelta
 from schemas import session as s
 from models import session as m
 from models.user import User
@@ -105,3 +105,33 @@ def sessions_monthly_focus_summary(
         {"day": str(day), "total_focus_secs": int(total_focus_secs or 0)}
         for day, total_focus_secs in results
     ]
+
+
+@router.post("/by-day", response_model=list[s.SessionOut])
+def sessions_by_day(
+    date: str = Body(..., embed=True),     # expects "YYYY-MM-DD"
+    access_token: str = Body(...),
+    db: Session = Depends(get_db)
+):
+    user = get_user_from_token(access_token, db)
+    # Parse the input date
+    try:
+        day_start = datetime.strptime(date, "%Y-%m-%d")
+    except Exception:
+        raise HTTPException(400, "Invalid date format (expected YYYY-MM-DD)")
+
+    day_end = day_start + timedelta(days=1)
+
+    # Fetch all sessions started that day for this user
+    sessions = (
+        db.query(m.Session)
+        .filter(
+            m.Session.user_id == user.id,
+            m.Session.start_time >= day_start,
+            m.Session.start_time < day_end,
+        )
+        .order_by(m.Session.start_time)
+        .all()
+    )
+
+    return sessions

@@ -2,28 +2,33 @@
 import { useSupabase } from "../contexts/SupabaseContext";
 import { useRef, useState } from "react";
 
-type SessionType   = "FOCUS" | "BREAK";
+type SessionType = "FOCUS" | "BREAK";
 type SessionStatus = "PAUSED" | "STOPPED" | "COMPLETED" | "RUNNING";
 
 export interface SessionHandler {
   startSessionOnServer: (type: SessionType) => Promise<boolean>;
-  updateSessionStatus : (status: SessionStatus, focusSecs?: number) => Promise<void>;
-  sessionIdRef        : React.MutableRefObject<number | null>;
-  setSessionId        : React.Dispatch<React.SetStateAction<number | null>>;
+  updateSessionStatus: (status: SessionStatus, focusSecs?: number) => Promise<void>;
+  sessionIdRef: React.MutableRefObject<number | null>;
+  setSessionId: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export function useSessionHandler(): SessionHandler {
   const supabase = useSupabase();
-  const base     = `${import.meta.env.VITE_API_URL as string}`;  
+  const base = `${import.meta.env.VITE_API_URL as string}`;
 
   const [, setSessionId] = useState<number | null>(null);
-  const sessionIdRef     = useRef<number | null>(null);
+  const sessionIdRef = useRef<number | null>(null);
 
   const getAccessToken = async () => {
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
     if (!token) throw new Error("No access token");
     return token;
+  };
+
+  const clearSession = () => {
+    setSessionId(null);
+    sessionIdRef.current = null;
   };
 
   /* ---------------- POST /sessions ---------------- */
@@ -33,9 +38,9 @@ export function useSessionHandler(): SessionHandler {
     try {
       const access_token = await getAccessToken();
       const res = await fetch(`https://${base}/sessions/`, {
-        method : "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body   : JSON.stringify({ type, access_token }),
+        body: JSON.stringify({ type, access_token }),
       });
       if (!res.ok) return false;
       const { id } = await res.json();
@@ -51,7 +56,7 @@ export function useSessionHandler(): SessionHandler {
 
   /* ------------- PATCH /sessions/:id/update -------- */
   const updateSessionStatus = async (
-    status    : SessionStatus,
+    status: SessionStatus,
     focusSecs?: number,
   ) => {
     if (!sessionIdRef.current) return;
@@ -62,10 +67,16 @@ export function useSessionHandler(): SessionHandler {
 
     const access_token = await getAccessToken();
     await fetch(url.toString(), {
-      method : "PATCH",
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body   : JSON.stringify({ access_token }),
+      body: JSON.stringify({ access_token }),
     });
+
+    // 🟢 Clear sessionId after STOPPED or COMPLETED
+    if (status === "STOPPED" || status === "COMPLETED") {
+      setSessionId(null);
+      sessionIdRef.current = null;
+    }
   };
 
   return {

@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import '../../App.css';
 import './MainPage.css';
 import { useNavigate } from 'react-router-dom';
+import { useSupabase } from '../../contexts/SupabaseContext';
 
 export default function MainPage() {
   const [showOverlay, setShowOverlay] = useState(false);
@@ -22,6 +23,8 @@ export default function MainPage() {
   const [totalFocusSeconds, setTotalFocusSeconds] = useState(0);
 
   const navigate = useNavigate();
+
+  const supabase = useSupabase();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -93,6 +96,7 @@ export default function MainPage() {
                   setCameraInitialized={setCameraInitialized}
                   externalTimerControlsRef={externalTimerControlsRef}
                   externalTimerStateRef={externalTimerStateRef}
+                  supabase={supabase}
                 />
                 {(!externalTimerStateRef.current.isRunning || !isFocus) && <DistractionsButton />}
               </div>

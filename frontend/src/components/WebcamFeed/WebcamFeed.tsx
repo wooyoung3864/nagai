@@ -14,6 +14,7 @@ import fistImg from '../../assets/imgs/fist.png';
 
 import { useBehaviorDetection } from '../../hooks/useBehaviorDetection';
 import useIsMobile from '../../hooks/useIsMobile';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 /* ────────────────────────── prop types ────────────────────────── */
 export interface WebcamFeedProps {
@@ -38,6 +39,7 @@ export interface WebcamFeedProps {
     isPaused: boolean;
     isDuringBreak: boolean;
   }>;
+  supabase: SupabaseClient
 }
 
 /* ─────────────────────────── component ────────────────────────── */
@@ -52,6 +54,7 @@ export default function WebcamFeed({
   setCameraInitialized,
   externalTimerControlsRef,
   externalTimerStateRef,
+  supabase
 }: WebcamFeedProps) {
   const videoRef   = useRef<HTMLVideoElement>(null);
   const streamRef  = useRef<MediaStream | null>(null);   // keep stream alive
@@ -61,6 +64,7 @@ export default function WebcamFeed({
     videoRef,
     externalTimerControlsRef,
     externalTimerStateRef,
+    supabase
   });
   const {
     startBehaviorDetection = () => {},
@@ -77,6 +81,9 @@ export default function WebcamFeed({
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
 
+          /** Fix by ChatGPT (o3).
+           * wyjung (05/19): fixed WebcamFeed HTMLVideoElement not loading in Vercel production build. wait for onloadedmetadata AND THEN setCameraAvailable(true). 
+           */
           /* wait until browser has video metadata */
           videoRef.current.onloadedmetadata = () => {
             videoRef.current!.play().catch(console.error);

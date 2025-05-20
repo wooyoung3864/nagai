@@ -1,8 +1,7 @@
 // frontend/src/hooks/useBehaviorDetection.ts
 import { useEffect, useRef } from 'react';
 import { useGeminiKeys } from './useGeminiKeys';  // gemini keys rotation logic
-import { supabase } from '../../../backend/auth/supabaseClient'
-
+import { SupabaseClient } from "@supabase/supabase-js";
 
 // const API_KEY = 'AIzaSyCZ9yNobnF2wJap7f9LEvPVr2dCFTb5aCo';     // ⚠️ real key
 // const API_KEY = 'AIzaSyAl9TIvPzX4OC7Uixl08cb-UDnQ-kGTSHw';
@@ -38,7 +37,7 @@ Return JSON only.
 `.trim()
 
 const BEHAVIOR_RULES = `
-If NO hand passes A–E, analyse the user's **focus state** instead.
+If NO hand passes A–E, analyze the user's **focus state** instead.
 
 Distraction cues (set "is_focused": false, add to "observed_behaviors"):
   • phone visible in hand or near face  
@@ -110,6 +109,7 @@ interface UseBehaviorDetectionProps {
     isDuringBreak: boolean;
     isDistractionModalVisible?: boolean;
   }>;
+  supabase: SupabaseClient;
 }
 
 /*
@@ -124,38 +124,12 @@ interface UseBehaviorDetectionProps {
   "explanation": "A single hand is visible, palm up, and satisfies all criteria A-E."
 }
 */
-  
-const sendDataToBackend = async (gemini_data:JSON) => {
-  const { data } = await supabase.auth.getSession();
-  const access_token = data.session?.access_token;
-  if (!access_token) {
-    console.error('No access token found');
-    return false;
-  }
-
-  console.log("access token: " + access_token);
-  try {
-    const response = await fetch("http://localhost:8000/distractions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json", // Send as JSON
-      },
-      body: JSON.stringify({access_token, gemini_data}), // Convert JS object to JSON string
-    });
-
-    console.log("data da 101: "+JSON.stringify(gemini_data));
-
-    const result = await response.json(); // Read the response
-    console.log("BACKEND HAHAHAHAHA : "+JSON.stringify(result));
-  } catch (error) {
-    console.error("Error sending data:", error);
-  }
-};
 
 export function useBehaviorDetection({
   videoRef,
   externalTimerControlsRef,
   externalTimerStateRef,
+  supabase
 }: UseBehaviorDetectionProps) {
   // const [cooldownActive] = useState(false);   // reserved, still unused
   const motionCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -180,7 +154,6 @@ export function useBehaviorDetection({
   /* clean-up on unmount */
   useEffect(() => () => stopBehaviorDetection(), []);
 
-  
   // ───────────────────────────── control API ────────────────────────────
   function startBehaviorDetection() {
     if (isActiveRef.current) return;
@@ -362,6 +335,30 @@ export function useBehaviorDetection({
       makeSquarePNG(full, 512),         // lossless for Gemini
       makeAspectWebP(full, 512, 0.7),   // space-saving for storage
     ]);
+
+    const sendDataToBackend = async (gemini_data: JSON) => {
+      const { data } = await supabase.auth.getSession();
+      const access_token = data.session?.access_token;
+      if (!access_token) {
+        console.error("No access token found");
+        return false;
+      }
+
+      try {
+        const response = await fetch("http://localhost:8000/distractions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ access_token, gemini_data }),
+        });
+
+        const result = await response.json();
+        console.log("Backend result:", result);
+      } catch (error) {
+        console.error("Error sending data:", error);
+      }
+    };
 
     /* 3️⃣  Send to Gemini (if enabled) */
     let parsed: any | null = null;

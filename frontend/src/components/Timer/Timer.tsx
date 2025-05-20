@@ -68,6 +68,7 @@ export default function Timer({
     videoRef,
     externalTimerControlsRef,
     externalTimerStateRef,
+    supabase
   }) || {};
 
   const computeElapsed = () => sessionStartRef.current

@@ -43,7 +43,6 @@ export interface WebcamFeedProps {
   supabase: SupabaseClient
   sessionIdRef: SessionHandler['sessionIdRef'];
   setSessionId: SessionHandler['setSessionId'];
-  trackFocusScore: SessionHandler['trackFocusScore'];
 }
 
 /* ─────────────────────────── component ────────────────────────── */
@@ -59,8 +58,7 @@ export default function WebcamFeed({
   externalTimerControlsRef,
   externalTimerStateRef,
   supabase,
-  sessionIdRef,
-  trackFocusScore
+  sessionIdRef
 }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);   // keep stream alive
@@ -71,8 +69,8 @@ export default function WebcamFeed({
     externalTimerControlsRef,
     externalTimerStateRef,
     supabase,
-    onFocusScore: trackFocusScore,
-    sessionIdRef
+    sessionIdRef,
+    onFocusScore: () => {} // no-op handler
   });
   const {
     startBehaviorDetection = () => { },

@@ -37,8 +37,6 @@ export interface TimerProps {
   // Add these fields from sessionHandler:
   startSessionOnServer: SessionHandler['startSessionOnServer'];
   updateSessionStatus: SessionHandler['updateSessionStatus'];
-  trackFocusScore: SessionHandler['trackFocusScore'];
-  flushAvgToSession: SessionHandler['flushAvgToSession'];
   sessionIdRef: SessionHandler['sessionIdRef'];
   setSessionId: SessionHandler['setSessionId'];
 }
@@ -51,8 +49,6 @@ export default function Timer({
   onSessionComplete,
   startSessionOnServer,
   updateSessionStatus,
-  trackFocusScore,
-  flushAvgToSession,
   sessionIdRef,
   setSessionId,
 }: TimerProps) {
@@ -84,8 +80,8 @@ export default function Timer({
     externalTimerControlsRef,
     externalTimerStateRef,
     supabase,
-    onFocusScore: trackFocusScore,
     sessionIdRef,
+    onFocusScore: () => {}, // no-op handler to satisfy required prop
   }) || {};
 
 
@@ -159,7 +155,6 @@ export default function Timer({
     if (!isRunningRef.current) return;
     if (isFocus) {
       await commitFocusTime('PAUSED');
-      await flushAvgToSession("PAUSED");
     }
 
 
@@ -175,7 +170,6 @@ export default function Timer({
     if (isRunning && isFocus) {
       await commitFocusTime();
       await updateSessionStatus('STOPPED', focusAccumulated);
-      await flushAvgToSession("STOPPED");
     }
 
     setIsRunning(false);
@@ -199,7 +193,6 @@ export default function Timer({
     if (isRunning && isFocus) {
       await commitFocusTime();
       await updateSessionStatus('PAUSED', focusAccumulated);
-      await flushAvgToSession('PAUSED');
       console.log('Distraction triggered. Session ID:', sessionIdRef.current);
     }
 
@@ -247,7 +240,6 @@ export default function Timer({
     if (!isRunningRef.current || !isFocus) return;
 
     const id = setInterval(() => {
-      flushAvgToSession("RUNNING");
     }, FLUSH_INTERVAL_MS);
 
     return () => clearInterval(id);

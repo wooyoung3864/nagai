@@ -10,8 +10,11 @@ from database import get_db
 from config import JWT_SECRET, SUPABASE_JWT_SECRET
 from routes.auth import get_user_from_token
 import jwt
+from models.distraction import Distraction
+from sqlalchemy import func
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
+
 
 @router.post("/", response_model=s.SessionOut)
 def start_session(
@@ -31,13 +34,13 @@ def start_session(
 def update_session_status(
     sid: int,
     status: s.SessionStatus = Query(..., description="New session status"),
-    focus_secs: int | None = Query(None, description="Optional updated focus seconds"),
-    avg_score : float | None = Query(None, description="Average focus-score"),
+    focus_secs: int | None = Query(
+        None, description="Optional updated focus seconds"),
+    avg_score: float | None = Query(None, description="Average focus-score"),
     payload: s.SessionUpdateInput = Body(...),
     db: Session = Depends(get_db),
 ):
     user = get_user_from_token(payload.access_token, db)
-
     session = db.get(m.Session, sid)
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -45,16 +48,60 @@ def update_session_status(
         raise HTTPException(status_code=403, detail="Forbidden")
 
     session.status = s.SessionStatus(status)
-
     if status in [s.SessionStatus.STOPPED, s.SessionStatus.COMPLETED]:
         session.end_time = datetime.utcnow()
+        # AGGREGATE FOCUS_SCORE FROM DISTRACTIONS, AND PERSIST TO SESSION
+        avg = db.query(func.avg(Distraction.focus_score)) \
+                .filter(Distraction.session_id == sid).scalar()
+        if avg is not None:
+            session.avg_score = int(round(avg))
 
     if focus_secs is not None:
         session.focus_secs = focus_secs
-        
+    # Legacy/manual
     if avg_score is not None:
-        session.avg_score = avg_score
+        session.avg_score = int(round(avg_score))
 
     db.commit()
     db.refresh(session)
     return session
+
+
+@router.post("/monthly-focus-summary")
+def sessions_monthly_focus_summary(
+    year: int = Body(..., embed=True),
+    month: int = Body(..., embed=True),
+    access_token: str = Body(...),
+    db: Session = Depends(get_db)
+):
+    user = get_user_from_token(access_token, db)
+    # Start and end of the month
+    from datetime import date
+
+    month_start = datetime(year, month, 1)
+    if month == 12:
+        month_end = datetime(year + 1, 1, 1)
+    else:
+        month_end = datetime(year, month + 1, 1)
+
+    # Group by DATE, summing focus_secs
+    results = (
+        db.query(
+            func.date(m.Session.start_time).label("day"),
+            func.sum(m.Session.focus_secs).label("total_focus_secs")
+        )
+        .filter(
+            m.Session.user_id == user.id,
+            m.Session.start_time >= month_start,
+            m.Session.start_time < month_end
+        )
+        .group_by(func.date(m.Session.start_time))
+        .order_by("day")
+        .all()
+    )
+
+    # Response: list of {"day": "YYYY-MM-DD", "total_focus_secs": N}
+    return [
+        {"day": str(day), "total_focus_secs": int(total_focus_secs or 0)}
+        for day, total_focus_secs in results
+    ]

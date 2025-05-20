@@ -6,12 +6,12 @@ from database import SessionLocal
 
 
 class DistractionIn(BaseModel):
-    session_id: int | None = None
-    timestamp: datetime | None = None
-    focus_score: int | None = None
-    is_focused: bool | None = None
-    observed_behaviors: List[str] | None = None
-    explanation: str | None = None
+    session_id: int or None = None
+    timestamp: datetime or None = None
+    focus_score: int or None = None
+    is_focused: bool or None = None
+    observed_behaviors: List[str] or None = None
+    explanation: str or None = None
 
 
 class DistractionOut(DistractionIn):
@@ -25,7 +25,7 @@ class DistractionOut(DistractionIn):
 {
   "action": "STOP",
   "focus_score": 95,
-  "is_focused": true,
+  "is_focused": True,
   "observed_behaviors": [],
   "explanation": "A single hand is visible, palm up, and satisfies all criteria A-E."
 }

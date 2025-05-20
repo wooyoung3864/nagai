@@ -1,6 +1,6 @@
 # usage: ./run_backend.sh
 
-source ~/miniconda3/etc/profile.d/conda.sh
+source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate nagai
 export PYTHONPATH=.
 uvicorn main:app --reload

@@ -41,11 +41,14 @@ conda activate nagai
 # Upgrade pip
 python3 -m pip install --upgrade pip
 
-# Install packages
+# Install packages (force psycopg2-binary to avoid building from source)
 pip install fastapi "uvicorn[standard]" \
-    sqlalchemy psycopg2-binary python-dotenv \
-    supabase google-auth jwt cryptography httpie python-multipart email-validator \
-    alembic
+    sqlalchemy "psycopg2-binary==2.9.9" --only-binary :all:  # freeze version & force binary
+
+# Install remaining packages
+pip install \
+    python-dotenv supabase google-auth pyjwt cryptography httpie \
+    python-multipart email-validator alembic
 
 echo "✅ Environment setup complete."
 echo "👉 Run 'conda activate nagai' to get started."

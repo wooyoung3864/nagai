@@ -112,18 +112,6 @@ interface UseBehaviorDetectionProps {
   supabase: SupabaseClient;
 }
 
-/*
-  Jiwoo Kim
-  05/18
-  Gemini result
- {
-  "action": "STOP",
-  "focus_score": 95,
-  "is_focused": true,
-  "observed_behaviors": [],
-  "explanation": "A single hand is visible, palm up, and satisfies all criteria A-E."
-}
-*/
 
 export function useBehaviorDetection({
   videoRef,
@@ -363,7 +351,6 @@ export function useBehaviorDetection({
     /* 3️⃣  Send to Gemini (if enabled) */
     let parsed: any | null = null;
     if (GEMINI_CALL_ENABLED) {
-      console.log("GEMINI CALL ENABLED GERWEGRTTJYUTREWCRVETBRYNTMUYUK<")
       try {
         const b64 = await blobToBase64(geminiBlob);
         const prompt = selectPrompt();
@@ -379,9 +366,7 @@ export function useBehaviorDetection({
             : "• (empty / no-op response) •"
         );
 
-        console.log("data going to be sent");
         sendDataToBackend(parsed);
-        console.log("data sent");
 
         handleBehaviorResult(parsed);
       } catch (err) {

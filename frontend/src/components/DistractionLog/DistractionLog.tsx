@@ -5,9 +5,9 @@ import Pagination from 'react-bootstrap/Pagination';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { motion } from 'framer-motion';
 import DistractionLogDetail from './DistractionLogDetail';
-// import DistractionLogEntry from './DistractionLogEntry/DistractionLogEntry';
+import { useSupabase } from "../../contexts/SupabaseContext";
 
-interface FocusLogProps {
+interface DistractionLogProps {
     isOpen: boolean;
     onClose: () => void;
 }
@@ -19,41 +19,56 @@ interface LogEntry {
     focusScore: number;
 }
 
-const DistractionLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
+interface Distraction {
+    id: number;
+    timestamp: Date;
+    session_id: number;
+    focus_score: number;
+    is_focused: boolean;
+    observed_behaviors: string[];
+    explanation: string;
+    snapshot_url: string;
+    user_id: number;
+}
+  
+
+const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
     const [logs, setLogs] = useState<LogEntry[]>([]);
+    const [log, setLog] = useState<LogEntry>();
     const [sortField, setSortField] = useState<keyof LogEntry>('id');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
+    const [distractions, setDistractions] = useState<Distraction[]>([]);
+    const [distractionMap, setDistractionMap] = useState<Map<number, Distraction>>(new Map());
+    const supabase = useSupabase();
+    
 
     useEffect(() => {
-        if (!isOpen) return;
+        if (distractionMap.size === 0) return;
 
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                onClose();
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose]);
+        const newLogs: LogEntry[] = Array.from(distractionMap.values()).map((distraction) => ({
+            id: distraction.id,
+            timestamp: new Date(distraction.timestamp).toLocaleString('en-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'short',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZoneName: 'short'
+              }),
+              events: Array.isArray(distraction.observed_behaviors)
+                ? distraction.observed_behaviors.join(", ")
+                : "N/A",
+            focusScore: distraction.focus_score,
+        }));
 
-    useEffect(() => {
-        // Simulated fetch data
-        setLogs([
-            {
-                id: 1,
-                timestamp: 'March 10, 2025, 12:13 AM',
-                events: 'using phone, sleeping',
-                focusScore: 20,
-            },
-            {
-                id: 2,
-                timestamp: 'March 11, 2025, 10:05 PM',
-                events: 'tab switching, looking away',
-                focusScore: 40,
-            },
-        ]);
-    }, []);
+        console.log("distractionMap:", Array.from(distractionMap.values()));
+        setLogs(newLogs);
+    }, [distractionMap]);
+
 
     const handleSort = (field: keyof LogEntry) => {
         const order = field === sortField ? (sortOrder === 'asc' ? 'desc' : 'asc') : 'asc';
@@ -70,7 +85,6 @@ const DistractionLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
         );
     };
 
-    if (!isOpen) return null;
 
     const showDetail = (id: number) => {
       const log = logs.find((log) => log.id === id);
@@ -81,12 +95,78 @@ const DistractionLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
       setSelectedLog(null);
     };
 
-    if (!isOpen && !selectedLog) return null;
 
     const handleClose = () => {
         handleBackToTable();
         onClose();
     }
+
+    
+    // ✅ Always call hooks unconditionally
+    useEffect(() => {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          onClose();
+        }
+      };
+      if (isOpen) {
+        window.addEventListener('keydown', handleKeyDown);
+      }
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+  
+    useEffect(() => {
+      const getDistractionData = async () => {
+        const { data } = await supabase.auth.getSession();
+        const access_token = data.session?.access_token;
+        console.log("access token: ", access_token);
+        if (!access_token) {
+          console.error("No access token found");
+          return;
+        }
+  
+        const user = localStorage.getItem("user");
+        const user_id_kv = user?.split(",")[3];
+        const user_id = user_id_kv?.split(":")[1];
+        console.log("User ID:", user_id);
+  
+        const payload = { "user_id":user_id, "access_token":access_token };
+        console.log("payload: ", payload);
+  
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/distractions/query`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            if (!res.ok) {
+              console.error("Failed to fetch distraction", await res.text());
+              return;
+            }
+            const result: Distraction[] = await res.json(); // ✅ only once
+            setDistractions(result);
+                
+            const map = new Map<number, Distraction>();
+            result.forEach((entry) => {
+              map.set(entry.id, entry);
+            });
+            setDistractionMap(map);
+        
+            console.log("Distraction Map:", map);
+            
+        } catch (err) {
+            console.error("Error fetching data:", err);
+        }
+
+      };
+      getDistractionData();
+    }, [isOpen, supabase]);
+
+
+
+    if (!isOpen && !selectedLog) return null;
+
+
 
     return (
         <>

@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { motion } from 'framer-motion';
 import DistractionLogDetail from './DistractionLogDetail';
 import { useSupabase } from "../../contexts/SupabaseContext";
-
+// test
 interface DistractionLogProps {
     isOpen: boolean;
     onClose: () => void;

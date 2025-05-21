@@ -24,7 +24,6 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
   const month = now.getMonth() + 1;
   const supabase = useSupabase();
 
-  
 
   useEffect(() => {
     if (!isOpen) return;

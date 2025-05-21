@@ -302,7 +302,7 @@ export function useBehaviorDetection({
    */
   async function captureSnapshotAndAnalyze(
     gen: number,
-    onSnapshotReady: SnapshotHook = (b, _) => // TODO: replace _ with r later
+    onSnapshotReady: SnapshotHook = (b, _) =>
       console.log("📸 storageBlob ready:", b.size, "bytes")
   ) {
     if (
@@ -313,7 +313,7 @@ export function useBehaviorDetection({
     )
       return;
 
-    /* 1️⃣  draw full-res frame into an off-screen canvas */
+    // 1️⃣ Draw frame into off-screen canvas
     const video = videoRef.current;
     const full = Object.assign(document.createElement("canvas"), {
       width: video.videoWidth,
@@ -321,15 +321,31 @@ export function useBehaviorDetection({
     });
     full.getContext("2d")!.drawImage(video, 0, 0);
 
-    /* 2️⃣  make the two derivatives in parallel */
+    // 2️⃣ Derivatives in parallel
     const [geminiBlob, storageBlob] = await Promise.all([
       makeSquarePNG(full, 512),         // lossless for Gemini
       makeAspectWebP(full, 512, 0.7),   // space-saving for storage
     ]);
 
+    // Helper: Upload image to Supabase Storage, get public URL
+    async function uploadToSupabase(blob: Blob, userId: number, sessionId: number) {
+      const filename = `snapshots/${userId}_${sessionId}_${Date.now()}.webp`;
+      const { data, error } = await supabase.storage
+        .from('webcam-snapshots')
+        .upload(filename, blob, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: 'image/webp',
+        });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage
+        .from('webcam-snapshots')
+        .getPublicUrl(filename);
+      return urlData.publicUrl;
+    }
+
+    // Send distraction event to backend
     const sendDistractionDataToBackend = async (gemini_data: any) => {
-      // ① don’t even try logging if no session yet
-      //console.log(sessionIdRef.current)
       if (!sessionIdRef.current) {
         console.debug("No active session, skipping log distraction");
         return;
@@ -342,17 +358,25 @@ export function useBehaviorDetection({
         return;
       }
 
-      console.log(`sessionIdRef.current: ${sessionIdRef.current}`);
+      // If is_focused === false, upload snapshot and include snapshot_url
+      let snapshot_url: string | undefined;
+      if (gemini_data.is_focused === false) {
+        try {
+          const user = localStorage.getItem('user');
+          const userId = user ? JSON.parse(user).id : undefined; // or wherever you store it
+          snapshot_url = await uploadToSupabase(storageBlob, userId, sessionIdRef.current);
+        } catch (e) {
+          console.error("Snapshot upload failed", e);
+          // Optionally still continue to log event without snapshot_url
+        }
+      }
 
-      // include session_id & access_token in body
       const payload = {
         access_token,
-        session_id: sessionIdRef.current,  // make sure you pass sessionIdRef from useSessionHandler
+        session_id: sessionIdRef.current,
         ...gemini_data,
+        ...(snapshot_url && { snapshot_url }), // Only add if present
       };
-
-      // console.log("da payload 101: ", JSON.stringify(payload))
-      // console.log("access token: " + access_token)
 
       try {
         const res = await fetch(
@@ -374,7 +398,7 @@ export function useBehaviorDetection({
       }
     };
 
-    /* 3️⃣  Send to Gemini (if enabled) */
+    // 3️⃣ Send to Gemini (if enabled)
     let parsed: any | null = null;
     if (GEMINI_CALL_ENABLED) {
       try {
@@ -384,19 +408,13 @@ export function useBehaviorDetection({
         const rawResp = await callGeminiAPI(b64.split(",")[1], prompt);
         parsed = rawResp ? parseGeminiResponse(rawResp) : null;
 
-        /* 🎨  Pretty-print */
         console.log(
           "🧠 Gemini result\n",
-          parsed
-            ? JSON.stringify(parsed, null, 2)
-            : "• (empty / no-op response) •"
+          parsed ? JSON.stringify(parsed, null, 2) : "• (empty / no-op response) •"
         );
 
-
-        if ('is_focused' in parsed) { // && parsed.is_focused === false
-          // console.log("data going to be sent");
-          sendDistractionDataToBackend(parsed);
-          // console.log("data sent");
+        if ("is_focused" in parsed) {
+          await sendDistractionDataToBackend(parsed);
         }
 
         handleBehaviorResult(parsed);
@@ -405,9 +423,10 @@ export function useBehaviorDetection({
       }
     }
 
-    /* 4️⃣  Notify caller (for future upload); now we just log */
+    // 4️⃣ Notify caller (for future upload); now we just log
     onSnapshotReady(storageBlob, parsed);
   }
+
 
   /* ───────── helper: 512×512 square PNG (letter-box) ───────── */
   function makeSquarePNG(

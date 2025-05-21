@@ -51,7 +51,8 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
       console.log("✅ Supabase token:", token);
 
       try {
-        const userId = localStorage.getItem('user_id');
+        const user = localStorage.getItem('user');
+        const userId = user ? JSON.parse(user).id : null;
 
         if (!userId || !token) {
           console.error("Missing user_id or token in localStorage");

@@ -54,9 +54,8 @@ export default function MyPage() {
       setShowCancelModal(true);
     } else {
       setTempName(name);
+      navigate('/main');
     }
-
-    navigate('/main');
   };
 
   const handleConfirmDiscard = () => {

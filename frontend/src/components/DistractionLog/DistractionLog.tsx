@@ -39,6 +39,8 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
     const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
     const [distractionMap, setDistractionMap] = useState<Map<number, Distraction>>(new Map());
     const supabase = useSupabase();
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 7;
     
 
     useEffect(() => {
@@ -164,6 +166,11 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
     if (!isOpen && !selectedLog) return null;
 
 
+    const indexOfLastRow = currentPage * rowsPerPage;
+    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+    const currentLogs = logs.slice(indexOfFirstRow, indexOfLastRow);
+    
+    const totalPages = Math.ceil(logs.length / rowsPerPage);
 
     return (
         <>
@@ -198,7 +205,7 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {logs.map((log) => (
+                                    {currentLogs.map((log) => (
                                         <tr key={log.id} onClick={() => showDetail(log.id)}>
                                             <th scope="row">{log.id}</th>
                                             <td >{log.timestamp}</td>
@@ -211,11 +218,18 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
                         </div>
                         <div className="modal-footer justify-content-center">
                             <Pagination size="sm">
-                                {[1, 2, 3, 4, 5].map((number) => (
-                                    <Pagination.Item key={number} active={number === 1}>
-                                        {number}
-                                    </Pagination.Item>
-                                ))}
+                              {[...Array(totalPages)].map((_, idx) => {
+                                const page = idx + 1;
+                                return (
+                                  <Pagination.Item
+                                    key={page}
+                                    active={page === currentPage}
+                                    onClick={() => setCurrentPage(page)}
+                                  >
+                                    {page}
+                                  </Pagination.Item>
+                                );
+                              })}
                             </Pagination>
                         </div>
                     </motion.div>

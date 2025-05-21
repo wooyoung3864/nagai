@@ -330,7 +330,7 @@ export function useBehaviorDetection({
     // Helper: Upload image to Supabase Storage, get public URL
     async function uploadToSupabase(blob: Blob, userId: number, sessionId: number) {
       const filename = `snapshots/${userId}_${sessionId}_${Date.now()}.webp`;
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('webcam-snapshots')
         .upload(filename, blob, {
           cacheControl: '3600',

@@ -17,6 +17,7 @@ interface LogEntry {
     timestamp: string;
     events: string;
     focusScore: number;
+    distractionImg: string;
 }
 
 interface Distraction {
@@ -63,6 +64,7 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
                 ? distraction.observed_behaviors.join(", ")
                 : "N/A",
             focusScore: distraction.focus_score,
+            distractionImg: distraction.snapshot_url
         }));
 
         console.log("distractionMap:", Array.from(distractionMap.values()));

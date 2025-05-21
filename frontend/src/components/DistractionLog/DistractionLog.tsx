@@ -134,7 +134,7 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
         console.log("payload: ", payload);
   
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/distractions/query`, {
+            const res = await fetch(`https://${import.meta.env.VITE_API_URL}/distractions/query`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(payload),

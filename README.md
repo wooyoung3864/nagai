@@ -106,10 +106,11 @@ cd backend
 ./setup.sh (only for the first time)
 conda activate nagai
 ./run_backend.sh
-(
-    if [Errno 48] Address already in use error occurs: 
-    lsof -i :8000
-    kill -9 [PID]
-    ./run_backend.sh
-)
+```
+
+if [Errno 48] Address already in use error occurs: 
+```
+lsof -i :8000
+kill -9 [PID]
+./run_backend.sh
 ```

@@ -43,14 +43,14 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, numDis
     const supabase = useSupabase();
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 7;
-    const [logLength, setLogLength] = useState(0);
+    const [, setLogLength] = useState(0);
     
 
     useEffect(() => {
         if (distractionMap.size === 0) return;
 
-        const newLogs: LogEntry[] = Array.from(distractionMap.values()).map((distraction) => ({
-            id: distraction.id,
+        const newLogs: LogEntry[] = Array.from(distractionMap.values()).map((distraction, index) => ({
+            id: (index + 1),
             timestamp: new Date(distraction.timestamp).toLocaleString('en-KR', {
                 year: 'numeric',
                 month: 'long',
@@ -190,16 +190,16 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, numDis
                                 <thead className="table-primary">
                                     <tr>
                                         <th scope="col" onClick={() => handleSort('id')}>
-                                            # {sortField === 'id' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                                            # {sortField === 'id' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
                                         </th>
                                         <th scope="col" onClick={() => handleSort('timestamp')}>
-                                            Date & Time {sortField === 'timestamp' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                                            Date & Time {sortField === 'timestamp' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
                                         </th>
                                         <th scope="col" onClick={() => handleSort('events')}>
-                                            Distraction Elements {sortField === 'events' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                                            Distraction Elements {sortField === 'events' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
                                         </th>
                                         <th scope="col" onClick={() => handleSort('focusScore')}>
-                                            Estimated Focus Score {sortField === 'focusScore' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                                            Estimated Focus Score {sortField === 'focusScore' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
                                         </th>
                                     </tr>
                                 </thead>

@@ -34,11 +34,9 @@ interface Distraction {
 
 const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
     const [logs, setLogs] = useState<LogEntry[]>([]);
-    const [log, setLog] = useState<LogEntry>();
     const [sortField, setSortField] = useState<keyof LogEntry>('id');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
-    const [distractions, setDistractions] = useState<Distraction[]>([]);
     const [distractionMap, setDistractionMap] = useState<Map<number, Distraction>>(new Map());
     const supabase = useSupabase();
     
@@ -132,9 +130,9 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
   
         const payload = { "user_id":user_id, "access_token":access_token };
         console.log("payload: ", payload);
-  
+
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/distractions/query`, {
+            const res = await fetch(`https://${import.meta.env.VITE_API_URL}/distractions/query`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(payload),
@@ -143,8 +141,7 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
               console.error("Failed to fetch distraction", await res.text());
               return;
             }
-            const result: Distraction[] = await res.json(); // ✅ only once
-            setDistractions(result);
+            const result: Distraction[] = await res.json(); 
                 
             const map = new Map<number, Distraction>();
             result.forEach((entry) => {

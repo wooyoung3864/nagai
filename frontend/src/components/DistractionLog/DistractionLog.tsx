@@ -10,6 +10,7 @@ import { useSupabase } from "../../contexts/SupabaseContext";
 interface DistractionLogProps {
     isOpen: boolean;
     onClose: () => void;
+    numDistraction: (length: number) => void;
 }
 
 interface LogEntry {
@@ -33,7 +34,7 @@ interface Distraction {
 }
   
 
-const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
+const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, numDistraction }) => {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [sortField, setSortField] = useState<keyof LogEntry>('id');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -42,6 +43,7 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
     const supabase = useSupabase();
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 7;
+    const [logLength, setLogLength] = useState(0);
     
 
     useEffect(() => {
@@ -66,9 +68,9 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
             focusScore: distraction.focus_score,
             distractionImg: distraction.snapshot_url
         }));
-
-        console.log("distractionMap:", Array.from(distractionMap.values()));
         setLogs(newLogs);
+        setLogLength(newLogs.length);
+        numDistraction(newLogs.length);
     }, [distractionMap]);
 
 
@@ -121,7 +123,6 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
       const getDistractionData = async () => {
         const { data } = await supabase.auth.getSession();
         const access_token = data.session?.access_token;
-        console.log("access token: ", access_token);
         if (!access_token) {
           console.error("No access token found");
           return;
@@ -130,10 +131,8 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
         const user = localStorage.getItem("user");
         const user_id_kv = user?.split(",")[3];
         const user_id = user_id_kv?.split(":")[1];
-        console.log("User ID:", user_id);
   
         const payload = { "user_id":user_id, "access_token":access_token };
-        console.log("payload: ", payload);
 
         try {
             const res = await fetch(`https://${import.meta.env.VITE_API_URL}/distractions/query`, {
@@ -152,8 +151,6 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
               map.set(entry.id, entry);
             });
             setDistractionMap(map);
-        
-            console.log("Distraction Map:", map);
             
         } catch (err) {
             console.error("Error fetching data:", err);

@@ -2,8 +2,6 @@
 import  { useEffect, useState } from 'react'
 import logo from '../../assets/imgs/nagai_logo.png'
 import { useNavigate } from 'react-router-dom'
-// import { Auth } from '@supabase/auth-ui-react'
-// import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { useSupabase } from '../../contexts/SupabaseContext'
 import { motion } from 'framer-motion'
 import type { Session } from '@supabase/supabase-js'
@@ -14,6 +12,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const { setName } = useUser();
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const variants = {
     initial: { opacity: 0, y: 20 },
@@ -31,7 +30,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!session) return;
-    console.log(`${import.meta.env.VITE_API_URL}`)
+    setLoginError(null); // reset error on new session
     fetch(`https://${import.meta.env.VITE_API_URL}/auth/google`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -39,7 +38,7 @@ export default function LoginPage() {
     })
       .then(async r => {
         if (!r.ok) {
-          navigate('/login-fail');
+          setLoginError("Failed to authenticate with Google. Please try again.");
           return;
         }
         const data = await r.json();
@@ -51,8 +50,6 @@ export default function LoginPage() {
             localStorage.setItem('userName', data.user.full_name);
           }
         } 
-        console.log(data)
-
         // smart redirect
         if (!data.user.has_agreed_terms) {
           navigate('/terms');
@@ -61,22 +58,25 @@ export default function LoginPage() {
         } else {
           navigate('/main');
         }
+      })
+      .catch(() => {
+        setLoginError("Network error during authentication. Please try again.");
       });
-  }, [session, navigate]);
+  }, [session, navigate, setName]);
 
-  if (!session) {
-    return (
-      <motion.div
-        className="login-container"
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        variants={variants}
-      >
-        <div className="login-flex-col">
-          <div className="login-logo">
-            <img src={logo} alt="nagAI logo" />
-          </div>
+  return (
+    <motion.div
+      className="login-container"
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={variants}
+    >
+      <div className="login-flex-col">
+        <div className="login-logo">
+          <img src={logo} alt="nagAI logo" />
+        </div>
+        {!session && (
           <button
             onClick={() => supabase.auth.signInWithOAuth({ provider: "google" })}
             style={{
@@ -101,10 +101,13 @@ export default function LoginPage() {
             />
             Continue with Google
           </button>
-        </div>
-      </motion.div>
-    )
-  }
-
-  return null
+        )}
+        {loginError && (
+          <div className='login-fail-message'>
+            <h3>{loginError}</h3>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
 }

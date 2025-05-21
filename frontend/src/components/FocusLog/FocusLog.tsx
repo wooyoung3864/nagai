@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './FocusLog.css';
 import Calendar from '../Calendar/Calendar';
 import { motion } from 'framer-motion';
+import { useSupabase } from "../../contexts/SupabaseContext";
 
 interface FocusLogProps {
   isOpen: boolean;
@@ -18,29 +19,55 @@ interface DailyData {
 const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
   const [focusData, setFocusData] = useState<DailyData[]>([]);
   const [avgScore, setAvgScore] = useState<number | null>(null);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const supabase = useSupabase();
+
+  
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
 
     const fetchFocusData = async () => {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+
+      if (!token) {
+        console.error("No access_token found"); 
+        return;
+      }
+      console.log("✅ Supabase token:", token);
+
       try {
-        const userId = localStorage.getItem('user_id');  
-        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('user_id');
 
         if (!userId || !token) {
           console.error("Missing user_id or token in localStorage");
           return;
         }
 
-        const response = await fetch("https://nagai-backend.onrender.com/focus/query", {
+        const response = await fetch("https://nagai.onrender.com/sessions/monthly-focus-summary", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            user_id: parseInt(userId),
-            aggregate: false
+            year,
+            month,
+            access_token: token
           })
         });
 
@@ -50,22 +77,26 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
         }
 
         const data = await response.json();
-
+        const result: DailyData[] = [];
         const map = new Map<string, { secs: number, scoreSum: number, count: number }>();
+        console.log("📦 raw response from backend:", data);
         data.forEach((entry: any) => {
-          const date = entry.timestamp.slice(0, 10); // "YYYY-MM-DD"
-          if (!map.has(date)) {
-            map.set(date, { secs: 0, scoreSum: 0, count: 0 });
-          }
-          const item = map.get(date)!;
-          item.secs += entry.focus_secs;
-          if (entry.focus_score !== null && entry.focus_score !== undefined) {
-            item.scoreSum += entry.focus_score;
-            item.count += 1;
-          }
+          const date = entry.day; 
+          const secs = entry.total_focus_secs || 0;
+
+          const hours = Math.floor(secs / 3600);
+          const mins = Math.floor((secs % 3600) / 60);
+          const timeStr = `${hours}h ${mins}m`;
+          const cycle = secs / 60 / 25.0;
+
+          result.push({
+            date,
+            focusTime: timeStr,
+            focusCycle: parseFloat(cycle.toFixed(1)),
+            focusScore: undefined 
+          });
         });
 
-        const result: DailyData[] = [];
         let totalScore = 0, scoreCount = 0;
 
         map.forEach((value, date) => {
@@ -88,6 +119,9 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
         });
 
         setFocusData(result);
+        result.forEach(d => {
+          console.log(`🔍 ${d.date} → ${d.focusTime}`);
+        });
         setAvgScore(scoreCount ? Math.round(totalScore / scoreCount) : null);
       } catch (error) {
         console.error("Error fetching focus data:", error);

@@ -17,7 +17,7 @@ const MOTION_SENSITIVITY = 7;    // tuned threshold for pixel diff
 const MOTION_DETECTION_THRESHOLD = 2;    // frames
 const MOTION_END_THRESHOLD = 3;    // frames
 
-const HIGH_MOTION_THRESHOLD = 10;          // triggers instant Gemini snapshot
+const HIGH_MOTION_THRESHOLD = 7;          // triggers instant Gemini snapshot
 const HIGH_MOTION_COOLDOWN_MS = 3000;      // minimum delay between high-motion triggers in ms
 // ──────────────────────────────────────────────────────────────────────────
 
@@ -130,6 +130,7 @@ export function useBehaviorDetection({
   const motionDetectedCountRef = useRef(0);
   const motionEndedCountRef = useRef(0);
   const lastMotionDetectedRef = useRef(false);
+  const lastIdleSnapshotTimeRef = useRef(0);
   const nextSnapshotAllowedTimeRef = useRef(0);
   const motionBufferRef = useRef<boolean[]>([]);
   const isAnalyzingRef = useRef(false);
@@ -172,6 +173,7 @@ export function useBehaviorDetection({
     motionDetectedCountRef.current = 0;
     motionEndedCountRef.current = 0;
     lastMotionDetectedRef.current = false;
+    lastIdleSnapshotTimeRef.current = Date.now();
     previousFrameDataRef.current = null;
     nextSnapshotAllowedTimeRef.current = Date.now();
     motionBufferRef.current = [];
@@ -192,13 +194,8 @@ export function useBehaviorDetection({
    */
 
   async function detectMotion(gen: number) {
-    shouldSkipRef.current = externalTimerStateRef.current?.isDistractionModalVisible ?? false; // capture before evaluating shouldSkipRef
-    // early return to skip behaviorDetection while DistractionModal is active.
-    // console.log(`shouldSkipRef.current: ${shouldSkipRef.current}`)
-    if (shouldSkipRef.current) {
-      // console.log('Behavior detection paused: DistractionModal active.');
-      return;
-    }
+    shouldSkipRef.current = externalTimerStateRef.current?.isDistractionModalVisible ?? false;
+    if (shouldSkipRef.current) return;
 
     if (!videoRef.current ||
       !isActiveRef.current ||
@@ -230,7 +227,7 @@ export function useBehaviorDetection({
       const avgDiff = diff / (w * h);
       const now = Date.now();
 
-      // Instant override: High motion triggers snapshot immediately
+      // High motion: instant trigger
       if (avgDiff > HIGH_MOTION_THRESHOLD &&
         now - lastHighMotionTriggerRef.current > HIGH_MOTION_COOLDOWN_MS &&
         !isAnalyzingRef.current) {
@@ -240,7 +237,7 @@ export function useBehaviorDetection({
         await captureSnapshotAndAnalyze(gen);
         isAnalyzingRef.current = false;
         previousFrameDataRef.current = pixels; // update frame data early to prevent retrigger
-        return; // skip rest of logic this cycle
+        return;
       }
 
       const isMotion = avgDiff > MOTION_SENSITIVITY;
@@ -276,22 +273,23 @@ export function useBehaviorDetection({
           console.log('😴 motion ended');
         }
 
+        // Regular idle snapshots every IDLE_SNAPSHOT_INTERVAL ms
         if (!lastMotionDetectedRef.current &&
-          now >= nextSnapshotAllowedTimeRef.current &&
+          now - lastIdleSnapshotTimeRef.current >= IDLE_SNAPSHOT_INTERVAL + Math.random() * 3_000 &&
           !isAnalyzingRef.current) {
           isAnalyzingRef.current = true;
           await captureSnapshotAndAnalyze(gen);
-          nextSnapshotAllowedTimeRef.current =
-            now + IDLE_SNAPSHOT_INTERVAL + Math.random() * 3_000;
+          lastIdleSnapshotTimeRef.current = now;
           isAnalyzingRef.current = false;
         }
       }
 
-      console.log(`avgDiff: ${avgDiff.toFixed(2)} | motion: ${isMotion}`);
+      // console.log(`avgDiff: ${avgDiff.toFixed(2)} | motion: ${isMotion}`);
     }
 
     previousFrameDataRef.current = pixels;
   }
+
 
   // ─────────────────── snapshot + Gemini analysis ───────────────────────
   type SnapshotHook = (blob: Blob, parsed: any | null) => void;
@@ -395,10 +393,10 @@ export function useBehaviorDetection({
         );
 
 
-        if ('is_focused' in parsed && parsed.is_focused === false) {
-          console.log("data going to be sent");
+        if ('is_focused' in parsed) { // && parsed.is_focused === false
+          // console.log("data going to be sent");
           sendDistractionDataToBackend(parsed);
-          console.log("data sent");
+          // console.log("data sent");
         }
 
         handleBehaviorResult(parsed);

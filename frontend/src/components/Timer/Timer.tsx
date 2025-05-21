@@ -2,13 +2,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useBehaviorDetection } from '../../hooks/useBehaviorDetection';
-import { useSessionHandler } from '../../hooks/useSessionHandler';
 import './Timer.css';
 import DistractionModal from '../DistractionModal/DistractionModal';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { SessionHandler } from '../../hooks/useSessionHandler';
 
-const FOCUS_DURATION = 30;
+const FOCUS_DURATION = 10;
 const BREAK_DURATION = 10;
 const FLUSH_INTERVAL_MS =
   (FOCUS_DURATION * 60 * 1000) / 5;   // 2 s in dev, 5 min in prod
@@ -37,8 +36,6 @@ export interface TimerProps {
   // Add these fields from sessionHandler:
   startSessionOnServer: SessionHandler['startSessionOnServer'];
   updateSessionStatus: SessionHandler['updateSessionStatus'];
-  trackFocusScore: SessionHandler['trackFocusScore'];
-  flushAvgToSession: SessionHandler['flushAvgToSession'];
   sessionIdRef: SessionHandler['sessionIdRef'];
   setSessionId: SessionHandler['setSessionId'];
 }
@@ -51,8 +48,6 @@ export default function Timer({
   onSessionComplete,
   startSessionOnServer,
   updateSessionStatus,
-  trackFocusScore,
-  flushAvgToSession,
   sessionIdRef,
   setSessionId,
 }: TimerProps) {
@@ -84,8 +79,8 @@ export default function Timer({
     externalTimerControlsRef,
     externalTimerStateRef,
     supabase,
-    onFocusScore: trackFocusScore,
     sessionIdRef,
+    onFocusScore: () => { }, // no-op handler to satisfy required prop
   }) || {};
 
 
@@ -112,16 +107,16 @@ export default function Timer({
     if (distractionVisibleRef.current || isRunningRef.current) return;
 
     // if session already exists, just resume it
-    if (sessionIdRef.current !== null) {
-      await updateSessionStatus('RUNNING');
-    } else {
-      const success = await startSessionOnServer(isFocus ? 'FOCUS' : 'BREAK');
-      // console.log('Timer sessionIdRef.current:', sessionIdRef.current);
-      if (!success) {
-        console.error("Error starting session.");
-        return;
-      }
+    // if (sessionIdRef.current !== null) {
+    //  await updateSessionStatus('RUNNING');
+    //} else {
+    const success = await startSessionOnServer(isFocus ? 'FOCUS' : 'BREAK');
+    // console.log('Timer sessionIdRef.current:', sessionIdRef.current);
+    if (!success) {
+      console.error("Error starting session.");
+      return;
     }
+    // }
 
     setIsRunning(true);
     isRunningRef.current = true;
@@ -159,7 +154,10 @@ export default function Timer({
     if (!isRunningRef.current) return;
     if (isFocus) {
       await commitFocusTime('PAUSED');
-      await flushAvgToSession("PAUSED");
+
+      if (sessionIdRef.current !== null) {
+        await updateSessionStatus('PAUSED', focusAccumulated);
+      }
     }
 
 
@@ -172,10 +170,9 @@ export default function Timer({
   };
 
   const stopTimer = async () => {
-    if (isRunning && isFocus) {
+    if (isRunning) {
       await commitFocusTime();
       await updateSessionStatus('STOPPED', focusAccumulated);
-      await flushAvgToSession("STOPPED");
     }
 
     setIsRunning(false);
@@ -199,7 +196,6 @@ export default function Timer({
     if (isRunning && isFocus) {
       await commitFocusTime();
       await updateSessionStatus('PAUSED', focusAccumulated);
-      await flushAvgToSession('PAUSED');
       console.log('Distraction triggered. Session ID:', sessionIdRef.current);
     }
 
@@ -238,7 +234,7 @@ export default function Timer({
       externalTimerControlsRef.current.pause = pauseTimer;
       externalTimerControlsRef.current.stop = stopTimer;
       externalTimerControlsRef.current.resume = resumeTimer;
-      externalTimerControlsRef.current.nextSession = stopTimer; // instead of nextSession
+      externalTimerControlsRef.current.nextSession = nextSession
       externalTimerControlsRef.current.distraction = handleDistraction;
     }
   }, []);
@@ -247,7 +243,6 @@ export default function Timer({
     if (!isRunningRef.current || !isFocus) return;
 
     const id = setInterval(() => {
-      flushAvgToSession("RUNNING");
     }, FLUSH_INTERVAL_MS);
 
     return () => clearInterval(id);

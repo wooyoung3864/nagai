@@ -45,17 +45,20 @@ def query(
     if payload.user_id != user.id:
         raise HTTPException(403, "Forbidden")
 
-    start = payload.start or (datetime.utcnow() - timedelta(days=7))
-    end   = payload.end   or datetime.utcnow()
+    start = datetime.utcnow() - timedelta(days=1)
+    end   = datetime.utcnow()
 
     return (
-      db.query(s_ev.Distraction)
+      db.query(m_ev.Distraction)
         .filter(
           and_(
-            s_ev.Distraction.user_id == payload.user_id,
-            s_ev.Distraction.timestamp.between(start, end)
+            m_ev.Distraction.user_id == payload.user_id,
+            m_ev.Distraction.timestamp.between(start, end),
+            m_ev.Distraction.is_focused == False
           )
         )
-        .order_by(s_ev.Distraction.timestamp)
+        .order_by(m_ev.Distraction.timestamp)
         .all()
     )
+
+    

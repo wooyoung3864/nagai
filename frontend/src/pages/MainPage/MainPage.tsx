@@ -102,7 +102,6 @@ export default function MainPage() {
                   supabase={supabase}
                   sessionIdRef={sessionHandler.sessionIdRef}
                   setSessionId={sessionHandler.setSessionId}
-                  trackFocusScore={sessionHandler.trackFocusScore}
                 />
                 {(!externalTimerStateRef.current.isRunning || !isFocus) && <DistractionsButton />}
               </div>
@@ -124,8 +123,6 @@ export default function MainPage() {
                     // Pass all sessionHandler fields
                     startSessionOnServer={sessionHandler.startSessionOnServer}
                     updateSessionStatus={sessionHandler.updateSessionStatus}
-                    trackFocusScore={sessionHandler.trackFocusScore}
-                    flushAvgToSession={sessionHandler.flushAvgToSession}
                     sessionIdRef={sessionHandler.sessionIdRef}
                     setSessionId={sessionHandler.setSessionId}
                   />

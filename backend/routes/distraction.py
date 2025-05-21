@@ -59,4 +59,3 @@ def query(
         .order_by(s_ev.Distraction.timestamp)
         .all()
     )
-    

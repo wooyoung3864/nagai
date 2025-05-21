@@ -5,9 +5,10 @@ import Pagination from 'react-bootstrap/Pagination';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { motion } from 'framer-motion';
 import DistractionLogDetail from './DistractionLogDetail';
-// import DistractionLogEntry from './DistractionLogEntry/DistractionLogEntry';
+import { SupabaseClient } from "@supabase/supabase-js";
+import { useSupabase } from '../../contexts/SupabaseContext'
 
-interface FocusLogProps {
+interface DistractionLogProps {
     isOpen: boolean;
     onClose: () => void;
 }
@@ -19,11 +20,30 @@ interface LogEntry {
     focusScore: number;
 }
 
-const DistractionLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
+interface Distraction {
+    id: number;
+    session_id: number;
+    focus_score: number;
+    is_focused: boolean;
+    observed_behaviors: string;
+    explanation: string;
+}
+  
+
+const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [sortField, setSortField] = useState<keyof LogEntry>('id');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
+
+    const [timestamp, setTimeStamp] = useState<Date>();
+    const [focusScore, setFocusScore] = useState(0);
+    const [isFocused, setIsFocused] = useState(false);
+    const [oberservedBehavior, setObservedBehavior] = useState([""]);
+    const [explanation, setExplanation] = useState("");
+    const [distractions, setDistractions] = useState<Distraction[]>([]);
+
+    const supabase = useSupabase();
 
     useEffect(() => {
         if (!isOpen) return;
@@ -87,6 +107,57 @@ const DistractionLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
         handleBackToTable();
         onClose();
     }
+
+    const getDistractionData = async () => {
+        const { data } = await supabase.auth.getSession();
+        const access_token = data.session?.access_token;
+        if(!access_token) {
+          console.error("No access token found");
+          return;
+        }
+
+        const { data: userData, error } = await supabase.auth.getUser();
+
+        if (error || !userData?.user) {
+          console.error("Failed to get user", error);
+          return;
+        }
+    
+        const user_id = userData.user.id; // 👈 This is your user_id
+        console.log("User ID:", user_id);
+        console.log("access token: ", access_token);
+        
+  
+        // include session_id & access_token in body
+        const payload = {
+            user_id,
+            access_token
+        };
+  
+        // console.log("da payload 101: ", JSON.stringify(payload))
+        // console.log("access token: " + access_token)
+  
+        try {
+          const res = await fetch(
+            `https://${import.meta.env.VITE_API_URL}/distractions/query`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            }
+          );
+          if (!res.ok) {
+            console.error("Failed to log distraction", await res.text());
+            return;
+          }
+          const result = await res.json();
+          console.log("Distraction logged:", result);
+        } catch (err) {
+          console.error("Error sending data:", err);
+        }
+      };
+
+      getDistractionData();
 
     return (
         <>

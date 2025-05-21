@@ -27,6 +27,7 @@ def add(
         is_focused         = payload.is_focused,
         observed_behaviors = payload.observed_behaviors,
         explanation        = payload.explanation,
+        snapshot_url       = payload.snapshot_url
     )
     db.add(obj)
     db.commit()

@@ -55,6 +55,8 @@ export default function MyPage() {
     } else {
       setTempName(name);
     }
+
+    navigate('/main');
   };
 
   const handleConfirmDiscard = () => {

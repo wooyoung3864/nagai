@@ -47,8 +47,8 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
     useEffect(() => {
         if (distractionMap.size === 0) return;
 
-        const newLogs: LogEntry[] = Array.from(distractionMap.values()).map((distraction) => ({
-            id: distraction.id,
+        const newLogs: LogEntry[] = Array.from(distractionMap.values()).map((distraction, index) => ({
+            id: (index + 1),
             timestamp: new Date(distraction.timestamp).toLocaleString('en-KR', {
                 year: 'numeric',
                 month: 'long',

@@ -101,9 +101,17 @@ npm run dev
 ```
 
 # Runing the backend
+running and setting up the backend for the first time:
 ```
 cd backend
-./setup.sh (only for the first time)
+./setup.sh 
+conda activate nagai
+./run_backend.sh
+```
+
+running backend for the 2nd time or more:
+```
+cd backend
 conda activate nagai
 ./run_backend.sh
 ```

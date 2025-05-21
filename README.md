@@ -18,6 +18,50 @@ We present ‘NAG,’ short for ‘Never Abandon Goals.’ A convenient companio
 ├── Documents
 │   └── nagAI_DataDesign.pdf
 ├── README.md
+├── backend
+│   ├── auth
+│   │   ├── oauth.py
+│   │   └── supabase_client.py
+│   ├── migrations
+│   │   ├── versions
+│   │   └── env.py
+│   ├── models
+│   │   ├── base.py
+│   │   ├── distraction.py
+│   │   ├── focus.py
+│   │   ├── secret.py
+│   │   ├── session.py
+│   │   └── user.py
+│   ├── routes
+│   │   ├── auth.py
+│   │   ├── distraction.py
+│   │   ├── focus.py
+│   │   ├── media.py
+│   │   ├── secrets.py
+│   │   ├── sessions.py
+│   │   └── users.py
+│   ├── schemas
+│   │   ├── auth.py
+│   │   ├── distraction.py
+│   │   ├── focus_query.py
+│   │   ├── focus.py
+│   │   ├── secret.py
+│   │   ├── session.py
+│   │   └── user.py
+│   ├── utils
+│   │   ├── crypto.py
+│   │   ├── init_env.py
+│   │   ├── jwt_utils.py
+│   │   └── push_secrets.py
+│   ├── __init__.py
+│   ├── config.py
+│   ├── create_tables.py
+│   ├── database.py
+│   ├── main.py
+│   ├── push_secrets.py
+│   ├── run_backend.sh
+│   ├── setup.sh
+│   └── startup_env.py
 ├── frontend
 │   ├── eslint.config.js
 │   ├── index.html
@@ -50,4 +94,19 @@ We present ‘NAG,’ short for ‘Never Abandon Goals.’ A convenient companio
 ```
 
 # Running the frontend
+cd frontend
+npm i --legacy-peer-deps
+npm run dev
 
+
+# Runing the backend
+cd backend
+./setup.sh (only for the first time)
+conda activate nagai
+./run_backend.sh
+(
+    if [Errno 48] Address already in use error occurs: 
+    lsof -i :8000
+    kill -9 [PID]
+    ./run_backend.sh
+)

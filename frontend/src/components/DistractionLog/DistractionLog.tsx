@@ -43,7 +43,7 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, numDis
     const supabase = useSupabase();
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 7;
-    const [, setLogLength] = useState(0);
+    const [_, setLogLength] = useState(0);
     
 
     useEffect(() => {
@@ -151,7 +151,7 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, numDis
               map.set(entry.id, entry);
             });
             setDistractionMap(map);
-            
+        
         } catch (err) {
             console.error("Error fetching data:", err);
         }

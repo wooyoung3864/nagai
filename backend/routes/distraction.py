@@ -58,7 +58,7 @@ def query(
             m_ev.Distraction.is_focused == False
           )
         )
-        .order_by(m_ev.Distraction.timestamp)
+        .order_by(m_ev.Distraction.timestamp.desc())
         .all()
     )
 

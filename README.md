@@ -12,6 +12,10 @@ As busy university students, we thought of a tool that would help minimize waste
 We present ‘NAG,’ short for ‘Never Abandon Goals.’ A convenient companion to help fight off distractions and achieve your creative and intellectual goals.
 
 
+# Deployed website
+https://nagai-pi.vercel.app/
+
+
 # Project structure
 ```
 /
@@ -100,6 +104,8 @@ npm i --legacy-peer-deps
 npm run dev
 ```
 
+check out: http://localhost:5173 to see your frontend running from your localhost.
+
 # Runing the backend
 running and setting up the backend for the first time:
 ```
@@ -122,3 +128,12 @@ lsof -i :8000
 kill -9 [PID]
 ./run_backend.sh
 ```
+
+check out http://localhost:8000 to see if backend is running.
+
+http://localhost:8000/docs will let you know the backend APIs used.
+
+# Supported OS
+- Linux
+- Darwin (MacOS)
+If none from above, please install Miniconda manually

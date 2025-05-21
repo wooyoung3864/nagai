@@ -12,6 +12,7 @@ class DistractionBase(BaseModel):
     is_focused: Optional[bool] = None
     observed_behaviors: Optional[List[str]] = None
     explanation: Optional[str] = None
+    snapshot_url: Optional[str] = None
 
 
 class DistractionIn(DistractionBase):

@@ -10,6 +10,7 @@ class Distraction(Base):
     user_id            = Column(Integer, ForeignKey("users.id"), nullable=True)
     session_id         = Column(Integer, ForeignKey("sessions.id"), nullable=True)  # ← NEW FIELD
     timestamp          = Column(DateTime, default=datetime.utcnow, nullable=True)
+    snapshot_url       = Column(String, nullable=True) # webcam snapshot URL
 
     # — Gemini fields —
     focus_score        = Column(Integer, nullable=True)   # 0–100

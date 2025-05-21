@@ -153,7 +153,7 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose }) => {
             });
             setDistractionMap(map);
         
-            console.log("Distraction Map:", map);
+            console.log("DistractionMap:", map);
             
         } catch (err) {
             console.error("Error fetching data:", err);

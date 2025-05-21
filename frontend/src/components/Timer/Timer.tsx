@@ -7,8 +7,8 @@ import DistractionModal from '../DistractionModal/DistractionModal';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { SessionHandler } from '../../hooks/useSessionHandler';
 
-const FOCUS_DURATION = 10;
-const BREAK_DURATION = 10;
+const FOCUS_DURATION = 30;
+const BREAK_DURATION = 15;
 const FLUSH_INTERVAL_MS =
   (FOCUS_DURATION * 60 * 1000) / 5;   // 2 s in dev, 5 min in prod
 

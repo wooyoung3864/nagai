@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useBehaviorDetection } from '../../hooks/useBehaviorDetection';
-import { useSessionHandler } from '../../hooks/useSessionHandler';
 import './Timer.css';
 import DistractionModal from '../DistractionModal/DistractionModal';
 import { useSupabase } from '../../contexts/SupabaseContext';

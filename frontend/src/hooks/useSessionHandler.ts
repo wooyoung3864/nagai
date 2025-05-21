@@ -26,10 +26,10 @@ export function useSessionHandler(): SessionHandler {
     return token;
   };
 
-  const clearSession = () => {
-    setSessionId(null);
-    sessionIdRef.current = null;
-  };
+  //const clearSession = () => {
+    //setSessionId(null);
+    //sessionIdRef.current = null;
+  //};
 
   /* ---------------- POST /sessions ---------------- */
   const startSessionOnServer = async (type: SessionType): Promise<boolean> => {

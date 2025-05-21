@@ -54,7 +54,7 @@ export default function Timer({
   const supabase = useSupabase();
   const [isRunning, setIsRunning] = useState(false);
   const isRunningRef = useRef(false);
-  const [wasPaused, setWasPaused] = useState(false);
+  const [_, setWasPaused] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(FOCUS_DURATION);
   const [isFocus, setIsFocus] = useState(true);
 

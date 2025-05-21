@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { motion } from 'framer-motion';
 import DistractionLogDetail from './DistractionLogDetail';
 import { useSupabase } from "../../contexts/SupabaseContext";
-// test 2
+// test 3
 interface DistractionLogProps {
     isOpen: boolean;
     onClose: () => void;
@@ -49,8 +49,8 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, numDis
     useEffect(() => {
         if (distractionMap.size === 0) return;
 
-        const newLogs: LogEntry[] = Array.from(distractionMap.values()).map((distraction, index) => ({
-            id: (index + 1),
+        const newLogs: LogEntry[] = Array.from(distractionMap.values()).map((distraction) => ({
+            id: distraction.id,
             timestamp: new Date(distraction.timestamp).toLocaleString('en-KR', {
                 year: 'numeric',
                 month: 'long',

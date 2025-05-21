@@ -94,12 +94,14 @@ We present ‘NAG,’ short for ‘Never Abandon Goals.’ A convenient companio
 ```
 
 # Running the frontend
+```
 cd frontend
 npm i --legacy-peer-deps
 npm run dev
-
+```
 
 # Runing the backend
+```
 cd backend
 ./setup.sh (only for the first time)
 conda activate nagai
@@ -110,3 +112,4 @@ conda activate nagai
     kill -9 [PID]
     ./run_backend.sh
 )
+```

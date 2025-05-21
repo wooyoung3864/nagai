@@ -302,17 +302,6 @@ export default function Timer({
 
   return (
     <>
-      {isRunning && isFocus && (
-        <div className="d-flex justify-content-center mb-3">
-          <button
-            className="timer-btn-temp distract-btn-overlay"
-            onClick={handleDistraction}
-          >
-            Distract Me!
-          </button>
-        </div>
-      )}
-
       <motion.div
         className="timer-circle"
         style={{
@@ -325,25 +314,6 @@ export default function Timer({
           {String(remainingSeconds % 60).padStart(2, '0')}
         </div>
       </motion.div>
-
-      <div className="d-flex justify-content-center align-items-center">
-        {!isRunning ? (
-          <button className="timer-btn-temp" onClick={startTimer}>
-            {wasPaused ? 'Resume' : 'Start'}
-          </button>
-        ) : (
-          <>
-            {isFocus && (
-              <button className="timer-btn-temp" onClick={pauseTimer}>
-                Pause
-              </button>
-            )}
-            <button className="timer-btn-temp" onClick={stopTimer}>
-              Stop
-            </button>
-          </>
-        )}
-      </div>
 
       <DistractionModal
         isVisible={distractionVisible}

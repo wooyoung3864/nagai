@@ -28,10 +28,15 @@ export function useLoadEnv() {
         })
       } catch (err) {
         console.warn("Falling back to hardcoded env vars:", err)
-        
+        setEnv({
+          SUPABASE_URL: "https://wphzfbfgsyqpzixgkltu.supabase.co/",
+          SUPABASE_ANON_KEY:
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaHpmYmZnc3lxcHppeGdrbHR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwMjIwOTQsImV4cCI6MjA2MTU5ODA5NH0.fnz0wju8X95U56pknwL81k2uwsF4Vpja7nuRqEerOJA",
+        })
       }
     }
 
+    load()
   }, [])
 
   return env

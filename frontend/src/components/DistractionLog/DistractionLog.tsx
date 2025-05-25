@@ -145,7 +145,6 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, numDis
               return;
             }
             const result: Distraction[] = await res.json();
-            console.log("result: ", result);
                 
             const map = new Map<number, Distraction>();
             result.forEach((entry) => {

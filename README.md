@@ -12,11 +12,11 @@ As busy university students, we thought of a tool that would help minimize waste
 We present ‘NAG,’ short for ‘Never Abandon Goals.’ A convenient companion to help fight off distractions and achieve your creative and intellectual goals.
 
 
-# Deployed website
+## Deployed website
 https://nagai-pi.vercel.app/
 
 
-# Project structure
+## Project structure
 ```
 /
 ├── Documents
@@ -87,12 +87,7 @@ https://nagai-pi.vercel.app/
 │   ├── tsconfig.app.json
 │   ├── tsconfig.json
 │   ├── tsconfig.node.json
-│   └── vite.config.ts
-├── nagai
-│   ├── README.md
-│   ├── initial_plan.md
-│   └── tips_for_working_in_a_group.md
-└── nagai.code-workspace
+│___└── vite.config.ts
 
 10 directories, 20 files
 ```
@@ -129,11 +124,13 @@ kill -9 [PID]
 ./run_backend.sh
 ```
 
-check out http://localhost:8000 to see if backend is running.
+check out http://localhost:8000 to see if the backend is running.
 
 http://localhost:8000/docs will let you know the backend APIs used.
 
 # Supported OS
 - Linux
 - Darwin (MacOS)
+- Windows
+
 If none from above, please install Miniconda manually

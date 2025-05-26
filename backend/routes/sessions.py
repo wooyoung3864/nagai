@@ -57,7 +57,7 @@ def update_session_status(
             session.avg_score = int(round(avg))
 
     if focus_secs is not None:
-        session.focus_secs = focus_secs
+        session.focus_secs = (session.focus_secs or 0) + focus_secs
     # Legacy/manual
     if avg_score is not None:
         session.avg_score = int(round(avg_score))

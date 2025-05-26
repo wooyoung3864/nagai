@@ -170,10 +170,8 @@ export default function Timer({
   };
 
   const stopTimer = async () => {
-    if (isRunning) {
-      await commitFocusTime();
-      await updateSessionStatus('STOPPED', focusAccumulated);
-    }
+    await commitFocusTime();
+    await updateSessionStatus('STOPPED', focusAccumulated);
 
     setIsRunning(false);
     isRunningRef.current = false;

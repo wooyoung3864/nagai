@@ -59,18 +59,25 @@ export function useSessionHandler(): SessionHandler {
     status: SessionStatus,
     focusSecs?: number,
   ) => {
-    if (!sessionIdRef.current) return;
+    if (!sessionIdRef.current) {
+      console.log('!sessionIdRef;')
+      return;
+    }
 
     const url = new URL(`/sessions/${sessionIdRef.current}/update`, `https://${base}`);
     url.searchParams.set("status", status);
     if (focusSecs !== undefined) url.searchParams.set("focus_secs", String(focusSecs));
 
     const access_token = await getAccessToken();
-    await fetch(url.toString(), {
+    const res = await fetch(url.toString(), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ access_token }),
     });
+
+    // Await the response JSON before logging
+    const data = await res.json();
+    console.log(data);
 
     // 🟢 Clear sessionId after STOPPED or COMPLETED
     if (status === "STOPPED" || status === "COMPLETED") {

@@ -48,7 +48,6 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
         console.error("No access_token found"); 
         return;
       }
-      console.log("✅ Supabase token:", token);
 
       try {
         const user = localStorage.getItem('user');

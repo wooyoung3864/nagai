@@ -91,7 +91,7 @@ export function useSessionHandler(): SessionHandler {
   const getTodayTotalFocus = async (): Promise<number> => {
     try {
       const access_token = await getAccessToken();
-      const res = await fetch(`https://${base}/today-total`, {
+      const res = await fetch(`https://${base}/sessions/today-total`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ access_token }),

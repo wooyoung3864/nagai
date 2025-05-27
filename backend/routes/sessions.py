@@ -144,10 +144,10 @@ def sessions_by_day(
 
 @router.post("/today-total")
 def total_focus_secs_today(
-    access_token: str = Body(...),
+    payload: s.SessionUpdateInput = Body(...),
     db: Session = Depends(get_db)
 ):
-    user = get_user_from_token(access_token, db)
+    user = get_user_from_token(payload.access_token, db)
     
     # calculate today's start and end (midnight to now, server local time)
     now = datetime.now()

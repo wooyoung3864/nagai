@@ -2,7 +2,7 @@ import startup_env  # ⬅️ this sets os.environ correctly
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import users, sessions, focus, media, distraction, secrets, auth
+from routes import users, sessions, focus, distraction, secrets, auth
 from utils.init_env import load_secrets_to_env
 
 app = FastAPI()
@@ -22,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for router in (users, sessions, focus, media, distraction, secrets, auth):
+for router in (users, sessions, focus, distraction, secrets, auth):
     app.include_router(router.router)
     
 load_secrets_to_env()

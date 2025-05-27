@@ -40,7 +40,6 @@ https://nagai-pi.vercel.app/
 │   │   ├── auth.py
 │   │   ├── distraction.py
 │   │   ├── focus.py
-│   │   ├── media.py
 │   │   ├── secrets.py
 │   │   ├── sessions.py
 │   │   └── users.py

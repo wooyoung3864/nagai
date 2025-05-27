@@ -18,7 +18,7 @@ interface DailyData {
 
 const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
   const [focusData, setFocusData] = useState<DailyData[]>([]);
-  const [avgScore, setAvgScore] = useState<number | null>(null);
+  const [_, setAvgScore] = useState<number | null>(null);
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;

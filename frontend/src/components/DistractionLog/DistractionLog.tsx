@@ -8,236 +8,242 @@ import DistractionLogDetail from './DistractionLogDetail';
 import { useSupabase } from "../../contexts/SupabaseContext";
 // test 4
 interface DistractionLogProps {
-    isOpen: boolean;
-    onClose: () => void;
-    distractionCount: (length: number) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  distractionCount: (length: number) => void;
 }
 
 interface LogEntry {
-    id: number;
-    timestamp: string;
-    events: string;
-    focusScore: number;
-    distractionImg: string;
+  id: number;
+  timestamp: string;
+  events: string;
+  focusScore: number;
+  distractionImg: string;
 }
 
 interface Distraction {
-    id: number;
-    timestamp: Date;
-    session_id: number;
-    focus_score: number;
-    is_focused: boolean;
-    observed_behaviors: string[];
-    explanation: string;
-    snapshot_url: string;
-    user_id: number;
+  id: number;
+  timestamp: Date;
+  session_id: number;
+  focus_score: number;
+  is_focused: boolean;
+  observed_behaviors: string[];
+  explanation: string;
+  snapshot_url: string;
+  user_id: number;
 }
-  
+
 
 const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, distractionCount: numDistraction }) => {
-    const [logs, setLogs] = useState<LogEntry[]>([]);
-    const [sortField, setSortField] = useState<keyof LogEntry>('id');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-    const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
-    const [distractionMap, setDistractionMap] = useState<Map<number, Distraction>>(new Map());
-    const supabase = useSupabase();
-    const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 7;
-    const [_, setDistractionCount] = useState(0);
-    
-    useEffect(() => {
-        if (distractionMap.size === 0) return;
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [sortField, setSortField] = useState<keyof LogEntry>('id');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
+  const [distractionMap, setDistractionMap] = useState<Map<number, Distraction>>(new Map());
+  const supabase = useSupabase();
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 7;
+  const [_, setDistractionCount] = useState(0);
 
-        const newLogs: LogEntry[] = Array.from(distractionMap.values()).map((distraction, index) => ({
-            id: (index + 1),
-            timestamp: new Date(distraction.timestamp).toLocaleString('en-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                weekday: 'short',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false,
-                timeZoneName: 'short'
-              }),
-              events: Array.isArray(distraction.observed_behaviors)
-                ? distraction.observed_behaviors.join(", ")
-                : "N/A",
-            focusScore: distraction.focus_score,
-            distractionImg: distraction.snapshot_url
-        }));
-        setLogs(newLogs);
-        setDistractionCount(newLogs.length);
-        numDistraction(newLogs.length);
-    }, [distractionMap]);
+  useEffect(() => {
+    if (distractionMap.size === 0) return;
 
+    const newLogs: LogEntry[] = Array.from(distractionMap.values()).map((distraction, index) => ({
+      id: (index + 1),
+      timestamp: (() => {
+        let ts = distraction.timestamp as unknown as string; // Type assertion, safe for JSON API
 
-    const handleSort = (field: keyof LogEntry) => {
-        const order = field === sortField ? (sortOrder === 'asc' ? 'desc' : 'asc') : 'asc';
-        setSortField(field);
-        setSortOrder(order);
-        setLogs((prev) =>
-            [...prev].sort((a, b) => {
-                const valA = a[field];
-                const valB = b[field];
-                if (valA < valB) return order === 'asc' ? -1 : 1;
-                if (valA > valB) return order === 'asc' ? 1 : -1;
-                return 0;
-            })
-        );
-    };
+        if (!ts.endsWith('Z')) ts += 'Z'; // Ensure UTC interpretation
+        let dateObj = new Date(ts);
+
+        // Format as local time (which will now be "manual KST")
+        return dateObj.toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          weekday: 'short',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+          // Don't specify timeZone, because we've already shifted it!
+        }) + ' GMT+9';
+      })(),
+      events: Array.isArray(distraction.observed_behaviors)
+        ? distraction.observed_behaviors.join(", ")
+        : "N/A",
+      focusScore: distraction.focus_score,
+      distractionImg: distraction.snapshot_url
+    }));
+    setLogs(newLogs);
+    setDistractionCount(newLogs.length);
+    numDistraction(newLogs.length);
+  }, [distractionMap]);
 
 
-    const showDetail = (id: number) => {
-      const log = logs.find((log) => log.id === id);
-      if (log) setSelectedLog(log);
-    };
-    
-    const handleBackToTable = () => {
-      setSelectedLog(null);
-    };
+  const handleSort = (field: keyof LogEntry) => {
+    const order = field === sortField ? (sortOrder === 'asc' ? 'desc' : 'asc') : 'asc';
+    setSortField(field);
+    setSortOrder(order);
+    setLogs((prev) =>
+      [...prev].sort((a, b) => {
+        const valA = a[field];
+        const valB = b[field];
+        if (valA < valB) return order === 'asc' ? -1 : 1;
+        if (valA > valB) return order === 'asc' ? 1 : -1;
+        return 0;
+      })
+    );
+  };
 
 
-    const handleClose = () => {
-        handleBackToTable();
+  const showDetail = (id: number) => {
+    const log = logs.find((log) => log.id === id);
+    if (log) setSelectedLog(log);
+  };
+
+  const handleBackToTable = () => {
+    setSelectedLog(null);
+  };
+
+
+  const handleClose = () => {
+    handleBackToTable();
+    onClose();
+  }
+
+
+  // ✅ Always call hooks unconditionally
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
         onClose();
-    }
-
-    
-    // ✅ Always call hooks unconditionally
-    useEffect(() => {
-      const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
-          onClose();
-        }
-      };
-      if (isOpen) {
-        window.addEventListener('keydown', handleKeyDown);
       }
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose]);
-  
-    useEffect(() => {
-      const getDistractionData = async () => {
-        const { data } = await supabase.auth.getSession();
-        const access_token = data.session?.access_token;
-        if (!access_token) {
-          console.error("No access token found");
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    const getDistractionData = async () => {
+      const { data } = await supabase.auth.getSession();
+      const access_token = data.session?.access_token;
+      if (!access_token) {
+        console.error("No access token found");
+        return;
+      }
+
+      const user = localStorage.getItem("user");
+      const user_id_kv = user?.split(",")[3];
+      const user_id = user_id_kv?.split(":")[1];
+
+      const payload = { "user_id": user_id, "access_token": access_token };
+
+      try {
+        const res = await fetch(`https://${import.meta.env.VITE_API_URL}/distractions/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          console.error("Failed to fetch distraction", await res.text());
           return;
         }
-  
-        const user = localStorage.getItem("user");
-        const user_id_kv = user?.split(",")[3];
-        const user_id = user_id_kv?.split(":")[1];
-  
-        const payload = { "user_id":user_id, "access_token":access_token };
+        const result: Distraction[] = await res.json();
 
-        try {
-            const res = await fetch(`https://${import.meta.env.VITE_API_URL}/distractions/query`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload),
-            });
-            if (!res.ok) {
-              console.error("Failed to fetch distraction", await res.text());
-              return;
-            }
-            const result: Distraction[] = await res.json();
-                
-            const map = new Map<number, Distraction>();
-            result.forEach((entry) => {
-              map.set(entry.id, entry);
-            });
-            setDistractionMap(map);
-        
-        } catch (err) {
-            console.error("Error fetching data:", err);
-        }
+        const map = new Map<number, Distraction>();
+        result.forEach((entry) => {
+          map.set(entry.id, entry);
+        });
+        setDistractionMap(map);
 
-      };
-      getDistractionData();
-    }, [isOpen, supabase]);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+
+    };
+    getDistractionData();
+  }, [isOpen, supabase]);
+
+  if (!isOpen && !selectedLog) return null;
 
 
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentLogs = logs.slice(indexOfFirstRow, indexOfLastRow);
 
-    if (!isOpen && !selectedLog) return null;
+  const totalPages = Math.ceil(logs.length / rowsPerPage);
 
-
-    const indexOfLastRow = currentPage * rowsPerPage;
-    const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-    const currentLogs = logs.slice(indexOfFirstRow, indexOfLastRow);
-    
-    const totalPages = Math.ceil(logs.length / rowsPerPage);
-
-    return (
-        <>
-            {!selectedLog && (
-                <div className="modal-overlay">
-                    <motion.div
-                        className="modal-box scrollable distraction-log-expanded"
-                        initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ duration: 0.4, ease: 'easeOut' }}
+  return (
+    <>
+      {!selectedLog && (
+        <div className="modal-overlay">
+          <motion.div
+            className="modal-box scrollable distraction-log-expanded"
+            initial={{ opacity: 0, scale: 0.9, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+          >
+            <div className="modal-header">
+              <h2 className="modal-title">Distraction Log</h2>
+              <button className="close-button" onClick={onClose}>✕</button>
+            </div>
+            <div className="modal-body">
+              <Table className="styled-table" striped bordered hover>
+                <thead className="table-primary">
+                  <tr>
+                    <th scope="col" onClick={() => handleSort('id')}>
+                      # {sortField === 'id' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('timestamp')}>
+                      Date & Time {sortField === 'timestamp' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('events')}>
+                      Distraction Elements {sortField === 'events' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
+                    </th>
+                    <th scope="col" onClick={() => handleSort('focusScore')}>
+                      Estimated Focus Score {sortField === 'focusScore' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentLogs.map((log) => (
+                    <tr key={log.id} onClick={() => showDetail(log.id)}>
+                      <th scope="row">{log.id}</th>
+                      <td >{log.timestamp}</td>
+                      <td>{log.events}</td>
+                      <td>{log.focusScore}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+            <div className="modal-footer justify-content-center">
+              <Pagination size="sm">
+                {[...Array(totalPages)].map((_, idx) => {
+                  const page = idx + 1;
+                  return (
+                    <Pagination.Item
+                      key={page}
+                      active={page === currentPage}
+                      onClick={() => setCurrentPage(page)}
                     >
-                        <div className="modal-header">
-                            <h2 className="modal-title">Distraction Log</h2>
-                            <button className="close-button" onClick={onClose}>✕</button>
-                        </div>
-                        <div className="modal-body">
-                            <Table className="styled-table" striped bordered hover>
-                                <thead className="table-primary">
-                                    <tr>
-                                        <th scope="col" onClick={() => handleSort('id')}>
-                                            # {sortField === 'id' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
-                                        </th>
-                                        <th scope="col" onClick={() => handleSort('timestamp')}>
-                                            Date & Time {sortField === 'timestamp' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
-                                        </th>
-                                        <th scope="col" onClick={() => handleSort('events')}>
-                                            Distraction Elements {sortField === 'events' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
-                                        </th>
-                                        <th scope="col" onClick={() => handleSort('focusScore')}>
-                                            Estimated Focus Score {sortField === 'focusScore' ? (sortOrder === 'asc' ? '↓' : '↑') : ''}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {currentLogs.map((log) => (
-                                        <tr key={log.id} onClick={() => showDetail(log.id)}>
-                                            <th scope="row">{log.id}</th>
-                                            <td >{log.timestamp}</td>
-                                            <td>{log.events}</td>
-                                            <td>{log.focusScore}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </Table>
-                        </div>
-                        <div className="modal-footer justify-content-center">
-                            <Pagination size="sm">
-                              {[...Array(totalPages)].map((_, idx) => {
-                                const page = idx + 1;
-                                return (
-                                  <Pagination.Item
-                                    key={page}
-                                    active={page === currentPage}
-                                    onClick={() => setCurrentPage(page)}
-                                  >
-                                    {page}
-                                  </Pagination.Item>
-                                );
-                              })}
-                            </Pagination>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
-            {selectedLog && (
-                <DistractionLogDetail log={selectedLog} onBack={handleBackToTable} closeLog={handleClose}/>
-            )}
-        </>
-    );
+                      {page}
+                    </Pagination.Item>
+                  );
+                })}
+              </Pagination>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      {selectedLog && (
+        <DistractionLogDetail log={selectedLog} onBack={handleBackToTable} closeLog={handleClose} />
+      )}
+    </>
+  );
 };
 
 export default DistractionLog;

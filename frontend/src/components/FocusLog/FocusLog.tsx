@@ -13,7 +13,7 @@ interface DailyData {
   date: string;
   focusTime: string;
   focusCycle: number;
-  focusScore?: number;
+  avgScore: number | null;
 }
 
 const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
@@ -45,7 +45,7 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
       const token = data.session?.access_token;
 
       if (!token) {
-        console.error("No access_token found"); 
+        console.error("No access_token found");
         return;
       }
 
@@ -77,51 +77,38 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
 
         const data = await response.json();
         const result: DailyData[] = [];
-        const map = new Map<string, { secs: number, scoreSum: number, count: number }>();
-        console.log("📦 raw response from backend:", data);
+
+        let totalScoreSum = 0, scoreDays = 0;
+
         data.forEach((entry: any) => {
-          const date = entry.day; 
+          const date = entry.day;
           const secs = entry.total_focus_secs || 0;
+          const avgScore = entry.avg_focus_score != null ? Math.round(entry.avg_focus_score) : null;
 
           const hours = Math.floor(secs / 3600);
           const mins = Math.floor((secs % 3600) / 60);
           const timeStr = `${hours}h ${mins}m`;
           const cycle = secs / 60 / 25.0;
 
-          result.push({
-            date,
-            focusTime: timeStr,
-            focusCycle: parseFloat(cycle.toFixed(1)),
-            focusScore: undefined 
-          });
-        });
-
-        let totalScore = 0, scoreCount = 0;
-
-        map.forEach((value, date) => {
-          const hours = Math.floor(value.secs / 3600);
-          const mins = Math.floor((value.secs % 3600) / 60);
-          const timeStr = `${hours}h ${mins}m`;
-          const cycle = value.secs / 60 / 25.0;
-          const score = value.count ? Math.round(value.scoreSum / value.count) : undefined;
-          if (score !== undefined) {
-            totalScore += score;
-            scoreCount++;
+          if (avgScore !== null) {
+            totalScoreSum += avgScore;
+            scoreDays++;
           }
 
           result.push({
             date,
             focusTime: timeStr,
             focusCycle: parseFloat(cycle.toFixed(1)),
-            focusScore: score
+            avgScore: avgScore,
           });
         });
 
         setFocusData(result);
         result.forEach(d => {
-          console.log(`🔍 ${d.date} → ${d.focusTime}`);
+          console.log(`🔍 ${d.date} → ${d.focusTime} (${d.avgScore ?? "N/A"})`);
         });
-        setAvgScore(scoreCount ? Math.round(totalScore / scoreCount) : null);
+
+        setAvgScore(scoreDays ? Math.round(totalScoreSum / scoreDays) : null);
       } catch (error) {
         console.error("Error fetching focus data:", error);
       }
@@ -141,9 +128,6 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
         </div>
         <div className="modal-body">
           <Calendar data={focusData} />
-          {avgScore !== null && (
-            <div className="average-score">Average Focus Score: <strong>{avgScore}</strong></div>
-          )}
         </div>
       </div>
     </motion.div>

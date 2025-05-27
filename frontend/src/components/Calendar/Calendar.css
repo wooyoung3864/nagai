@@ -31,6 +31,10 @@
     color: #ef4444;
 }
 
+.avg-score {
+  color: black;
+}
+
 .month{
     color: #000000;
     font-size: large;
@@ -41,8 +45,16 @@
     margin-bottom: 10px;
 }
 
-.month button {
+.month-nav {
   border-radius: 8px;
+}
+
+.month-nav:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  outline: none;
+  box-shadow: none;
 }
 
 .month h3 {

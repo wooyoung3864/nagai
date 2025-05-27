@@ -99,7 +99,8 @@ export function useSessionHandler(): SessionHandler {
       if (!res.ok) {
         return 0;
       }
-      const total = await res.json();
+      const rawResp = await res.json();
+      const total = rawResp.total_focus_secs
       return typeof total === "number" ? total : parseInt(total);
     } catch (err) {
       console.error("Error fetching today total focus:", err);

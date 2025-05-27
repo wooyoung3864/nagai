@@ -54,9 +54,9 @@ def query(
     if payload.user_id != user.id:
         raise HTTPException(403, "Forbidden")
 
-    # Compute "last 24 hours" in KST
+    # Compute "today" in KST
     now_kst = datetime.now(KST)
-    start = now_kst - timedelta(days=1)
+    start = datetime.combine(now_kst.date(), datetime.min.time(), tzinfo=KST)
     end = now_kst
 
     return (

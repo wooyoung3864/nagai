@@ -22,6 +22,7 @@ export default function MainPage() {
   const [_, setIsTimerRunning] = useState(false);
 
   const [totalFocusSeconds, setTotalFocusSeconds] = useState(0);
+  const [focusSecondsLoading, setFocusSecondsLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -78,6 +79,7 @@ export default function MainPage() {
   // fetch latest totalFocusSeconds value from backend
   useEffect(() => {
     sessionHandler.getTodayTotalFocus().then(setTotalFocusSeconds);
+    setFocusSecondsLoading(false);
   })
 
   return (
@@ -134,7 +136,7 @@ export default function MainPage() {
                 </div>
 
                 {(!externalTimerStateRef.current.isRunning || !isFocus) && (
-                  <FocusButton focusTime={formatTime(totalFocusSeconds)} />
+                  <FocusButton focusTime={focusSecondsLoading ? '--' : formatTime(totalFocusSeconds)} />
                 )}
               </div>
             </div>

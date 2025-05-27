@@ -163,4 +163,4 @@ def total_focus_secs_today(
     ).scalar() # returns int or None
     
     # return JSON object with "total_focus_secs" field
-    return {"total_focus_secs": total_focus_secs or None }
+    return {"total_focus_secs": total_focus_secs or 0 }

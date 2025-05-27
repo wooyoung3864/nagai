@@ -142,7 +142,7 @@ def sessions_by_day(
 
     return sessions
 
-@router.post("/today-total", response_model=list[s.SessionOut])
+@router.post("/today-total")
 def total_focus_secs_today(
     access_token: str = Body(...),
     db: Session = Depends(get_db)

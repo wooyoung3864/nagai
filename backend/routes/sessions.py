@@ -14,6 +14,8 @@ from models.distraction import Distraction
 from sqlalchemy import func
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
+# KST timezone
+KST = ZoneInfo("Asia/Seoul")
 
 
 @router.post("/", response_model=s.SessionOut)
@@ -78,11 +80,12 @@ def sessions_monthly_focus_summary(
     # Start and end of the month
     from datetime import date
 
-    month_start = datetime(year, month, 1)
+    month_start = datetime(year, month, 1, tzinfo=KST)
     if month == 12:
-        month_end = datetime(year + 1, 1, 1)
+        month_end = datetime(year + 1, 1, 1, tzinfo=KST)
     else:
-        month_end = datetime(year, month + 1, 1)
+        month_end = datetime(year, month + 1, 1, tzinfo=KST)
+
 
     # Group by DATE, summing focus_secs
     results = (
@@ -105,7 +108,7 @@ def sessions_monthly_focus_summary(
     # Response: list of {"day": "YYYY-MM-DD", "total_focus_secs": N}
     return [
         {
-            "day": str(day), 
+            "day": str(day),
             "total_focus_secs": int(total_focus_secs or 0),
             "avg_focus_score": float(avg_focus_score) if avg_focus_score is not None else None
         }
@@ -122,7 +125,8 @@ def sessions_by_day(
     user = get_user_from_token(access_token, db)
     # Parse the input date
     try:
-        day_start = datetime.strptime(date, "%Y-%m-%d")
+        day_start = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=KST)
+
     except Exception:
         raise HTTPException(400, "Invalid date format (expected YYYY-MM-DD)")
 
@@ -142,25 +146,24 @@ def sessions_by_day(
 
     return sessions
 
+
 @router.post("/today-total")
 def total_focus_secs_today(
     payload: s.SessionUpdateInput = Body(...),
     db: Session = Depends(get_db)
 ):
     user = get_user_from_token(payload.access_token, db)
-    
-    # KST timezone
-    KST = ZoneInfo("Asia/Seoul")
+
     now_kst = datetime.now(KST)
     today_start_kst = datetime.combine(now_kst.date(), time.min, tzinfo=KST)
-    
+
     # query: all sessions for this user, today, with focus time
     total_focus_secs = db.query(func.coalesce(func.sum(m.Session.focus_secs), 0)).filter(
         m.Session.user_id == user.id,
         m.Session.start_time >= today_start_kst,
         m.Session.start_time <= now_kst,
         m.Session.type == 'FOCUS'
-    ).scalar() # returns int or None
-    
+    ).scalar()  # returns int or None
+
     # return JSON object with "total_focus_secs" field
-    return {"total_focus_secs": total_focus_secs or 0 }
+    return {"total_focus_secs": total_focus_secs or 0}

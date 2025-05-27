@@ -69,7 +69,7 @@ export default function MainPage() {
   };
 
   const formatTime = (seconds: number) => {
-    if (!seconds) return '--';
+    if (seconds === null || seconds === undefined) return '--';
     const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
     const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
     const s = (seconds % 60).toString().padStart(2, '0');
@@ -78,9 +78,10 @@ export default function MainPage() {
 
   // fetch latest totalFocusSeconds value from backend
   useEffect(() => {
-    sessionHandler.getTodayTotalFocus().then(setTotalFocusSeconds);
-    setFocusSecondsLoading(false);
-  })
+    sessionHandler.getTodayTotalFocus()
+    .then(setTotalFocusSeconds)
+    .finally(() => setFocusSecondsLoading(false));
+  }, []); // ← Only on mount (or add dependencies if you want)
 
   return (
     <>

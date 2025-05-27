@@ -10,7 +10,7 @@ import { useSupabase } from "../../contexts/SupabaseContext";
 interface DistractionLogProps {
     isOpen: boolean;
     onClose: () => void;
-    numDistraction: (length: number) => void;
+    distractionCount: (length: number) => void;
 }
 
 interface LogEntry {
@@ -34,7 +34,7 @@ interface Distraction {
 }
   
 
-const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, numDistraction }) => {
+const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, distractionCount: numDistraction }) => {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [sortField, setSortField] = useState<keyof LogEntry>('id');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -43,9 +43,8 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, numDis
     const supabase = useSupabase();
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 7;
-    const [_, setLogLength] = useState(0);
+    const [_, setDistractionCount] = useState(0);
     
-
     useEffect(() => {
         if (distractionMap.size === 0) return;
 
@@ -69,7 +68,7 @@ const DistractionLog: React.FC<DistractionLogProps> = ({ isOpen, onClose, numDis
             distractionImg: distraction.snapshot_url
         }));
         setLogs(newLogs);
-        setLogLength(newLogs.length);
+        setDistractionCount(newLogs.length);
         numDistraction(newLogs.length);
     }, [distractionMap]);
 

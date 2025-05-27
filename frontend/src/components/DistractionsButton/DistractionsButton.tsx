@@ -5,10 +5,10 @@ import DistractionLog from '../DistractionLog/DistractionLog';
 
 export default function DistractionsButton() {
     const [isDistractionLogOpen, setDistractionLogOpen] = useState(false);
-    const [logLength, setLogLength] = useState(0);
+    const [distractionCount, setDistractionCount] = useState(0);
 
-    const handleNumDistraction = (length: number) => {
-        setLogLength(length);
+    const handleDistractionCount = (length: number) => {
+        setDistractionCount(length);
       };    
 
     return (
@@ -26,14 +26,14 @@ export default function DistractionsButton() {
                 <h3>Distractions</h3>
                 <div className='distraction-circle'>
                     <div className='distraction-text'>
-                        {logLength}
+                        {distractionCount}
                     </div>
                 </div>
             </button>
             <DistractionLog
                 isOpen={isDistractionLogOpen}
                 onClose={() => setDistractionLogOpen(false)}
-                numDistraction={handleNumDistraction}
+                distractionCount={handleDistractionCount}
             />
         </div>
     );

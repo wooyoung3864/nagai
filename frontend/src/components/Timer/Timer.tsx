@@ -88,7 +88,7 @@ export default function Timer({
     ? Math.floor((Date.now() - sessionStartRef.current) / 1000)
     : 0;
 
-  const commitFocusTime = async (status: 'RUNNING' | 'PAUSED' | 'COMPLETED' = 'RUNNING') => {
+  const commitFocusTime = async (status: 'RUNNING' | 'PAUSED' | 'COMPLETED' | 'STOPPED' = 'RUNNING') => {
     if (isFocus && sessionStartRef.current) {
       const delta = computeElapsed();
       const updatedTotal = focusAccumulated + delta;
@@ -106,12 +106,8 @@ export default function Timer({
   const startTimer = async () => {
     if (distractionVisibleRef.current || isRunningRef.current) return;
 
-    // if session already exists, just resume it
-    // if (sessionIdRef.current !== null) {
-    //  await updateSessionStatus('RUNNING');
-    //} else {
     const success = await startSessionOnServer(isFocus ? 'FOCUS' : 'BREAK');
-    // console.log('Timer sessionIdRef.current:', sessionIdRef.current);
+
     if (!success) {
       console.error("Error starting session.");
       return;
@@ -152,27 +148,24 @@ export default function Timer({
 
   const pauseTimer = async () => {
     if (!isRunningRef.current) return;
-    if (isFocus) {
-      await commitFocusTime('PAUSED');
 
-      if (sessionIdRef.current !== null) {
-        await updateSessionStatus('PAUSED', focusAccumulated);
-      }
-    }
-
-
+    // 🟢 1. Immediately pause the UI
     setIsRunning(false);
     isRunningRef.current = false;
     externalTimerStateRef.current.isRunning = false;
     externalTimerStateRef.current.isPaused = true;
     onRunningChange(false);
     setWasPaused(true);
+
+    // 🟢 2. Commit focus time (which already updates backend)
+    if (isFocus) {
+      await commitFocusTime('PAUSED');
+      // (remove any redundant backend call here)
+    }
   };
 
   const stopTimer = async () => {
-    await commitFocusTime();
-    await updateSessionStatus('STOPPED', focusAccumulated);
-
+    // 1️⃣ Immediately update UI state and refs
     setIsRunning(false);
     isRunningRef.current = false;
     externalTimerStateRef.current.isRunning = false;
@@ -180,22 +173,25 @@ export default function Timer({
     onRunningChange(false);
 
     setWasPaused(false);
+
+    // 2️⃣ Commit focus time and update backend (async, does not block UI)
+    await commitFocusTime('STOPPED');
+
+    // 3️⃣ Reset timer-related state for next session
     setIsFocus(true);
     setRemainingSeconds(FOCUS_DURATION);
     setFocusAccumulated(0);
     sessionStartRef.current = null;
 
+    // 4️⃣ Stop progress animation
     controlsRef.current?.stop();
     progress.set(0);
     progress.clearListeners();
   };
 
   const handleDistraction = async () => {
-    if (isRunning && isFocus) {
-      await commitFocusTime();
-      await updateSessionStatus('PAUSED', focusAccumulated);
-      console.log('Distraction triggered. Session ID:', sessionIdRef.current);
-    }
+    await commitFocusTime('PAUSED');
+    console.log('Distraction triggered. Session ID:', sessionIdRef.current);
 
     setIsRunning(false);
     isRunningRef.current = false;
@@ -320,7 +316,7 @@ export default function Timer({
           distractionVisibleRef.current = false;
           externalTimerStateRef.current.isDistractionModalVisible = false;
           setModalVisible(false); // this ref refers to the modal in UseBehaviorDetection.ts.
-          startTimer();
+          resumeTimer(); // NOT startTimer();
           startBehaviorDetection();
         }}
       />

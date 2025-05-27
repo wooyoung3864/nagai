@@ -3,13 +3,13 @@ import './FocusButton.css'
 import '../../App.css';
 import FocusLog from "../FocusLog/FocusLog";
 
-export default function FocusButton({ focustime }: { focustime: string }) {
+export default function FocusButton({ focusTime }: { focusTime: string }) {
     const [isFocusLogOpen, setFocusLogOpen] = useState(false);
 
     return (
         <div className="focus-btn-wrap">
             <button className="focus-button" onClick={() => setFocusLogOpen(true)}>
-                <h3>Focus Time: {focustime}</h3>
+                <h3>Focus Time: { focusTime }</h3>
             </button>
 
             <FocusLog

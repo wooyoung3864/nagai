@@ -392,7 +392,7 @@ export function useBehaviorDetection({
           return;
         }
         const result = await res.json();
-        console.log("Distraction logged:", result);
+        gemini_data.is_focused ? console.log("Focus Event logged:", result) : console.log("Distraction logged:", result);
       } catch (err) {
         console.error("Error sending data:", err);
       }
@@ -528,8 +528,6 @@ export function useBehaviorDetection({
     }
 
     if (!result) return;
-    // 🎯 log the incoming result and timer state
-    console.log('🎯 handleBehaviorResult', { result, timerState: externalTimerStateRef.current });
 
     if (result.action) {
       const map = {
@@ -542,6 +540,9 @@ export function useBehaviorDetection({
       await map[result.action as keyof typeof map]?.();
       return;
     }
+
+    // 🎯 log the incoming result and timer state
+    console.log('🎯 handleBehaviorResult', { result, timerState: externalTimerStateRef.current });
 
     let lastDistractionTime = 0;
 

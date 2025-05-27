@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, Depends, Body, Query
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from schemas import session as s
 from models import session as m
 from models.user import User
@@ -88,7 +88,9 @@ def sessions_monthly_focus_summary(
     results = (
         db.query(
             func.date(m.Session.start_time).label("day"),
-            func.sum(m.Session.focus_secs).label("total_focus_secs")
+            func.sum(m.Session.focus_secs).label("total_focus_secs"),
+            # wyjung (05/27): added avg_score to query and response model
+            func.avg(m.Session.avg_score).label("avg_focus_score")
         )
         .filter(
             m.Session.user_id == user.id,
@@ -102,8 +104,12 @@ def sessions_monthly_focus_summary(
 
     # Response: list of {"day": "YYYY-MM-DD", "total_focus_secs": N}
     return [
-        {"day": str(day), "total_focus_secs": int(total_focus_secs or 0)}
-        for day, total_focus_secs in results
+        {
+            "day": str(day), 
+            "total_focus_secs": int(total_focus_secs or 0),
+            "avg_focus_score": float(avg_focus_score) if avg_focus_score is not None else None
+        }
+        for day, total_focus_secs, avg_focus_score in results
     ]
 
 
@@ -135,3 +141,25 @@ def sessions_by_day(
     )
 
     return sessions
+
+@router.post("/today-total", response_model=list[s.SessionOut])
+def total_focus_secs_today(
+    access_token: str = Body(...),
+    db: Session = Depends(get_db)
+):
+    user = get_user_from_token(access_token, db)
+    
+    # calculate today's start and end (midnight to now, server local time)
+    now = datetime.now()
+    today_start = datetime.combine(now.date(), time.min)
+    
+    # query: all sessions for this user, today, with focus time
+    total_focus_secs = db.query(func.coalesce(func.sum(m.Session.focus_secs), 0)).filter(
+        m.Session.user_id == user.id,
+        m.Session.start_time >= today_start,
+        m.Session.start_time <= now,
+        m.Session.type == 'FOCUS'
+    ).scalar() # returns int or None
+    
+    # return JSON object with "total_focus_secs" field
+    return {"total_focus_secs": total_focus_secs or 0 }

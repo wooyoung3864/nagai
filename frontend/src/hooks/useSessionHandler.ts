@@ -8,6 +8,7 @@ type SessionStatus = "PAUSED" | "STOPPED" | "COMPLETED" | "RUNNING";
 export interface SessionHandler {
   startSessionOnServer: (type: SessionType) => Promise<boolean>;
   updateSessionStatus: (status: SessionStatus, focusSecs?: number) => Promise<void>;
+  getTodayTotalFocus: () => Promise<number>;
   sessionIdRef: React.MutableRefObject<number | null>;
   setSessionId: React.Dispatch<React.SetStateAction<number | null>>;
 }
@@ -86,10 +87,31 @@ export function useSessionHandler(): SessionHandler {
     }
   };
 
+  /** --------- POST /today-total: Get today's total focus seconds --------- */
+  const getTodayTotalFocus = async (): Promise<number> => {
+    try {
+      const access_token = await getAccessToken();
+      const res = await fetch(`https://${base}/today-total`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ access_token }),
+      });
+      if (!res.ok) {
+        return 0;
+      }
+      const total = await res.json();
+      return typeof total === "number" ? total : parseInt(total);
+    } catch (err) {
+      console.error("Error fetching today total focus:", err);
+      return 0;
+    }
+  }
+
   return {
     startSessionOnServer,
     updateSessionStatus,
     sessionIdRef,
     setSessionId,
+    getTodayTotalFocus
   };
 }

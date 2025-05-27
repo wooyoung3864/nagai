@@ -62,10 +62,9 @@ export default function MainPage() {
 
   const toggleOverlay = () => setShowOverlay(prev => !prev);
 
-  const handleSessionComplete = (duration: number, wasFocus: boolean) => {
-    if (wasFocus) {
-      setTotalFocusSeconds(prev => prev + duration);
-    }
+  // update totalFocusSeconds after each session
+  const handleSessionComplete = () => {
+    sessionHandler.getTodayTotalFocus().then(setTotalFocusSeconds);
   };
 
   const formatTime = (seconds: number) => {
@@ -74,6 +73,11 @@ export default function MainPage() {
     const s = (seconds % 60).toString().padStart(2, '0');
     return `${h}:${m}:${s}`;
   };
+
+  // fetch latest totalFocusSeconds value from backend
+  useEffect(() => {
+    sessionHandler.getTodayTotalFocus().then(setTotalFocusSeconds);
+  })
 
   return (
     <>
@@ -129,7 +133,7 @@ export default function MainPage() {
                 </div>
 
                 {(!externalTimerStateRef.current.isRunning || !isFocus) && (
-                  <FocusButton focustime={formatTime(totalFocusSeconds)} />
+                  <FocusButton focusTime={formatTime(totalFocusSeconds)} />
                 )}
               </div>
             </div>

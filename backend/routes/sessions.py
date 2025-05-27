@@ -9,7 +9,7 @@ from models.user import User
 from database import get_db
 from config import JWT_SECRET, SUPABASE_JWT_SECRET
 from routes.auth import get_user_from_token
-import jwt
+from zoneinfo import ZoneInfo
 from models.distraction import Distraction
 from sqlalchemy import func
 
@@ -149,17 +149,18 @@ def total_focus_secs_today(
 ):
     user = get_user_from_token(payload.access_token, db)
     
-    # calculate today's start and end (midnight to now, server local time)
-    now = datetime.now()
-    today_start = datetime.combine(now.date(), time.min)
+    # KST timezone
+    KST = ZoneInfo("Asia/Seoul")
+    now_kst = datetime.now(KST)
+    today_start_kst = datetime.combine(now_kst.date(), time.min, tzinfo=KST)
     
     # query: all sessions for this user, today, with focus time
     total_focus_secs = db.query(func.coalesce(func.sum(m.Session.focus_secs), 0)).filter(
         m.Session.user_id == user.id,
-        m.Session.start_time >= today_start,
-        m.Session.start_time <= now,
+        m.Session.start_time >= today_start_kst,
+        m.Session.start_time <= now_kst,
         m.Session.type == 'FOCUS'
     ).scalar() # returns int or None
     
     # return JSON object with "total_focus_secs" field
-    return {"total_focus_secs": total_focus_secs or 0 }
+    return {"total_focus_secs": total_focus_secs or None }

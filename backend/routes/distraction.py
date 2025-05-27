@@ -46,7 +46,7 @@ def query(
     if payload.user_id != user.id:
         raise HTTPException(403, "Forbidden")
 
-    start = datetime.combine(datetime.utcnow().date(), datetime.min.time())
+    start = datetime.utcnow() - timedelta(days=1)
     end   = datetime.utcnow()
 
     return (

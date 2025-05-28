@@ -61,6 +61,7 @@ export default function WebcamFeed({
   sessionIdRef
 }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const streamRef = useRef<MediaStream | null>(null);   // keep stream alive
   const isMobile = useIsMobile();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -141,7 +142,7 @@ export default function WebcamFeed({
 
   /* ────────────────────────── render ────────────────────────── */
   return (
-    <div className="webcam-feed">
+    <div className="webcam-feed" ref={containerRef}>
       {/* always mount the video; hide it until cameraAvailable */}
       <video
         ref={videoRef}
@@ -155,7 +156,7 @@ export default function WebcamFeed({
           className="webcam-fullscreen-button"
           onClick={() => {
             if (!document.fullscreenElement){
-              videoRef.current?.requestFullscreen().catch(console.error);
+              containerRef.current?.requestFullscreen().catch(console.error);
             } else {
               document.exitFullscreen().catch(console.error);
             }

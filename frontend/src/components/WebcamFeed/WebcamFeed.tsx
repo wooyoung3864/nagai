@@ -5,7 +5,7 @@
    is guaranteed to be set.  No duplicate getUserMedia calls.
    ────────────────────────────────────────────────────────────────────────── */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import './WebcamFeed.css';
 
@@ -63,6 +63,7 @@ export default function WebcamFeed({
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);   // keep stream alive
   const isMobile = useIsMobile();
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const behaviorDetection = useBehaviorDetection({
     videoRef,
@@ -76,6 +77,17 @@ export default function WebcamFeed({
     startBehaviorDetection = () => { },
     stopBehaviorDetection = () => { },
   } = behaviorDetection || {};
+  /* full screen */
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   /* ───────────── initialize camera once ───────────── */
   useEffect(() => {
@@ -138,7 +150,20 @@ export default function WebcamFeed({
         playsInline
         className={cameraAvailable ? '' : 'video--hidden'}
       />
-
+      {cameraAvailable && (
+        <button 
+          className="webcam-fullscreen-button"
+          onClick={() => {
+            if (!document.fullscreenElement){
+              videoRef.current?.requestFullscreen().catch(console.error);
+            } else {
+              document.exitFullscreen().catch(console.error);
+            }
+          }}
+        >
+          {isFullscreen ? 'Exit Fullscreen' : '⛶ Fullscreen'}
+        </button>
+      )}
       {cameraAvailable && showOverlay && (
         <motion.div
           className="gesture-overlay"

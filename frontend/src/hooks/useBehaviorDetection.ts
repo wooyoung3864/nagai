@@ -138,7 +138,7 @@ export function useBehaviorDetection({
   const { getKey, rotateKey } = useGeminiKeys();
 
   const isActiveRef = useRef(false);
-  const generationRef = useRef(0);  // 🔑 version counter; not sure if it works
+  const generationRef = useRef(0);  // 🔑 version counter
 
   // pause behaviorDetection while DistractionModal is active
   const isModalVisibleRef = useRef(false);

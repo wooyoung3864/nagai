@@ -149,7 +149,8 @@ def total_focus_secs_today(
     user = get_user_from_token(payload.access_token, db)
     
     # calculate 24h from today
-    today_start = datetime.utcnow() - timedelta(days=1)
+    now = datetime.utcnow()
+    today_start = now - timedelta(days=1)
     
     # query: all sessions for this user, today, with focus time
     total_focus_secs = db.query(func.coalesce(func.sum(m.Session.focus_secs), 0)).filter(

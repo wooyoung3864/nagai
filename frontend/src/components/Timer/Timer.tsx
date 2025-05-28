@@ -189,9 +189,17 @@ export default function Timer({
     progress.clearListeners();
   };
 
+  function playSystemChime() {
+    // Short Windows-like chime; you can replace the URL with another short mp3/wav
+    const audio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAB9AAACABAAZGF0YYQAAACAgICAgICAgICAA==');
+    audio.volume = 0.4;
+    audio.play();
+  }
+
   const handleDistraction = async () => {
     await commitFocusTime('PAUSED');
     console.log('Distraction triggered. Session ID:', sessionIdRef.current);
+    playSystemChime(); // TODO (wyjung, 05/28): not working
 
     setIsRunning(false);
     isRunningRef.current = false;

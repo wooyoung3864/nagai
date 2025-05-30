@@ -1,3 +1,4 @@
+//src/components/DistractionModal/DistractionModal.tsx
 import { motion } from 'framer-motion';
 import './DistractionModal.css';
 

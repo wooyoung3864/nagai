@@ -36,7 +36,7 @@
 .webcam-fullscreen-button {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  left: 1rem;
   z-index: 10;
   background-color: rgba(0, 0, 0, 0.6);
   color: white;

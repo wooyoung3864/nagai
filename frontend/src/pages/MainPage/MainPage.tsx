@@ -76,12 +76,81 @@ export default function MainPage() {
     return `${h}:${m}:${s}`;
   };
 
-  // fetch latest totalFocusSeconds value from backend
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Show intrusive alert
+      alert('Would you like to reload? Your ongoing session will be stopped.');
+      // Show confirmation dialog (browser default)
+      e.preventDefault();
+      e.returnValue = 'Would you like to reload? Your ongoing session will be stopped.'; // Most browsers ignore this text
+
+      // Correct usage: call updateSessionStatus with "STOPPED"
+      if (sessionHandler.sessionIdRef.current) {
+        // Fire and forget; cannot await in beforeunload
+        sessionHandler.updateSessionStatus("STOPPED");
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [sessionHandler]);
+
+  // fetch latest totalFocusSeconds value from backend on first page load
   useEffect(() => {
     sessionHandler.getTodayTotalFocus()
-    .then(setTotalFocusSeconds)
-    .finally(() => setFocusSecondsLoading(false));
+      .then(setTotalFocusSeconds)
+      .finally(() => setFocusSecondsLoading(false));
   }, []); // ← Only on mount (or add dependencies if you want)
+
+  // fetch latest totalFocusSeconds value from backend every time timer is paused or stopped
+  useEffect(() => {
+    // Wraps the original function and waits for it (if async) before fetching
+    const wrapWithFocusUpdate = (origFn?: () => void | Promise<any>) => () => {
+      setFocusSecondsLoading(true);
+      const result = origFn ? origFn() : undefined;
+      if (result && typeof result.then === 'function') {
+        // If original returns a promise, wait for it
+        result.then(() =>
+          sessionHandler.getTodayTotalFocus()
+            .then(setTotalFocusSeconds)
+            .finally(() => setFocusSecondsLoading(false))
+        );
+      } else {
+        // Otherwise, fetch immediately
+        sessionHandler.getTodayTotalFocus()
+          .then(setTotalFocusSeconds)
+          .finally(() => setFocusSecondsLoading(false));
+      }
+    };
+
+    // Only wrap if not already wrapped
+    if (
+      externalTimerControlsRef.current.pause &&
+      externalTimerControlsRef.current.pause.name !== 'wrappedPause'
+    ) {
+      const origPause = externalTimerControlsRef.current.pause;
+      externalTimerControlsRef.current.pause = function wrappedPause() {
+        wrapWithFocusUpdate(origPause)();
+      };
+    }
+
+    if (
+      externalTimerControlsRef.current.stop &&
+      externalTimerControlsRef.current.stop.name !== 'wrappedStop'
+    ) {
+      const origStop = externalTimerControlsRef.current.stop;
+      externalTimerControlsRef.current.stop = function wrappedStop() {
+        wrapWithFocusUpdate(origStop)();
+      };
+    }
+  }, [
+    externalTimerControlsRef.current.pause,
+    externalTimerControlsRef.current.stop,
+    sessionHandler,
+  ]);
 
   return (
     <>

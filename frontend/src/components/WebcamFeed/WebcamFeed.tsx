@@ -142,7 +142,7 @@ export default function WebcamFeed({
 
   /* ────────────────────────── render ────────────────────────── */
   return (
-    <div className="webcam-feed" ref={containerRef}>
+    <div className="webcam-feed">
       {/* always mount the video; hide it until cameraAvailable */}
       <video
         ref={videoRef}
@@ -156,7 +156,7 @@ export default function WebcamFeed({
           className="webcam-fullscreen-button"
           onClick={() => {
             if (!document.fullscreenElement){
-              containerRef.current?.requestFullscreen().catch(console.error);
+              videoRef.current?.requestFullscreen().catch(console.error);
             } else {
               document.exitFullscreen().catch(console.error);
             }

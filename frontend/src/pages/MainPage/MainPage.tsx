@@ -11,18 +11,23 @@ import './MainPage.css';
 import { useNavigate } from 'react-router-dom';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { useSessionHandler } from '../../hooks/useSessionHandler';
+import useIsMobile from '../../hooks/useIsMobile';
 
 export default function MainPage() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [cameraAvailable, setCameraAvailable] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [cameraInitialized, setCameraInitialized] = useState(false);
+  const [isFullWindow, setIsFullWindow] = useState(true);
 
   const [isFocus, setIsFocus] = useState(true);
   const [_, setIsTimerRunning] = useState(false);
 
   const [totalFocusSeconds, setTotalFocusSeconds] = useState(0);
   const [focusSecondsLoading, setFocusSecondsLoading] = useState(true);
+
+  const [isWidescreen, setIsWidescreen] = useState(false);
+  const isMobile = useIsMobile();
 
   const navigate = useNavigate();
 
@@ -40,6 +45,16 @@ export default function MainPage() {
       navigate('/create-account');
     }
   }, [navigate]);
+
+  useEffect(() => {
+    const checkFullWindow = () => {
+      setIsFullWindow(window.innerWidth >= 1200);  // 너비 기준 조정 가능
+    };
+    checkFullWindow();
+    window.addEventListener('resize', checkFullWindow);
+    return () => window.removeEventListener('resize', checkFullWindow);
+  }, []);
+
 
   // External refs to control Timer & DistractionModal
   const externalTimerControlsRef = useRef<{
@@ -94,6 +109,14 @@ export default function MainPage() {
       >
         <div className="center-content">
           <div className="webcam-timer-row">
+            {isFullWindow && !isMobile && cameraAvailable && (
+                <button
+                  className={`webcam-widescreen-toggle-button ${isWidescreen ? 'exit' : ''}`}
+                  onClick={() => setIsWidescreen(prev => !prev)}
+                >
+                  {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
+                </button>
+              )}
             <div className="webcam-wrapper">
               <div className="col-flex webcam-col-flex">
                 <WebcamFeed
@@ -110,37 +133,43 @@ export default function MainPage() {
                   supabase={supabase}
                   sessionIdRef={sessionHandler.sessionIdRef}
                   setSessionId={sessionHandler.setSessionId}
+                  isWidescreen={isWidescreen}
                 />
-                {(!externalTimerStateRef.current.isRunning || !isFocus) && <DistractionsButton />}
+                {!isWidescreen && (!externalTimerStateRef.current.isRunning || !isFocus) && (
+                  <DistractionsButton />
+                )}
               </div>
 
               {cameraAvailable && (
                 <GestureHelpButton onClick={toggleOverlay} />
               )}
+
+
             </div>
 
-            <div className="timer-wrap">
-              <div className="col-flex timer-col-flex">
-                <div className="timer-wrap-inner">
-                  <Timer
-                    externalTimerControlsRef={externalTimerControlsRef}
-                    externalTimerStateRef={externalTimerStateRef}
-                    onRunningChange={setIsTimerRunning}   // ✅ pass the update functions
-                    onFocusChange={setIsFocus}             // ✅ pass the update functions
-                    onSessionComplete={handleSessionComplete}
-                    // Pass all sessionHandler fields
-                    startSessionOnServer={sessionHandler.startSessionOnServer}
-                    updateSessionStatus={sessionHandler.updateSessionStatus}
-                    sessionIdRef={sessionHandler.sessionIdRef}
-                    setSessionId={sessionHandler.setSessionId}
-                  />
+            {!isWidescreen && (
+              <div className="timer-wrap">
+                <div className="col-flex timer-col-flex">
+                  <div className="timer-wrap-inner">
+                    <Timer
+                      externalTimerControlsRef={externalTimerControlsRef}
+                      externalTimerStateRef={externalTimerStateRef}
+                      onRunningChange={setIsTimerRunning}
+                      onFocusChange={setIsFocus}
+                      onSessionComplete={handleSessionComplete}
+                      startSessionOnServer={sessionHandler.startSessionOnServer}
+                      updateSessionStatus={sessionHandler.updateSessionStatus}
+                      sessionIdRef={sessionHandler.sessionIdRef}
+                      setSessionId={sessionHandler.setSessionId}
+                    />
+                  </div>
+                  {(!externalTimerStateRef.current.isRunning || !isFocus) && (
+                    <FocusButton focusTime={focusSecondsLoading ? '--' : formatTime(totalFocusSeconds)} />
+                  )}
                 </div>
-
-                {(!externalTimerStateRef.current.isRunning || !isFocus) && (
-                  <FocusButton focusTime={focusSecondsLoading ? '--' : formatTime(totalFocusSeconds)} />
-                )}
               </div>
-            </div>
+            )}
+
           </div>
         </div>
       </motion.div>

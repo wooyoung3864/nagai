@@ -1,3 +1,4 @@
+// frontend/src/pages/MyPage/Mypage.tsx
 import { ChangeEvent, useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import { motion } from 'framer-motion';

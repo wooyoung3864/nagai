@@ -111,7 +111,6 @@ def sessions_monthly_focus_summary(
         for day, total_focus_secs, avg_focus_score in results
     ]
 
-
 @router.post("/by-day", response_model=list[s.SessionOut])
 def sessions_by_day(
     date: str = Body(..., embed=True),     # expects "YYYY-MM-DD"
@@ -141,6 +140,7 @@ def sessions_by_day(
 
     return sessions
 
+# TODO: fix
 @router.post("/today-total")
 def total_focus_secs_today(
     payload: s.SessionUpdateInput = Body(...),

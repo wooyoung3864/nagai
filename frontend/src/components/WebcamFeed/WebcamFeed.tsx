@@ -19,6 +19,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 /* ────────────────────────── prop types ────────────────────────── */
 export interface WebcamFeedProps {
+  isWidescreen: boolean;
   showOverlay: boolean;
   setShowOverlay: (value: (prev: boolean) => boolean) => void;
   setCameraAvailable: (value: boolean) => void;
@@ -51,6 +52,7 @@ export default function WebcamFeed({
   setShowOverlay,
   setCameraAvailable,
   setErrorMessage,
+  isWidescreen,
   cameraAvailable,
   errorMessage,
   cameraInitialized,
@@ -62,6 +64,7 @@ export default function WebcamFeed({
 }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);   // keep stream alive
+  const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -141,7 +144,7 @@ export default function WebcamFeed({
 
   /* ────────────────────────── render ────────────────────────── */
   return (
-    <div className="webcam-feed">
+    <div className={`webcam-feed ${isWidescreen ? 'widescreen' : ''}`} ref={containerRef}>
       {/* always mount the video; hide it until cameraAvailable */}
       <video
         ref={videoRef}
@@ -150,20 +153,9 @@ export default function WebcamFeed({
         playsInline
         className={cameraAvailable ? '' : 'video--hidden'}
       />
-      {cameraAvailable && (
-        <button 
-          className="webcam-fullscreen-button"
-          onClick={() => {
-            if (!document.fullscreenElement){
-              videoRef.current?.requestFullscreen().catch(console.error);
-            } else {
-              document.exitFullscreen().catch(console.error);
-            }
-          }}
-        >
-          {isFullscreen ? 'Exit Fullscreen' : '⛶ Fullscreen'}
-        </button>
-      )}
+      
+  
+
       {cameraAvailable && showOverlay && (
         <motion.div
           className="gesture-overlay"

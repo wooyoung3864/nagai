@@ -177,3 +177,33 @@ html,
         padding: 1rem;
     }
 }
+
+/* widescreen toggle button*/
+.webcam-widescreen-toggle-button {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background-color: #4da6ff;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.25s ease;
+  z-index: 1000;
+}
+
+.webcam-widescreen-toggle-button:hover {
+  background-color: #1a8cff;
+  transform: scale(1.05);
+}
+
+.webcam-widescreen-toggle-button.exit {
+  background-color: #ef4444;
+}
+
+.webcam-widescreen-toggle-button.exit:hover {
+  background-color: #dc2626;
+}

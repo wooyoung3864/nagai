@@ -70,6 +70,9 @@ export default function Timer({
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  const distractionAudio = new Audio('/distractionsound.mp3');
+  const breakAudio = new Audio('/breaksound.wav')
+
   const {
     startBehaviorDetection = () => { },
     stopBehaviorDetection = () => { },
@@ -213,6 +216,14 @@ export default function Timer({
     setDistractionVisible(true);
     distractionVisibleRef.current = true;
     externalTimerStateRef.current.isDistractionModalVisible = true;
+
+    try {
+      distractionAudio.currentTime = 0; // rewind
+      distractionAudio.volume = 1;
+      distractionAudio.play();
+    } catch (e) {
+      console.error("Distraction Audio playback failed:", e);
+    }
   };
 
   useEffect(() => {
@@ -257,6 +268,14 @@ export default function Timer({
       // 🔧 Reset before creating the next session
       sessionIdRef.current = null;
       setSessionId(null);
+
+      try {
+        breakAudio.currentTime = 0; // rewind
+        breakAudio.volume = 1;
+        breakAudio.play();
+      } catch (e) {
+        console.error("Break Audio playback failed:", e);
+      }
     }
 
     const nextIsFocus = !isFocus;

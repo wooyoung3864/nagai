@@ -66,7 +66,7 @@ export default function WebcamFeed({
   const streamRef = useRef<MediaStream | null>(null);   // keep stream alive
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [_, setIsFullscreen] = useState(false);
 
   const behaviorDetection = useBehaviorDetection({
     videoRef,
@@ -143,6 +143,7 @@ export default function WebcamFeed({
   }, []);
 
   /* ────────────────────────── render ────────────────────────── */
+  // TODO (jhjun & wyjung): Fix timer resetting after switching back from widescreen mode
   return (
     <div className={`webcam-feed ${isWidescreen ? 'widescreen' : ''}`} ref={containerRef}>
       {/* always mount the video; hide it until cameraAvailable */}

@@ -80,6 +80,7 @@ html,
     justify-content: center;
     align-items: stretch;
     position: relative;
+    margin: 0 auto;
 }
 
 .timer-wrap {
@@ -182,9 +183,9 @@ html,
 
 /* widescreen toggle button*/
 .webcam-widescreen-toggle-button {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
+  position: fixed;
+  top: 10rem;
+  left: 12rem;
   background-color: #4da6ff;
   color: white;
   border: none;
@@ -194,7 +195,7 @@ html,
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.25s ease;
-  z-index: 1000;
+  z-index: 3000;
 }
 
 .webcam-widescreen-toggle-button:hover {
@@ -208,4 +209,14 @@ html,
 
 .webcam-widescreen-toggle-button.exit:hover {
   background-color: #dc2626;
+}
+
+.webcam-wrapper.widescreen {
+  max-width: none;
+  width: auto;
+
+  margin: 0 auto;
+  justify-content: right;  
+
+  margin-top: 10rem;  
 }

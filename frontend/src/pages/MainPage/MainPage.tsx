@@ -187,14 +187,14 @@ export default function MainPage() {
         <div className="center-content">
           <div className="webcam-timer-row">
             {isFullWindow && !isMobile && cameraAvailable && (
-              <button
-                className={`webcam-widescreen-toggle-button ${isWidescreen ? 'exit' : ''}`}
-                onClick={() => setIsWidescreen(prev => !prev)}
-              >
-                {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
-              </button>
-            )}
-            <div className="webcam-wrapper">
+                <button
+                  className={`webcam-widescreen-toggle-button ${isWidescreen ? 'exit' : ''}`}
+                  onClick={() => setIsWidescreen(prev => !prev)}
+                >
+                  {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
+                </button>
+              )}
+            <div className={`webcam-wrapper ${isWidescreen ? 'widescreen' : ''}`}>
               <div className="col-flex webcam-col-flex">
                 <WebcamFeed
                   showOverlay={showOverlay}
@@ -223,7 +223,7 @@ export default function MainPage() {
 
 
             </div>
-            <div className="timer-wrap">
+            <div className={`timer-wrap ${isWidescreen ? 'widescreen' : ''}`}>
               <div className="col-flex timer-col-flex">
                 <div className="timer-wrap-inner">
                   <Timer

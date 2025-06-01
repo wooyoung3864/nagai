@@ -183,9 +183,11 @@ html,
 
 /* widescreen toggle button*/
 .webcam-widescreen-toggle-button {
-  position: fixed;
-  top: 10rem;
-  left: 12rem;
+  position: absolute;
+  top: 1rem !important;
+  left: 1 !important;
+  transform: none !important;
+  margin: 0 !important;
   background-color: #4da6ff;
   color: white;
   border: none;
@@ -212,11 +214,19 @@ html,
 }
 
 .webcam-wrapper.widescreen {
-  max-width: none;
+  flex: 0 0 auto;
+  max-width: none; 
   width: auto;
-
   margin: 0 auto;
-  justify-content: right;  
+  justify-content: center; 
+}
 
-  margin-top: 10rem;  
+.timer-wrap.widescreen {
+    margin: 0 !important;
+    flex: 0 0 auto;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 5rem;
+    z-index: 1;
 }

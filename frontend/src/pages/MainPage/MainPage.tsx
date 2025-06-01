@@ -186,7 +186,7 @@ export default function MainPage() {
                   {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
                 </button>
               )}
-            <div className="webcam-wrapper">
+            <div className={`webcam-wrapper ${isWidescreen ? 'widescreen' : ''}`}>
               <div className="col-flex webcam-col-flex">
                 <WebcamFeed
                   showOverlay={showOverlay}
@@ -215,7 +215,7 @@ export default function MainPage() {
 
 
             </div>
-            <div className="timer-wrap">
+            <div className={`timer-wrap ${isWidescreen ? 'widescreen' : ''}`}>
               <div className="col-flex timer-col-flex">
                 <div className="timer-wrap-inner">
                   <Timer

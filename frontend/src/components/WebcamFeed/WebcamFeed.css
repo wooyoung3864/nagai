@@ -18,8 +18,10 @@
   position: relative;
 }
 .webcam-feed.widescreen {
-  transform: scale(1.5);
+  transform: scale(1.7);
   transform-origin: center;
+  left: 50%;
+  transform: translateX(-50%) scale(1.5);
   transition: transform 0.3s ease;
 }
 

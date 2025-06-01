@@ -215,29 +215,27 @@ export default function MainPage() {
 
 
             </div>
-
-            {!isWidescreen && (
-              <div className="timer-wrap">
-                <div className="col-flex timer-col-flex">
-                  <div className="timer-wrap-inner">
-                    <Timer
-                      externalTimerControlsRef={externalTimerControlsRef}
-                      externalTimerStateRef={externalTimerStateRef}
-                      onRunningChange={setIsTimerRunning}
-                      onFocusChange={setIsFocus}
-                      onSessionComplete={handleSessionComplete}
-                      startSessionOnServer={sessionHandler.startSessionOnServer}
-                      updateSessionStatus={sessionHandler.updateSessionStatus}
-                      sessionIdRef={sessionHandler.sessionIdRef}
-                      setSessionId={sessionHandler.setSessionId}
-                    />
-                  </div>
-                  {(!externalTimerStateRef.current.isRunning || !isFocus) && (
-                    <FocusButton focusTime={focusSecondsLoading ? '--' : formatTime(totalFocusSeconds)} />
-                  )}
+            <div className="timer-wrap">
+              <div className="col-flex timer-col-flex">
+                <div className="timer-wrap-inner">
+                  <Timer
+                    externalTimerControlsRef={externalTimerControlsRef}
+                    externalTimerStateRef={externalTimerStateRef}
+                    onRunningChange={setIsTimerRunning}
+                    onFocusChange={setIsFocus}
+                    onSessionComplete={handleSessionComplete}
+                    startSessionOnServer={sessionHandler.startSessionOnServer}
+                    updateSessionStatus={sessionHandler.updateSessionStatus}
+                    sessionIdRef={sessionHandler.sessionIdRef}
+                    setSessionId={sessionHandler.setSessionId}
+                  />
+                </div>
+                {(!externalTimerStateRef.current.isRunning || !isFocus) && (
+                  <FocusButton focusTime={focusSecondsLoading ? '--' : formatTime(totalFocusSeconds)} />
+                )}
                 </div>
               </div>
-            )}
+            
 
           </div>
         </div>

@@ -70,6 +70,9 @@ export default function Timer({
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  const distractionAudio = new Audio('/distractionsound.mp3');
+  const breakAudio = new Audio('/breaksound.wav')
+
   const {
     startBehaviorDetection = () => { },
     stopBehaviorDetection = () => { },
@@ -189,17 +192,9 @@ export default function Timer({
     progress.clearListeners();
   };
 
-  function playSystemChime() {
-    // Short Windows-like chime; you can replace the URL with another short mp3/wav
-    const audio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAB9AAACABAAZGF0YYQAAACAgICAgICAgICAA==');
-    audio.volume = 0.4;
-    audio.play();
-  }
-
   const handleDistraction = async () => {
     await commitFocusTime('PAUSED');
     console.log('Distraction triggered. Session ID:', sessionIdRef.current);
-    playSystemChime(); // TODO (wyjung, 05/28): not working
 
     setIsRunning(false);
     isRunningRef.current = false;
@@ -213,6 +208,14 @@ export default function Timer({
     setDistractionVisible(true);
     distractionVisibleRef.current = true;
     externalTimerStateRef.current.isDistractionModalVisible = true;
+
+    try {
+      distractionAudio.currentTime = 0; // rewind
+      distractionAudio.volume = 1;
+      distractionAudio.play();
+    } catch (e) {
+      console.error("Distraction Audio playback failed:", e);
+    }
   };
 
   useEffect(() => {
@@ -257,6 +260,14 @@ export default function Timer({
       // 🔧 Reset before creating the next session
       sessionIdRef.current = null;
       setSessionId(null);
+
+      try {
+        breakAudio.currentTime = 0; // rewind
+        breakAudio.volume = 1;
+        breakAudio.play();
+      } catch (e) {
+        console.error("Break Audio playback failed:", e);
+      }
     }
 
     const nextIsFocus = !isFocus;

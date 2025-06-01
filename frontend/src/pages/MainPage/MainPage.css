@@ -185,7 +185,7 @@ html,
 .webcam-widescreen-toggle-button {
   position: absolute;
   top: 1rem !important;
-  left: 1 !important;
+  left: 1rem !important;
   transform: none !important;
   margin: 0 !important;
   background-color: #4da6ff;
@@ -207,6 +207,12 @@ html,
 
 .webcam-widescreen-toggle-button.exit {
   background-color: #ef4444;
+  position: absolute;
+  top: -5rem !important;
+  left: -9rem !important;
+  transform: none !important;
+  margin: 0 !important;
+
 }
 
 .webcam-widescreen-toggle-button.exit:hover {

@@ -11,13 +11,6 @@ export default function AccountCreationPage(): JSX.Element {
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user?.has_set_name) {
-      navigate('/main');
-    }
-  }, []);
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (!user?.has_agreed_terms) {
       navigate('/terms');
     } else if (user?.has_set_name) {
@@ -64,6 +57,9 @@ export default function AccountCreationPage(): JSX.Element {
       })
       .then(updatedUser => {
         localStorage.setItem('user', JSON.stringify(updatedUser));
+        // After user sets name and agrees to terms
+        localStorage.setItem('first_time_login_complete', 'true');
+        console.log(localStorage.getItem('first_time_login_complete'));
         navigate('/main');
       })
       .catch(err => {

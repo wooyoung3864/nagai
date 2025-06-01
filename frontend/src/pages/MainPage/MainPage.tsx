@@ -91,6 +91,14 @@ export default function MainPage() {
     return `${h}:${m}:${s}`;
   };
 
+  // Show overlay on first login
+  useEffect(() => {
+    if (localStorage.getItem('first_time_login_complete') === 'true') {
+      toggleOverlay();
+      localStorage.removeItem('first_time_login_complete');
+    }
+  }, []);
+
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       // Show intrusive alert
@@ -233,9 +241,9 @@ export default function MainPage() {
                 {(!externalTimerStateRef.current.isRunning || !isFocus) && (
                   <FocusButton focusTime={focusSecondsLoading ? '--' : formatTime(totalFocusSeconds)} />
                 )}
-                </div>
               </div>
-            
+            </div>
+
 
           </div>
         </div>

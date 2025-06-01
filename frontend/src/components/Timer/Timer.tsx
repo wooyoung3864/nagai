@@ -6,6 +6,7 @@ import './Timer.css';
 import DistractionModal from '../DistractionModal/DistractionModal';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { SessionHandler } from '../../hooks/useSessionHandler';
+import { createPortal } from 'react-dom';
 
 const FOCUS_DURATION = 25 * 60;
 const BREAK_DURATION = 5 * 60;
@@ -335,18 +336,20 @@ export default function Timer({
           {String(remainingSeconds % 60).padStart(2, '0')}
         </div>
       </motion.div>
-
-      <DistractionModal
-        isVisible={distractionVisible}
-        onDismiss={() => {
-          setDistractionVisible(false);
-          distractionVisibleRef.current = false;
-          externalTimerStateRef.current.isDistractionModalVisible = false;
-          setModalVisible(false); // this ref refers to the modal in UseBehaviorDetection.ts.
-          resumeTimer(); // NOT startTimer();
-          startBehaviorDetection();
-        }}
-      />
+      {createPortal(
+        <DistractionModal
+          isVisible={distractionVisible}
+          onDismiss={() => {
+            setDistractionVisible(false);
+            distractionVisibleRef.current = false;
+            externalTimerStateRef.current.isDistractionModalVisible = false;
+            setModalVisible(false); // this ref refers to the modal in UseBehaviorDetection.ts.
+            resumeTimer(); // NOT startTimer();
+            startBehaviorDetection();
+          }}
+        />,
+        document.body
+        )}
     </>
   );
 }

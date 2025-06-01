@@ -84,6 +84,8 @@ html,
 
 .timer-wrap {
     margin-left: 4%;
+    position: relative;
+    z-index: 1;
 }
 
 .timer-wrap,

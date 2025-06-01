@@ -14,6 +14,7 @@
   border: 2px solid #66aaff;
   border-radius: 10px;
   flex-shrink: 0;
+  z-index: 2;
 }
 .webcam-feed.widescreen {
   transform: scale(1.5);

@@ -13,6 +13,7 @@ import { useSupabase } from '../../contexts/SupabaseContext';
 import { useSessionHandler } from '../../hooks/useSessionHandler';
 import useIsMobile from '../../hooks/useIsMobile';
 
+
 export default function MainPage() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [cameraAvailable, setCameraAvailable] = useState(false);
@@ -54,7 +55,6 @@ export default function MainPage() {
     window.addEventListener('resize', checkFullWindow);
     return () => window.removeEventListener('resize', checkFullWindow);
   }, []);
-
 
   // External refs to control Timer & DistractionModal
   const externalTimerControlsRef = useRef<{

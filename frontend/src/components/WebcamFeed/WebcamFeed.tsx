@@ -44,6 +44,7 @@ export interface WebcamFeedProps {
   supabase: SupabaseClient
   sessionIdRef: SessionHandler['sessionIdRef'];
   setSessionId: SessionHandler['setSessionId'];
+  onMotionDetected: () => void;  // Callback when motion is detected
 }
 
 /* ─────────────────────────── component ────────────────────────── */
@@ -60,7 +61,8 @@ export default function WebcamFeed({
   externalTimerControlsRef,
   externalTimerStateRef,
   supabase,
-  sessionIdRef
+  sessionIdRef,
+  onMotionDetected
 }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);   // keep stream alive

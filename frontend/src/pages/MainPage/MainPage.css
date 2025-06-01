@@ -80,13 +80,13 @@ html,
     justify-content: center;
     align-items: stretch;
     position: relative;
-    margin: 0 auto;
+    margin: 0;
 }
 
 .timer-wrap {
     margin-left: 4%;
     position: relative;
-    z-index: 1;
+    
 }
 
 .timer-wrap,

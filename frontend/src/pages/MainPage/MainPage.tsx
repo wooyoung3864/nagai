@@ -36,6 +36,11 @@ export default function MainPage() {
 
   const sessionHandler = useSessionHandler();
 
+  const lastUserInputRef = useRef(Date.now());
+  const lastMotionRef = useRef(Date.now());
+  const [shouldBlink, setShouldBlink] = useState(false);
+  const [blinkActive, setBlinkActive] = useState(false);
+
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -175,6 +180,61 @@ export default function MainPage() {
     sessionHandler,
   ]);
 
+  // Listen for user input
+  useEffect(() => {
+    const updateUserInput = () => lastUserInputRef.current = Date.now();
+    window.addEventListener('mousemove', updateUserInput);
+    window.addEventListener('keydown', updateUserInput);
+    window.addEventListener('mousedown', updateUserInput);
+    window.addEventListener('touchstart', updateUserInput);
+    return () => {
+      window.removeEventListener('mousemove', updateUserInput);
+      window.removeEventListener('keydown', updateUserInput);
+      window.removeEventListener('mousedown', updateUserInput);
+      window.removeEventListener('touchstart', updateUserInput);
+    };
+  }, []);
+
+  // Provide a callback for motion detection
+  const onMotionDetected = () => {
+    lastMotionRef.current = Date.now();
+  };
+
+  // Idle check (shouldBlink = true if idle and not running)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const idle = now - lastUserInputRef.current > 15000 && now - lastMotionRef.current > 15000;
+      setShouldBlink(!externalTimerStateRef.current.isRunning && idle);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Blinking interval: 3s blink, 5s pause
+  useEffect(() => {
+    let blinkTimeout: NodeJS.Timeout;
+    let pauseTimeout: NodeJS.Timeout;
+
+    function startBlinkCycle() {
+      setBlinkActive(true);
+      blinkTimeout = setTimeout(() => {
+        setBlinkActive(false);
+        pauseTimeout = setTimeout(startBlinkCycle, 5000); // 5s pause
+      }, 3000); // 3s blink
+    }
+
+    if (shouldBlink) {
+      startBlinkCycle();
+    } else {
+      setBlinkActive(false);
+    }
+
+    return () => {
+      clearTimeout(blinkTimeout);
+      clearTimeout(pauseTimeout);
+    };
+  }, [shouldBlink]);
+
   return (
     <>
       <Navbar />
@@ -211,14 +271,15 @@ export default function MainPage() {
                   sessionIdRef={sessionHandler.sessionIdRef}
                   setSessionId={sessionHandler.setSessionId}
                   isWidescreen={isWidescreen}
+                  onMotionDetected={onMotionDetected}
                 />
                 {!isWidescreen && (!externalTimerStateRef.current.isRunning || !isFocus) && (
                   <DistractionsButton />
                 )}
               </div>
 
-              {cameraAvailable && (
-                <GestureHelpButton onClick={toggleOverlay} />
+              {cameraAvailable && !isWidescreen && (
+                <GestureHelpButton onClick={toggleOverlay} shouldBlink={blinkActive} />
               )}
 
 

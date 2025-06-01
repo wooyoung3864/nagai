@@ -6,7 +6,6 @@ import './Timer.css';
 import DistractionModal from '../DistractionModal/DistractionModal';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { SessionHandler } from '../../hooks/useSessionHandler';
-import { createPortal } from 'react-dom';
 
 const FOCUS_DURATION = 25 * 60;
 const BREAK_DURATION = 5 * 60;
@@ -70,9 +69,6 @@ export default function Timer({
   const controlsRef = useRef<ReturnType<typeof animate> | null>(null);  // Add
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  const distractionAudio = new Audio('/distractionsound.mp3');
-  const breakAudio = new Audio('/breaksound.wav')
 
   const {
     startBehaviorDetection = () => { },
@@ -217,14 +213,6 @@ export default function Timer({
     setDistractionVisible(true);
     distractionVisibleRef.current = true;
     externalTimerStateRef.current.isDistractionModalVisible = true;
-
-    try {
-      distractionAudio.currentTime = 0; // rewind
-      distractionAudio.volume = 1;
-      distractionAudio.play();
-    } catch (e) {
-      console.error("Distraction Audio playback failed:", e);
-    }
   };
 
   useEffect(() => {
@@ -269,14 +257,6 @@ export default function Timer({
       // 🔧 Reset before creating the next session
       sessionIdRef.current = null;
       setSessionId(null);
-
-      try {
-        breakAudio.currentTime = 0; // rewind
-        breakAudio.volume = 1;
-        breakAudio.play();
-      } catch (e) {
-        console.error("Break Audio playback failed:", e);
-      }
     }
 
     const nextIsFocus = !isFocus;
@@ -336,20 +316,18 @@ export default function Timer({
           {String(remainingSeconds % 60).padStart(2, '0')}
         </div>
       </motion.div>
-      {createPortal(
-        <DistractionModal
-          isVisible={distractionVisible}
-          onDismiss={() => {
-            setDistractionVisible(false);
-            distractionVisibleRef.current = false;
-            externalTimerStateRef.current.isDistractionModalVisible = false;
-            setModalVisible(false); // this ref refers to the modal in UseBehaviorDetection.ts.
-            resumeTimer(); // NOT startTimer();
-            startBehaviorDetection();
-          }}
-        />,
-        document.body
-        )}
+
+      <DistractionModal
+        isVisible={distractionVisible}
+        onDismiss={() => {
+          setDistractionVisible(false);
+          distractionVisibleRef.current = false;
+          externalTimerStateRef.current.isDistractionModalVisible = false;
+          setModalVisible(false); // this ref refers to the modal in UseBehaviorDetection.ts.
+          resumeTimer(); // NOT startTimer();
+          startBehaviorDetection();
+        }}
+      />
     </>
   );
 }

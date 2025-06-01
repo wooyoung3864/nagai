@@ -197,7 +197,10 @@ export default function MainPage() {
     const interval = setInterval(() => {
       const now = Date.now();
       const idle = now - lastUserInputRef.current > 15000 && now - lastMotionRef.current > 15000;
-      setShouldBlink(!externalTimerStateRef.current.isRunning && idle);
+      setShouldBlink(!externalTimerStateRef.current.isRunning &&
+        !externalTimerStateRef.current.isPaused &&
+        !externalTimerStateRef.current.isDuringBreak &&
+        idle);
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -239,13 +242,13 @@ export default function MainPage() {
         <div className="center-content">
           <div className="webcam-timer-row">
             {isFullWindow && !isMobile && cameraAvailable && (
-                <button
-                  className={`webcam-widescreen-toggle-button ${isWidescreen ? 'exit' : ''}`}
-                  onClick={() => setIsWidescreen(prev => !prev)}
-                >
-                  {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
-                </button>
-              )}
+              <button
+                className={`webcam-widescreen-toggle-button ${isWidescreen ? 'exit' : ''}`}
+                onClick={() => setIsWidescreen(prev => !prev)}
+              >
+                {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
+              </button>
+            )}
             <div className={`webcam-wrapper ${isWidescreen ? 'widescreen' : ''}`}>
               <div className="col-flex webcam-col-flex">
                 <WebcamFeed
@@ -294,9 +297,9 @@ export default function MainPage() {
                 {(!externalTimerStateRef.current.isRunning || !isFocus) && (
                   <FocusButton focusTime={focusSecondsLoading ? '--' : formatTime(totalFocusSeconds)} />
                 )}
-                </div>
               </div>
-            
+            </div>
+
 
           </div>
         </div>

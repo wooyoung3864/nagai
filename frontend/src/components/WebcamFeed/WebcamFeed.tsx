@@ -76,7 +76,8 @@ export default function WebcamFeed({
     externalTimerStateRef,
     supabase,
     sessionIdRef,
-    onFocusScore: () => {} // no-op handler
+    onFocusScore: () => {}, // no-op handler
+    onMotionDetected // pass the prop to the hook
   });
   const {
     startBehaviorDetection = () => { },

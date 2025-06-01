@@ -9,8 +9,8 @@
     width: 40px;
     height: 40px;
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 1rem;
+    right: 1rem;
     cursor: pointer;
     box-shadow: 0 0 5px rgba(0,0,0,0.3);
     z-index: 1000; /* IMPORTANT: should be above HelpMessage overlay & below modals */
@@ -24,3 +24,43 @@
     outline: none;
     box-shadow: none;
   }
+
+  .gesture-help.blink {
+    animation: flash-blink 0.5s alternate infinite;
+    position: relative;
+    z-index: 1001; /* above overlay */
+  }
+
+  .gesture-help.blink::after {
+    content: '';
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 70px; height: 70px;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    opacity: 0;
+    background: repeating-conic-gradient(
+      white 0deg 10deg,
+      transparent 10deg 30deg
+    );
+    border-radius: 50%;
+    transition: opacity 0.1s;
+    /* Only show spokes during the "white" phase of the blink */
+    animation: spokes-flash 0.5s alternate infinite;
+  }
+
+  @keyframes spokes-flash {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 0.7;
+    }
+  }
+  
+.gesture-help.widescreen {
+  top: 1.5rem;
+  right: 1.5rem;
+}
+  

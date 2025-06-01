@@ -13,6 +13,8 @@ import { useSupabase } from '../../contexts/SupabaseContext';
 import { useSessionHandler } from '../../hooks/useSessionHandler';
 import useIsMobile from '../../hooks/useIsMobile';
 
+
+
 export default function MainPage() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [cameraAvailable, setCameraAvailable] = useState(false);
@@ -35,6 +37,11 @@ export default function MainPage() {
 
   const sessionHandler = useSessionHandler();
 
+  const lastUserInputRef = useRef(Date.now());
+  const lastMotionRef = useRef(Date.now());
+  const [shouldBlink, setShouldBlink] = useState(false);
+  const [blinkActive, setBlinkActive] = useState(false);
+
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -54,7 +61,6 @@ export default function MainPage() {
     window.addEventListener('resize', checkFullWindow);
     return () => window.removeEventListener('resize', checkFullWindow);
   }, []);
-
 
   // External refs to control Timer & DistractionModal
   const externalTimerControlsRef = useRef<{
@@ -167,6 +173,64 @@ export default function MainPage() {
     sessionHandler,
   ]);
 
+  // Listen for user input
+  useEffect(() => {
+    const updateUserInput = () => lastUserInputRef.current = Date.now();
+    window.addEventListener('mousemove', updateUserInput);
+    window.addEventListener('keydown', updateUserInput);
+    window.addEventListener('mousedown', updateUserInput);
+    window.addEventListener('touchstart', updateUserInput);
+    return () => {
+      window.removeEventListener('mousemove', updateUserInput);
+      window.removeEventListener('keydown', updateUserInput);
+      window.removeEventListener('mousedown', updateUserInput);
+      window.removeEventListener('touchstart', updateUserInput);
+    };
+  }, []);
+
+  // Provide a callback for motion detection
+  const onMotionDetected = () => {
+    lastMotionRef.current = Date.now();
+  };
+
+  // Idle check (shouldBlink = true if idle and not running)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const idle = now - lastUserInputRef.current > 15000 && now - lastMotionRef.current > 15000;
+      setShouldBlink(!externalTimerStateRef.current.isRunning &&
+        !externalTimerStateRef.current.isPaused &&
+        !externalTimerStateRef.current.isDuringBreak &&
+        idle);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Blinking interval: 3s blink, 5s pause
+  useEffect(() => {
+    let blinkTimeout: NodeJS.Timeout;
+    let pauseTimeout: NodeJS.Timeout;
+
+    function startBlinkCycle() {
+      setBlinkActive(true);
+      blinkTimeout = setTimeout(() => {
+        setBlinkActive(false);
+        pauseTimeout = setTimeout(startBlinkCycle, 5000); // 5s pause
+      }, 3000); // 3s blink
+    }
+
+    if (shouldBlink) {
+      startBlinkCycle();
+    } else {
+      setBlinkActive(false);
+    }
+
+    return () => {
+      clearTimeout(blinkTimeout);
+      clearTimeout(pauseTimeout);
+    };
+  }, [shouldBlink]);
+
   return (
     <>
       <Navbar />
@@ -178,15 +242,8 @@ export default function MainPage() {
       >
         <div className="center-content">
           <div className="webcam-timer-row">
-            {isFullWindow && !isMobile && cameraAvailable && (
-                <button
-                  className={`webcam-widescreen-toggle-button ${isWidescreen ? 'exit' : ''}`}
-                  onClick={() => setIsWidescreen(prev => !prev)}
-                >
-                  {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
-                </button>
-              )}
-            <div className="webcam-wrapper">
+            
+            <div className={`webcam-wrapper ${isWidescreen ? 'widescreen' : ''}`}>
               <div className="col-flex webcam-col-flex">
                 <WebcamFeed
                   showOverlay={showOverlay}
@@ -203,41 +260,49 @@ export default function MainPage() {
                   sessionIdRef={sessionHandler.sessionIdRef}
                   setSessionId={sessionHandler.setSessionId}
                   isWidescreen={isWidescreen}
+                  onMotionDetected={onMotionDetected}
                 />
                 {!isWidescreen && (!externalTimerStateRef.current.isRunning || !isFocus) && (
                   <DistractionsButton />
                 )}
               </div>
 
-              {cameraAvailable && (
-                <GestureHelpButton onClick={toggleOverlay} />
+              {cameraAvailable && !isWidescreen && (
+                <GestureHelpButton onClick={toggleOverlay} shouldBlink={blinkActive} />
               )}
+
+              {isFullWindow && !isMobile && cameraAvailable && (
+              <button
+                className={`webcam-widescreen-toggle-button ${isWidescreen ? 'exit' : ''}`}
+                onClick={() => setIsWidescreen(prev => !prev)}
+              >
+                {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
+              </button>
+            )}
 
 
             </div>
-
-            {!isWidescreen && (
-              <div className="timer-wrap">
-                <div className="col-flex timer-col-flex">
-                  <div className="timer-wrap-inner">
-                    <Timer
-                      externalTimerControlsRef={externalTimerControlsRef}
-                      externalTimerStateRef={externalTimerStateRef}
-                      onRunningChange={setIsTimerRunning}
-                      onFocusChange={setIsFocus}
-                      onSessionComplete={handleSessionComplete}
-                      startSessionOnServer={sessionHandler.startSessionOnServer}
-                      updateSessionStatus={sessionHandler.updateSessionStatus}
-                      sessionIdRef={sessionHandler.sessionIdRef}
-                      setSessionId={sessionHandler.setSessionId}
-                    />
-                  </div>
-                  {(!externalTimerStateRef.current.isRunning || !isFocus) && (
-                    <FocusButton focusTime={focusSecondsLoading ? '--' : formatTime(totalFocusSeconds)} />
-                  )}
+            <div className={`timer-wrap ${isWidescreen ? 'widescreen' : ''}`}>
+              <div className="col-flex timer-col-flex">
+                <div className="timer-wrap-inner">
+                  <Timer
+                    externalTimerControlsRef={externalTimerControlsRef}
+                    externalTimerStateRef={externalTimerStateRef}
+                    onRunningChange={setIsTimerRunning}
+                    onFocusChange={setIsFocus}
+                    onSessionComplete={handleSessionComplete}
+                    startSessionOnServer={sessionHandler.startSessionOnServer}
+                    updateSessionStatus={sessionHandler.updateSessionStatus}
+                    sessionIdRef={sessionHandler.sessionIdRef}
+                    setSessionId={sessionHandler.setSessionId}
+                  />
                 </div>
+                {(!externalTimerStateRef.current.isRunning || !isFocus) && (
+                  <FocusButton focusTime={focusSecondsLoading ? '--' : formatTime(totalFocusSeconds)} />
+                )}
               </div>
-            )}
+            </div>
+
 
           </div>
         </div>

@@ -14,10 +14,14 @@
   border: 2px solid #66aaff;
   border-radius: 10px;
   flex-shrink: 0;
+  z-index: 2;
+  position: relative;
 }
 .webcam-feed.widescreen {
-  transform: scale(1.5);
+  transform: scale(2.0);
   transform-origin: center;
+  left: 50%;
+  transform: translateX(-50%) scale(1.5);
   transition: transform 0.3s ease;
 }
 

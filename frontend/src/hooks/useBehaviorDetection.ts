@@ -113,6 +113,7 @@ interface UseBehaviorDetectionProps {
   /** push every valid focus_score upward so SessionHandler can average */
   onFocusScore: (score: number) => void;
   sessionIdRef: React.MutableRefObject<number | null>;
+  onMotionDetected?: () => void;
 }
 
 
@@ -123,6 +124,7 @@ export function useBehaviorDetection({
   supabase,
   // onFocusScore,
   sessionIdRef,
+  onMotionDetected = () => {},  // default no-op
 }: UseBehaviorDetectionProps) {
   // const [cooldownActive] = useState(false);   // reserved, still unused
   const motionCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -232,6 +234,7 @@ export function useBehaviorDetection({
         now - lastHighMotionTriggerRef.current > HIGH_MOTION_COOLDOWN_MS &&
         !isAnalyzingRef.current) {
         console.log('🚨 High motion detected — triggering Gemini API');
+        onMotionDetected();  // notify parent component
         lastHighMotionTriggerRef.current = now;
         isAnalyzingRef.current = true;
         await captureSnapshotAndAnalyze(gen);

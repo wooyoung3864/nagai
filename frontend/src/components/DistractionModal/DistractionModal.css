@@ -5,18 +5,23 @@
   width: 100vw;
   height: 100vh;
   background-color: rgba(255, 255, 255, 0.6);
-  z-index: 999;
+  z-index: 3000;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .distraction-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background: #4E5158;
   padding: 2rem;
   border-radius: 15px;
   text-align: center;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  z-index: 3001;
 }
 
 .distraction-modal h1 {
@@ -28,6 +33,7 @@
 .distraction-modal p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
+  color: white;
 }
 
 .distraction-modal button {

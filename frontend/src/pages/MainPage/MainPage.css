@@ -80,10 +80,13 @@ html,
     justify-content: center;
     align-items: stretch;
     position: relative;
+    margin: 0;
 }
 
 .timer-wrap {
     margin-left: 4%;
+    position: relative;
+    
 }
 
 .timer-wrap,
@@ -181,8 +184,10 @@ html,
 /* widescreen toggle button*/
 .webcam-widescreen-toggle-button {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
+  top: 1rem !important;
+  left: 1rem !important;
+  transform: none !important;
+  margin: 0 !important;
   background-color: #4da6ff;
   color: white;
   border: none;
@@ -192,7 +197,7 @@ html,
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.25s ease;
-  z-index: 1000;
+  z-index: 3000;
 }
 
 .webcam-widescreen-toggle-button:hover {
@@ -202,8 +207,32 @@ html,
 
 .webcam-widescreen-toggle-button.exit {
   background-color: #ef4444;
+  position: absolute;
+  top: -5rem !important;
+  left: -9rem !important;
+  transform: none !important;
+  margin: 0 !important;
+
 }
 
 .webcam-widescreen-toggle-button.exit:hover {
   background-color: #dc2626;
+}
+
+.webcam-wrapper.widescreen {
+  flex: 0 0 auto;
+  max-width: none; 
+  width: auto;
+  margin: 0 auto;
+  justify-content: center; 
+}
+
+.timer-wrap.widescreen {
+    margin: 0 !important;
+    flex: 0 0 auto;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 5rem;
+    z-index: 1;
 }

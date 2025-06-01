@@ -44,6 +44,7 @@ export interface WebcamFeedProps {
   supabase: SupabaseClient
   sessionIdRef: SessionHandler['sessionIdRef'];
   setSessionId: SessionHandler['setSessionId'];
+  onMotionDetected: () => void;  // Callback when motion is detected
 }
 
 /* ─────────────────────────── component ────────────────────────── */
@@ -60,13 +61,14 @@ export default function WebcamFeed({
   externalTimerControlsRef,
   externalTimerStateRef,
   supabase,
-  sessionIdRef
+  sessionIdRef,
+  onMotionDetected
 }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);   // keep stream alive
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [_, setIsFullscreen] = useState(false);
 
   const behaviorDetection = useBehaviorDetection({
     videoRef,
@@ -74,7 +76,8 @@ export default function WebcamFeed({
     externalTimerStateRef,
     supabase,
     sessionIdRef,
-    onFocusScore: () => {} // no-op handler
+    onFocusScore: () => {}, // no-op handler
+    onMotionDetected // pass the prop to the hook
   });
   const {
     startBehaviorDetection = () => { },
@@ -143,6 +146,7 @@ export default function WebcamFeed({
   }, []);
 
   /* ────────────────────────── render ────────────────────────── */
+  // TODO (jhjun & wyjung): Fix timer resetting after switching back from widescreen mode
   return (
     <div className={`webcam-feed ${isWidescreen ? 'widescreen' : ''}`} ref={containerRef}>
       {/* always mount the video; hide it until cameraAvailable */}

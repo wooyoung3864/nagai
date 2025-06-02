@@ -25,6 +25,7 @@ interface DailyData {
 
 interface Props {
   data: DailyData[];
+  onMonthChange: (year: number, month: number) => void;
 }
 
 function getDate() {
@@ -34,7 +35,7 @@ function getDate() {
   return `${year}/${month}`;
 }
 
-const Calendar: React.FC<Props> = ({ data }) => {
+const Calendar: React.FC<Props> = ({ data, onMonthChange }) => {
   // Single state for year & month
   const [ym, setYm] = useState(() => {
     const [y, m] = getDate().split('/').map(Number);
@@ -58,27 +59,21 @@ const Calendar: React.FC<Props> = ({ data }) => {
 
   const pastMonth = () => {
     setYm(({ year, month }) => {
-      if (month === 0) {
-        return { year: year - 1, month: 11 };
-      } else {
-        return { year, month: month - 1 };
-      }
+      const newYm = month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 };
+      onMonthChange(newYm.year, newYm.month + 1); // +1 to match `Date.getMonth() + 1` format
+      return newYm;
     });
   };
 
   const nextMonth = () => {
     setYm(({ year, month }) => {
-      if (year === currentYear && month === currentMonth) {
-        // Already at the latest, do nothing
-        return { year, month };
-      }
-      if (month === 11) {
-        return { year: year + 1, month: 0 };
-      } else {
-        return { year, month: month + 1 };
-      }
+      if (year === currentYear && month === currentMonth) return { year, month };
+      const newYm = month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 };
+      onMonthChange(newYm.year, newYm.month + 1);
+      return newYm;
     });
   };
+
 
   // Calendar grid rendering
   const calendarDays = Array.from({ length: startDay + daysInMonth }).map((_, i) => {

@@ -22,6 +22,7 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
+  const [yearMonth, setYearMonth] = useState({ year, month }); // month: 1-indexed
   const supabase = useSupabase();
 
 
@@ -41,8 +42,8 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return;
 
     const fetchFocusData = async () => {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
 
       if (!token) {
         console.error("No access_token found");
@@ -64,8 +65,8 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            year,
-            month,
+            year: yearMonth.year,
+            month: yearMonth.month,
             access_token: token
           })
         });
@@ -75,20 +76,22 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
           return;
         }
 
-        const data = await response.json();
+        const raw = await response.json();
         const result: DailyData[] = [];
 
         let totalScoreSum = 0, scoreDays = 0;
 
-        data.forEach((entry: any) => {
+        raw.forEach((entry: any) => {
           const date = entry.day;
-          const secs = entry.total_focus_secs || 0;
+          const secs = Math.max(entry.total_focus_secs || 0, 0);
           const avgScore = entry.avg_focus_score != null ? Math.round(entry.avg_focus_score) : null;
 
           const hours = Math.floor(secs / 3600);
           const mins = Math.floor((secs % 3600) / 60);
-          const timeStr = `${hours}h ${mins}m`;
-          const cycle = secs / 60 / 25.0;
+          const timeStr = secs < 60 ? `${secs}s` : `${hours}h ${mins}m`;
+
+          let cycle = secs / 60 / 25;
+          cycle = cycle > 0 && cycle < 0.1 ? 0.1 : parseFloat(cycle.toFixed(1));
 
           if (avgScore !== null) {
             totalScoreSum += avgScore;
@@ -98,7 +101,7 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
           result.push({
             date,
             focusTime: timeStr,
-            focusCycle: parseFloat(cycle.toFixed(1)),
+            focusCycle: cycle,
             avgScore: avgScore,
           });
         });
@@ -114,8 +117,9 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
       }
     };
 
+
     fetchFocusData();
-  }, [isOpen]);
+  }, [isOpen, yearMonth]);
 
   if (!isOpen) return null;
 
@@ -127,7 +131,7 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
           <button className="close-button" onClick={onClose}>✕</button>
         </div>
         <div className="modal-body">
-          <Calendar data={focusData} />
+          <Calendar data={focusData} onMonthChange={(y, m) => setYearMonth({ year: y, month: m })} />
         </div>
       </div>
     </motion.div>

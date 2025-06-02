@@ -97,6 +97,14 @@ export default function MainPage() {
     return `${h}:${m}:${s}`;
   };
 
+  // Show overlay on first login
+  useEffect(() => {
+    if (localStorage.getItem('first_time_login_complete') === 'true') {
+      toggleOverlay();
+      localStorage.removeItem('first_time_login_complete');
+    }
+  }, []);
+
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       // Show intrusive alert
@@ -242,7 +250,7 @@ export default function MainPage() {
       >
         <div className="center-content">
           <div className="webcam-timer-row">
-            
+
             <div className={`webcam-wrapper ${isWidescreen ? 'widescreen' : ''}`}>
               <div className="col-flex webcam-col-flex">
                 <WebcamFeed
@@ -272,13 +280,13 @@ export default function MainPage() {
               )}
 
               {isFullWindow && !isMobile && cameraAvailable && (
-              <button
-                className={`webcam-widescreen-toggle-button ${isWidescreen ? 'exit' : ''}`}
-                onClick={() => setIsWidescreen(prev => !prev)}
-              >
-                {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
-              </button>
-            )}
+                <button
+                  className={`webcam-widescreen-toggle-button ${isWidescreen ? 'exit' : ''}`}
+                  onClick={() => setIsWidescreen(prev => !prev)}
+                >
+                  {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
+                </button>
+              )}
 
 
             </div>

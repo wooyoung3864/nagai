@@ -14,6 +14,7 @@ import { useSessionHandler } from '../../hooks/useSessionHandler';
 import useIsMobile from '../../hooks/useIsMobile';
 
 
+
 export default function MainPage() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [cameraAvailable, setCameraAvailable] = useState(false);
@@ -241,14 +242,7 @@ export default function MainPage() {
       >
         <div className="center-content">
           <div className="webcam-timer-row">
-            {isFullWindow && !isMobile && cameraAvailable && (
-              <button
-                className={`webcam-widescreen-toggle-button ${isWidescreen ? 'exit' : ''}`}
-                onClick={() => setIsWidescreen(prev => !prev)}
-              >
-                {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
-              </button>
-            )}
+            
             <div className={`webcam-wrapper ${isWidescreen ? 'widescreen' : ''}`}>
               <div className="col-flex webcam-col-flex">
                 <WebcamFeed
@@ -276,6 +270,15 @@ export default function MainPage() {
               {cameraAvailable && !isWidescreen && (
                 <GestureHelpButton onClick={toggleOverlay} shouldBlink={blinkActive} />
               )}
+
+              {isFullWindow && !isMobile && cameraAvailable && (
+              <button
+                className={`webcam-widescreen-toggle-button ${isWidescreen ? 'exit' : ''}`}
+                onClick={() => setIsWidescreen(prev => !prev)}
+              >
+                {isWidescreen ? 'Exit Widescreen' : 'Widescreen Mode'}
+              </button>
+            )}
 
 
             </div>

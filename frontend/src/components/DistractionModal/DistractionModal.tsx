@@ -1,6 +1,7 @@
 //src/components/DistractionModal/DistractionModal.tsx
 import { motion } from 'framer-motion';
 import './DistractionModal.css';
+import { createPortal } from 'react-dom';
 
 interface DistractionModalProps {
   isVisible: boolean;
@@ -17,7 +18,7 @@ export default function DistractionModal({
     onDismiss();
   };
 
-  return (
+  return createPortal(
     <motion.div
       className="distraction-modal-overlay"
       initial={{ opacity: 0 }}
@@ -34,6 +35,7 @@ export default function DistractionModal({
         <p>Try to focus on your task.</p>
         <button onClick={handleDismiss}>Dismiss</button>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }

@@ -12,6 +12,10 @@
 }
 
 .distraction-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background: #4E5158;
   padding: 2rem;
   border-radius: 15px;

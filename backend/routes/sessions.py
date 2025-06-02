@@ -86,43 +86,49 @@ def sessions_monthly_focus_summary(
 
     results = []
     for day in range(days_in_month):
-        day_start = month_start + timedelta(days=day, hours=9)  # 09:00 UTC of this day
-        day_end = day_start + timedelta(days=1)                 # 09:00 UTC of next day
+        # day_start_kst is the KST date for this day
+        day_start_kst = month_start + timedelta(days=day)
+        day_start_utc = day_start_kst - timedelta(hours=9)
+        day_end_utc = day_start_utc + timedelta(days=1)
 
         total_focus_secs, avg_focus_score = db.query(
             func.coalesce(func.sum(m.Session.focus_secs), 0),
             func.avg(m.Session.avg_score)
         ).filter(
             m.Session.user_id == user.id,
-            m.Session.start_time >= day_start,
-            m.Session.start_time < day_end,
+            m.Session.start_time >= day_start_utc,
+            m.Session.start_time < day_end_utc,
             m.Session.type == 'FOCUS'
         ).first()
 
         results.append({
-            "day": day_start.strftime("%Y-%m-%d"),
+            "day": day_start_kst.strftime("%Y-%m-%d"),
             "total_focus_secs": int(total_focus_secs or 0),
             "avg_focus_score": float(avg_focus_score) if avg_focus_score is not None else None
         })
 
     return results
 
+def kst_day_start(date_str: str):
+    # date_str: "YYYY-MM-DD" in KST
+    day_start_kst = datetime.strptime(date_str, "%Y-%m-%d")
+    # Subtract 9 hours to get UTC start
+    day_start_utc = day_start_kst - timedelta(hours=9)
+    day_end_utc = day_start_utc + timedelta(days=1)
+    return day_start_utc, day_end_utc
+
 @router.post("/by-day", response_model=list[s.SessionOut])
 def sessions_by_day(
-    date: str = Body(..., embed=True),     # expects "YYYY-MM-DD"
+    date: str = Body(..., embed=True),     # expects "YYYY-MM-DD" (KST)
     access_token: str = Body(...),
     db: Session = Depends(get_db)
 ):
     user = get_user_from_token(access_token, db)
-    # Parse the input date
     try:
-        day_start = datetime.strptime(date, "%Y-%m-%d")
+        day_start, day_end = kst_day_start(date)
     except Exception:
         raise HTTPException(400, "Invalid date format (expected YYYY-MM-DD)")
 
-    day_end = day_start + timedelta(days=1)
-
-    # Fetch all sessions started that day for this user
     sessions = (
         db.query(m.Session)
         .filter(
@@ -133,32 +139,25 @@ def sessions_by_day(
         .order_by(m.Session.start_time)
         .all()
     )
-
     return sessions
 
-# TODO: fix
 @router.post("/today-total")
 def total_focus_secs_today(
     payload: s.SessionUpdateInput = Body(...),
     db: Session = Depends(get_db)
 ):
     user = get_user_from_token(payload.access_token, db)
-    
     now = datetime.utcnow()
-    # Calculate today's 09:00 UTC (start of "today" in KST)
-    today_utc = now.date()
-    today_start = datetime.combine(today_utc, time(9, 0))
-    if now < today_start:
-        # If before 09:00 UTC, use 09:00 UTC of the previous day
-        today_start = today_start - timedelta(days=1)
-    
-    # query: all sessions for this user, today, with focus time
+    # Get today's date in KST
+    now_kst = now + timedelta(hours=9)
+    today_kst = now_kst.date()
+    # Start of today in KST, in UTC
+    today_start_utc = datetime.combine(today_kst, time(0, 0)) - timedelta(hours=9)
+    # End is now (UTC)
     total_focus_secs = db.query(func.coalesce(func.sum(m.Session.focus_secs), 0)).filter(
         m.Session.user_id == user.id,
-        m.Session.start_time >= today_start,
+        m.Session.start_time >= today_start_utc,
         m.Session.start_time <= now,
         m.Session.type == 'FOCUS'
-    ).scalar() # returns int or None
-    
-    # return JSON object with "total_focus_secs" field
+    ).scalar()
     return {"total_focus_secs": total_focus_secs or 0 }

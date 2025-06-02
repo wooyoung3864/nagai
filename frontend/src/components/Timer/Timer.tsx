@@ -209,7 +209,7 @@ export default function Timer({
     distractionVisibleRef.current = true;
     externalTimerStateRef.current.isDistractionModalVisible = true;
 
-    notifyUser(/*"Distraction Detected"*/);
+    notifyUser("Distraction Detected!");
 
     try {
       distractionAudio.currentTime = 0; // rewind
@@ -283,17 +283,17 @@ export default function Timer({
     await startSessionOnServer(nextIsFocus ? 'FOCUS' : 'BREAK');
   };
 
-  function notifyUser(/*notificationText = "Distraction Detected!"*/){
-    if(!("Notification" in window)){
-      alert("Browser does not support notifications");
-    }else if(Notification.permission === "granted"){
-      // const notification = new Notification(notificationText)
-    }else if(Notification.permission !== "denied"){
+  function notifyUser(notificationText = "Distraction Detected!") {
+    if (!("Notification" in window)) {
+      alert("Browser does not support notifications.");
+    } else if (Notification.permission === "granted") {
+      new Notification(notificationText);
+    } else if (Notification.permission !== "denied") {
       Notification.requestPermission().then((permission) => {
-        if(permission === "granted"){
-          // const notification = new Notification(notificationText)
+        if (permission === "granted") {
+          new Notification(notificationText);
         }
-      })
+      });
     }
   }
 

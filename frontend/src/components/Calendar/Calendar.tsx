@@ -25,6 +25,9 @@ interface DailyData {
 
 interface Props {
   data: DailyData[];
+  onMonthChange?: (year: number, month: number) => void;
+  ym: { year: number; month: number };
+  setYm: React.Dispatch<React.SetStateAction<{ year: number; month: number }>>;
 }
 
 function getDate() {
@@ -34,7 +37,7 @@ function getDate() {
   return `${year}/${month}`;
 }
 
-const Calendar: React.FC<Props> = ({ data }) => {
+const Calendar: React.FC<Props> = ({ data, onMonthChange }) => {
   // Single state for year & month
   const [ym, setYm] = useState(() => {
     const [y, m] = getDate().split('/').map(Number);
@@ -58,25 +61,22 @@ const Calendar: React.FC<Props> = ({ data }) => {
 
   const pastMonth = () => {
     setYm(({ year, month }) => {
-      if (month === 0) {
-        return { year: year - 1, month: 11 };
-      } else {
-        return { year, month: month - 1 };
-      }
+      const newYm = month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 };
+      return newYm;
     });
   };
 
   const nextMonth = () => {
     setYm(({ year, month }) => {
+      let newYm;
       if (year === currentYear && month === currentMonth) {
-        // Already at the latest, do nothing
-        return { year, month };
-      }
-      if (month === 11) {
-        return { year: year + 1, month: 0 };
+        newYm = { year, month };
+      } else if (month === 11) {
+        newYm = { year: year + 1, month: 0 };
       } else {
-        return { year, month: month + 1 };
+        newYm = { year, month: month + 1 };
       }
+      return newYm;
     });
   };
 
@@ -124,6 +124,12 @@ const Calendar: React.FC<Props> = ({ data }) => {
       window.removeEventListener("keydown", handleKeyChangeMonth);
     };
   }, [isAtCurrentMonth]);
+
+  useEffect(() => {
+    if (onMonthChange) {
+      onMonthChange(ym.year, ym.month);
+    }
+  }, [ym, onMonthChange]);
 
   return (
     <div className="calendar">

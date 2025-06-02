@@ -23,7 +23,11 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
   const supabase = useSupabase();
+  const [ym, setYm] = useState({ year, month }); // month: 1-indexed
 
+  const handleMonthChange = (year: number, month: number) => {
+    setYm({ year, month });
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -64,8 +68,8 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            year,
-            month,
+            year: ym.year,
+            month: ym.month,
             access_token: token
           })
         });
@@ -115,7 +119,7 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
     };
 
     fetchFocusData();
-  }, [isOpen]);
+  }, [isOpen, ym]);
 
   if (!isOpen) return null;
 
@@ -127,7 +131,7 @@ const FocusLog: React.FC<FocusLogProps> = ({ isOpen, onClose }) => {
           <button className="close-button" onClick={onClose}>✕</button>
         </div>
         <div className="modal-body">
-          <Calendar data={focusData} />
+          <Calendar data={focusData} ym={ym} setYm={setYm} />
         </div>
       </div>
     </motion.div>

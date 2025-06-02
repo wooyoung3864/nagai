@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import './TermsPage.css';
+import logo from '../../assets/imgs/nagai_logo.png'
 
 export default function TermsPage() {
   const navigate = useNavigate();
@@ -89,7 +90,7 @@ export default function TermsPage() {
       transition={{ duration: 0.6 }}
     >
       <div className="terms-logo">
-        <img src="src/assets/imgs/nagai_logo.png" alt="nagai_logo" />
+        <img src={logo} alt="nagai_logo" />
       </div>
 
       {/* Terms Section */}

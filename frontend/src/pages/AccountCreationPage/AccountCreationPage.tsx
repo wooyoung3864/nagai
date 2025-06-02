@@ -2,6 +2,7 @@ import { ChangeEvent, JSX, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 import { motion } from 'framer-motion';
+import logo from '../../assets/imgs/nagai_logo.png'
 import './AccountCreationPage.css';
 
 export default function AccountCreationPage(): JSX.Element {
@@ -91,7 +92,7 @@ export default function AccountCreationPage(): JSX.Element {
       transition={{ duration: 0.6 }}
     >
       <div className="accountCreation-logo">
-        <img src="src/assets/imgs/nagai_logo.png" alt="nagai_logo" />
+        <img src={logo} alt="nagai_logo" />
       </div>
 
       <div className="accountCreation-form-content">

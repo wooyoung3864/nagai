@@ -70,14 +70,35 @@ export default function WebcamFeed({
   const isMobile = useIsMobile();
   const [_, setIsFullscreen] = useState(false);
 
+  // state for spinner message
+  const [spinnerMsg, setSpinnerMsg] = useState<string | null>(null);
+
+  /** helper: show msg + spinner for N ms */
+  const showTempSpinner = (msg: string, duration = 3000) => {
+    setSpinnerMsg(msg);
+    setTimeout(() => setSpinnerMsg(null), duration);
+  };
+
+  /* replace onMotionDetected prop with a wrapped version */
+  const handleMotionDetected = () => {
+    showTempSpinner('Motion Detected!  Please hold your hand still.', 3000);
+    onMotionDetected();                  // keep the original callback
+  };
+
+  /* new error handler coming from useBehaviorDetection */
+  const handleGeminiError = () => {
+    showTempSpinner('Please try again.', 4500);
+  };
+
   const behaviorDetection = useBehaviorDetection({
     videoRef,
     externalTimerControlsRef,
     externalTimerStateRef,
     supabase,
     sessionIdRef,
-    onFocusScore: () => {}, // no-op handler
-    onMotionDetected // pass the prop to the hook
+    onFocusScore: () => { }, // no-op handler
+    onMotionDetected: handleMotionDetected,   // ⬅ wrapped
+    onAnalysisError: handleGeminiError,       // ⬅ NEW
   });
   const {
     startBehaviorDetection = () => { },
@@ -157,8 +178,6 @@ export default function WebcamFeed({
         playsInline
         className={cameraAvailable ? '' : 'video--hidden'}
       />
-      
-  
 
       {cameraAvailable && showOverlay && (
         <motion.div
@@ -197,17 +216,44 @@ export default function WebcamFeed({
         </motion.div>
       )}
 
-      {!cameraAvailable && cameraInitialized && (
-        <div className="webcam-error">
-          <p style={{ whiteSpace: 'pre-line' }}>{errorMessage}</p>
-          <button
-            className="retry-camera-button"
-            onClick={() => window.location.reload()}
-          >
-            Retry
-          </button>
-        </div>
-      )}
-    </div>
+      {/* NEW spinner / status overlay */}
+      {spinnerMsg && !showOverlay && (
+        <motion.div
+          className="spinner-overlay gesture-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          onClick={() => setShowOverlay(prev => !prev)}  /* tap to dismiss */
+         /* full-screen translucent */>
+          <div className='overlay-grid-wrap'>
+            <div className='overlay-grid-col'>
+              <div className='overlay-grid-row'>
+                <div className='loading-spinner-wrap'>
+                  <div className="loading-spinner" />
+                </div>
+              </div>
+              <p className="overlay-text overlay-grid-row">{spinnerMsg}</p>
+            </div>
+
+          </div>
+        </motion.div>
+      )
+      }
+
+      {
+        !cameraAvailable && cameraInitialized && (
+          <div className="webcam-error">
+            <p style={{ whiteSpace: 'pre-line' }}>{errorMessage}</p>
+            <button
+              className="retry-camera-button"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </button>
+          </div>
+        )
+      }
+    </div >
   );
 }

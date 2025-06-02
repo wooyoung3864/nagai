@@ -114,6 +114,8 @@ interface UseBehaviorDetectionProps {
   onFocusScore: (score: number) => void;
   sessionIdRef: React.MutableRefObject<number | null>;
   onMotionDetected?: () => void;
+  /** NEW: show an error overlay whenever Gemini fails or returns “{}” */
+  onAnalysisError?: () => void;        // ➊ add
 }
 
 
@@ -125,6 +127,7 @@ export function useBehaviorDetection({
   // onFocusScore,
   sessionIdRef,
   onMotionDetected = () => {},  // default no-op
+  onAnalysisError = () => {},          // default no-op
 }: UseBehaviorDetectionProps) {
   // const [cooldownActive] = useState(false);   // reserved, still unused
   const motionCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -416,6 +419,10 @@ export function useBehaviorDetection({
           parsed ? JSON.stringify(parsed, null, 2) : "• (empty / no-op response) •"
         );
 
+        if (!parsed || Object.keys(parsed).length === 0) {
+          onAnalysisError();           // empty / no-op result
+        }
+
         if ("is_focused" in parsed) {
           await sendDistractionDataToBackend(parsed);
         }
@@ -423,6 +430,7 @@ export function useBehaviorDetection({
         handleBehaviorResult(parsed);
       } catch (err) {
         console.error("Gemini error", err);
+        onAnalysisError();             // network / 4xx / 5xx errors
       }
     }
 

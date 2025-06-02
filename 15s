@@ -1,0 +1,2 @@
+[main b75a0e0] frontend update 32: widescreen mode, gesture help for first-login users, flash GestureHelpButton on inactivity
+ 2 files changed, 15 insertions(+), 11 deletions(-)

@@ -6,7 +6,6 @@ import './Timer.css';
 import DistractionModal from '../DistractionModal/DistractionModal';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { SessionHandler } from '../../hooks/useSessionHandler';
-import { permission } from 'process';
 
 const FOCUS_DURATION = 25 * 60;
 const BREAK_DURATION = 5 * 60;
@@ -210,7 +209,7 @@ export default function Timer({
     distractionVisibleRef.current = true;
     externalTimerStateRef.current.isDistractionModalVisible = true;
 
-    notifyUser("Distraction Detected");
+    notifyUser(/*"Distraction Detected"*/);
 
     try {
       distractionAudio.currentTime = 0; // rewind
@@ -284,15 +283,15 @@ export default function Timer({
     await startSessionOnServer(nextIsFocus ? 'FOCUS' : 'BREAK');
   };
 
-  function notifyUser(notificationText = "Distraction Detected"){
+  function notifyUser(/*notificationText = "Distraction Detected!"*/){
     if(!("Notification" in window)){
       alert("Browser does not support notifications");
     }else if(Notification.permission === "granted"){
-      const notification = new Notification(notificationText)
+      // const notification = new Notification(notificationText)
     }else if(Notification.permission !== "denied"){
       Notification.requestPermission().then((permission) => {
         if(permission === "granted"){
-          const notification = new Notification(notificationText)
+          // const notification = new Notification(notificationText)
         }
       })
     }

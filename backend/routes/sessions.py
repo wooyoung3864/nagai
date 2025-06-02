@@ -74,42 +74,38 @@ def sessions_monthly_focus_summary(
     db: Session = Depends(get_db)
 ):
     user = get_user_from_token(access_token, db)
-    # Start and end of the month
     from datetime import date
 
-    month_start = datetime(year, month, 1)
+    # Calculate the number of days in the month
     if month == 12:
-        month_end = datetime(year + 1, 1, 1)
+        next_month = datetime(year + 1, 1, 1)
     else:
-        month_end = datetime(year, month + 1, 1)
+        next_month = datetime(year, month + 1, 1)
+    month_start = datetime(year, month, 1)
+    days_in_month = (next_month - month_start).days
 
-    # Group by DATE, summing focus_secs
-    results = (
-        db.query(
-            func.date(m.Session.start_time).label("day"),
-            func.sum(m.Session.focus_secs).label("total_focus_secs"),
-            # wyjung (05/27): added avg_score to query and response model
-            func.avg(m.Session.avg_score).label("avg_focus_score")
-        )
-        .filter(
+    results = []
+    for day in range(days_in_month):
+        day_start = month_start + timedelta(days=day, hours=9)  # 09:00 UTC of this day
+        day_end = day_start + timedelta(days=1)                 # 09:00 UTC of next day
+
+        total_focus_secs, avg_focus_score = db.query(
+            func.coalesce(func.sum(m.Session.focus_secs), 0),
+            func.avg(m.Session.avg_score)
+        ).filter(
             m.Session.user_id == user.id,
-            m.Session.start_time >= month_start,
-            m.Session.start_time < month_end
-        )
-        .group_by(func.date(m.Session.start_time))
-        .order_by("day")
-        .all()
-    )
+            m.Session.start_time >= day_start,
+            m.Session.start_time < day_end,
+            m.Session.type == 'FOCUS'
+        ).first()
 
-    # Response: list of {"day": "YYYY-MM-DD", "total_focus_secs": N}
-    return [
-        {
-            "day": str(day), 
+        results.append({
+            "day": day_start.strftime("%Y-%m-%d"),
             "total_focus_secs": int(total_focus_secs or 0),
             "avg_focus_score": float(avg_focus_score) if avg_focus_score is not None else None
-        }
-        for day, total_focus_secs, avg_focus_score in results
-    ]
+        })
+
+    return results
 
 @router.post("/by-day", response_model=list[s.SessionOut])
 def sessions_by_day(
@@ -148,9 +144,13 @@ def total_focus_secs_today(
 ):
     user = get_user_from_token(payload.access_token, db)
     
-    # calculate 24h from today
     now = datetime.utcnow()
-    today_start = now - timedelta(days=1)
+    # Calculate today's 09:00 UTC (start of "today" in KST)
+    today_utc = now.date()
+    today_start = datetime.combine(today_utc, time(9, 0))
+    if now < today_start:
+        # If before 09:00 UTC, use 09:00 UTC of the previous day
+        today_start = today_start - timedelta(days=1)
     
     # query: all sessions for this user, today, with focus time
     total_focus_secs = db.query(func.coalesce(func.sum(m.Session.focus_secs), 0)).filter(

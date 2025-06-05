@@ -1,133 +1,72 @@
-# CSE 416 Final Project: nagAI
-Jiwoo Kim, Joohyoung Jun, Wooyoung Jung
+# nagAI: Never Abandon Goals
 
-## Problem statement
-While we have benefited a lot from the Internet, it is a double-edged sword, as the easy access to information has made it easier to become distracted. 
-   
-With our phones at our fingertips, we often find it difficult to stay focused when we have to. Even though we try to commit to a routine, we end up spending hours mindlessly scrolling on our phones. 
-   
-As busy university students, we thought of a tool that would help minimize wasted time. We envision an AI-based application that watches the user through their webcam, and warns them when they are distracted, such as when they are on their phones.
-   
-We present ‘NAG,’ short for ‘Never Abandon Goals.’ A convenient companion to help fight off distractions and achieve your creative and intellectual goals.
+**A web-based focus-tracking assistant combining a Pomodoro timer with real-time AI-powered distraction detection.**
 
+nagAI helps users maintain productivity by using their webcam to detect distractions during study sessions. It provides gentle alerts when users lose focus and logs distraction events and focus time for later review.
 
-## Deployed website: https://nagai-pi.vercel.app/
+**Deployed Website:**  
+- **Frontend (Vercel):** [https://nagai-pi.vercel.app](https://nagai-pi.vercel.app)  
+- **Backend API Docs (Render):** [https://nagai.onrender.com/docs](https://nagai.onrender.com/docs)
 
+**Core Features:**  
+- **Real-time distraction detection:** Gemini 1.5 Flash Vision API  
+- **Pomodoro timer:** 25-minute focus sessions and 5-minute breaks  
+- **Data logging:** Session and distraction data stored via Supabase PostgreSQL  
+- **Focus & Distraction Logs:** Calendar and detailed table views  
+- **Desktop notifications:** Alerts for detected distractions  
 
-## Project structure
-```
-/
-├── Documents
-│   └── nagAI_DataDesign.pdf
-├── README.md
-├── backend
-│   ├── auth
-│   │   ├── oauth.py
-│   │   └── supabase_client.py
-│   ├── migrations
-│   │   ├── versions
-│   │   └── env.py
-│   ├── models
-│   │   ├── base.py
-│   │   ├── distraction.py
-│   │   ├── focus.py
-│   │   ├── secret.py
-│   │   ├── session.py
-│   │   └── user.py
-│   ├── routes
-│   │   ├── auth.py
-│   │   ├── distraction.py
-│   │   ├── focus.py
-│   │   ├── secrets.py
-│   │   ├── sessions.py
-│   │   └── users.py
-│   ├── schemas
-│   │   ├── auth.py
-│   │   ├── distraction.py
-│   │   ├── focus_query.py
-│   │   ├── focus.py
-│   │   ├── secret.py
-│   │   ├── session.py
-│   │   └── user.py
-│   ├── utils
-│   │   ├── crypto.py
-│   │   ├── init_env.py
-│   │   ├── jwt_utils.py
-│   │   └── push_secrets.py
-│   ├── __init__.py
-│   ├── config.py
-│   ├── create_tables.py
-│   ├── database.py
-│   ├── main.py
-│   ├── push_secrets.py
-│   ├── run_backend.sh
-│   ├── setup.sh
-│   └── startup_env.py
-├── frontend
-│   ├── eslint.config.js
-│   ├── index.html
-│   ├── package-lock.json
-│   ├── package.json
-│   ├── public
-│   │   └── ...
-│   ├── src
-│   │   ├── App.css
-│   │   ├── App.tsx
-│   │   ├── assets
-│   │   ├── components
-│   │   ├── contexts
-│   │   ├── hooks
-│   │   ├── index.css
-│   │   ├── main.tsx
-│   │   ├── pages
-│   │   └── vite-env.d.ts
-│   ├── tsconfig.app.json
-│   ├── tsconfig.json
-│   ├── tsconfig.node.json
-│___└── vite.config.ts
+**New Features:**  
+- **Widescreen mode:** Hides interface elements to minimize distractions  
+- **Gesture Help Overlay:** Guides new users through gesture-based interaction  
+- **Loading Spinner:** Assists users with gesture timing
 
-10 directories, 20 files
-```
-
-# Running the frontend
-```
+**Project Setup:**  
+Frontend:
+```bash
 cd frontend
 npm i --legacy-peer-deps
 npm run dev
 ```
+Visit [http://localhost:5173](http://localhost:5173)
 
-check out: http://localhost:5173 to see your frontend running from your localhost.
-
-# Runing the backend
-running and setting up the backend for the first time:
-```
+Backend (First-time setup):
+```bash
 cd backend
-./setup.sh 
+./setup.sh
 conda activate nagai
 ./run_backend.sh
 ```
 
-running backend for the 2nd time or more:
-```
+Backend (Subsequent runs):
+```bash
 cd backend
 conda activate nagai
 ./run_backend.sh
 ```
+Access [http://localhost:8000/docs](http://localhost:8000/docs)
 
-if [Errno 48] Address already in use error occurs: 
-```
-lsof -i :8000
-kill -9 [PID]
-./run_backend.sh
-```
+**Supported OS:** Linux, macOS, Windows (Manually install Miniconda for others)
 
-check out http://localhost:8000 to see if the backend is running.
+**User Feedback & Improvements:**  
+- Widescreen mode for fewer distractions  
+- Notifications on inactive tabs  
+- Enhanced onboarding with gesture assistance
 
-http://localhost:8000/docs will let you know the backend APIs used.
+**Known Issues:**  
+- Occasional false positives (e.g., user drinking water)  
+- Backend latency (Render Free Tier)
 
-# Supported OS
-- Linux
-- Darwin (MacOS)
-- Windows
+**Future Plans:**  
+- On-device AI model for lower latency  
+- Adaptive breaks based on fatigue signals  
+- Social leaderboard
 
-If none from above, please install Miniconda manually.
+**Contributions:**  
+- **Wooyoung:** Backend endpoints, deployment, gesture help, storage setup  
+- **Jiwoo:** OAuth setup, notifications, log pages  
+- **Joohyoung:** Frontend core pages, widescreen mode, webcam integration
+
+**Code Conventions:**  
+- PascalCase for class names, camelCase for methods  
+- Consistent naming and descriptive CSS classes  
+- Modularized React components and clear distinction between pages/components

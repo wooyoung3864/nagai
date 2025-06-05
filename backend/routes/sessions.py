@@ -138,7 +138,6 @@ def sessions_by_day(
 
     return sessions
 
-# TODO: fix
 @router.post("/today-total")
 def total_focus_secs_today(
     payload: s.SessionUpdateInput = Body(...),

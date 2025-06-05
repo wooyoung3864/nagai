@@ -1,8 +1,7 @@
-# CSE 416
-### Team NAGA — Jiwoo Kim, Joohyoung Jun, Wooyoung Jung
+# CSE 416 Final Project: nagAI
+Jiwoo Kim, Joohyoung Jun, Wooyoung Jung
 
 ## Problem statement
-### NAG-AI
 While we have benefited a lot from the Internet, it is a double-edged sword, as the easy access to information has made it easier to become distracted. 
    
 With our phones at our fingertips, we often find it difficult to stay focused when we have to. Even though we try to commit to a routine, we end up spending hours mindlessly scrolling on our phones. 
@@ -12,8 +11,7 @@ As busy university students, we thought of a tool that would help minimize waste
 We present ‘NAG,’ short for ‘Never Abandon Goals.’ A convenient companion to help fight off distractions and achieve your creative and intellectual goals.
 
 
-## Deployed website
-https://nagai-pi.vercel.app/
+## Deployed website: https://nagai-pi.vercel.app/
 
 
 ## Project structure
@@ -132,4 +130,4 @@ http://localhost:8000/docs will let you know the backend APIs used.
 - Darwin (MacOS)
 - Windows
 
-If none from above, please install Miniconda manually
+If none from above, please install Miniconda manually.
